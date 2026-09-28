@@ -4,6 +4,7 @@
 <head>
 
     <meta charset="UTF-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
@@ -11,8 +12,13 @@
 
     <title>FLUX Upscaler</title>
 
-    <!-- ONNX Runtime Web -->
-    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
+
+    <!--
+        ONNX Runtime WebGPU build.
+        This is the correct build for WebGPU inference.
+    -->
+
+    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.webgpu.min.js"></script>
 
 
     <style>
@@ -20,6 +26,7 @@
         * {
             box-sizing: border-box;
         }
+
 
         body {
 
@@ -72,7 +79,7 @@
 
 
         /* =========================
-           UPLOAD
+           UPLOAD BOX
         ========================= */
 
         .upload-box {
@@ -140,6 +147,28 @@
             color: #78859a;
 
             pointer-events: none;
+
+        }
+
+
+        /* =========================
+           CHANGE IMAGE
+        ========================= */
+
+        #changeImageBtn {
+
+            display: none;
+
+            margin-top: 18px;
+
+            background: #16263c;
+
+        }
+
+
+        #changeImageBtn:hover {
+
+            background: #21415f;
 
         }
 
@@ -278,6 +307,8 @@
 
             min-height: 24px;
 
+            line-height: 1.5;
+
         }
 
 
@@ -334,7 +365,18 @@
 
 
     <!-- =========================
-         UPLOAD
+         FILE INPUT
+    ========================= -->
+
+    <input
+        type="file"
+        id="fileInput"
+        accept="image/png,image/jpeg,image/webp"
+    >
+
+
+    <!-- =========================
+         UPLOAD BOX
     ========================= -->
 
     <div
@@ -342,21 +384,34 @@
         id="dropZone"
     >
 
-        <input
-            type="file"
-            id="fileInput"
-            accept="image/png,image/jpeg,image/webp"
-        >
-
         <div class="upload-title">
+
             Drop an image here
+
         </div>
 
+
         <div class="upload-info">
+
             or click to browse
+
         </div>
 
     </div>
+
+
+    <!-- =========================
+         CHANGE IMAGE
+    ========================= -->
+
+    <button
+        id="changeImageBtn"
+        type="button"
+    >
+
+        Change Image
+
+    </button>
 
 
     <!-- =========================
@@ -373,7 +428,9 @@
             data-scale="2"
             type="button"
         >
+
             2×
+
         </button>
 
 
@@ -382,7 +439,9 @@
             data-scale="4"
             type="button"
         >
+
             4×
+
         </button>
 
 
@@ -390,7 +449,9 @@
             id="upscaleBtn"
             type="button"
         >
+
             Upscale Image
+
         </button>
 
     </div>
@@ -409,6 +470,7 @@
             id="previewImage"
             alt="Selected image preview"
         >
+
 
         <div
             class="filename"
@@ -436,7 +498,9 @@
         id="downloadBtn"
         download="flux-upscaled.png"
     >
+
         Download Upscaled Image
+
     </a>
 
 
@@ -448,37 +512,27 @@
 
 
 /* ============================================================
-   CONFIGURATION
+   MODEL
 ============================================================ */
 
 
 /*
-    Browser-ready Real-ESRGAN x2plus model.
+    Real-ESRGAN x2plus
 
-    This model accepts:
+    Input:
+        input
+        float32
+        [1, 3, H, W]
 
-        [1, 3, height, width]
-
-    RGB float32 pixels from 0 → 1
-
-    and returns:
-
-        [1, 3, height*2, width*2]
+    Output:
+        output
+        float32
+        [1, 3, H*2, W*2]
 */
 
 
 const MODEL_URL =
     "https://huggingface.co/skillsafe-ai/realesrgan-x2plus/resolve/main/model.onnx";
-
-
-/*
-    We keep the model session in memory.
-
-    The first upscale will therefore take longer because
-    the browser has to download and initialise the model.
-
-    Subsequent images can reuse it.
-*/
 
 
 let session = null;
@@ -495,6 +549,10 @@ const fileInput =
 
 const dropZone =
     document.getElementById("dropZone");
+
+
+const changeImageBtn =
+    document.getElementById("changeImageBtn");
 
 
 const preview =
@@ -538,18 +596,42 @@ let previewURL = null;
 
 
 /* ============================================================
-   FILE PICKER
+   OPEN FILE PICKER
+============================================================ */
+
+
+function openFilePicker() {
+
+    fileInput.click();
+
+}
+
+
+/* ============================================================
+   UPLOAD BOX CLICK
 ============================================================ */
 
 
 dropZone.addEventListener(
     "click",
-    function () {
-
-        fileInput.click();
-
-    }
+    openFilePicker
 );
+
+
+/* ============================================================
+   CHANGE IMAGE CLICK
+============================================================ */
+
+
+changeImageBtn.addEventListener(
+    "click",
+    openFilePicker
+);
+
+
+/* ============================================================
+   FILE SELECTED
+============================================================ */
 
 
 fileInput.addEventListener(
@@ -561,7 +643,9 @@ fileInput.addEventListener(
             this.files.length > 0
         ) {
 
-            loadImage(this.files[0]);
+            loadImage(
+                this.files[0]
+            );
 
         }
 
@@ -570,7 +654,7 @@ fileInput.addEventListener(
 
 
 /* ============================================================
-   DRAG AND DROP
+   DRAG OVER
 ============================================================ */
 
 
@@ -582,10 +666,17 @@ dropZone.addEventListener(
 
         event.stopPropagation();
 
-        dropZone.classList.add("dragging");
+        dropZone.classList.add(
+            "dragging"
+        );
 
     }
 );
+
+
+/* ============================================================
+   DRAG LEAVE
+============================================================ */
 
 
 dropZone.addEventListener(
@@ -594,10 +685,17 @@ dropZone.addEventListener(
 
         event.preventDefault();
 
-        dropZone.classList.remove("dragging");
+        dropZone.classList.remove(
+            "dragging"
+        );
 
     }
 );
+
+
+/* ============================================================
+   DROP
+============================================================ */
 
 
 dropZone.addEventListener(
@@ -608,7 +706,9 @@ dropZone.addEventListener(
 
         event.stopPropagation();
 
-        dropZone.classList.remove("dragging");
+        dropZone.classList.remove(
+            "dragging"
+        );
 
 
         const files =
@@ -620,7 +720,9 @@ dropZone.addEventListener(
             files.length > 0
         ) {
 
-            loadImage(files[0]);
+            loadImage(
+                files[0]
+            );
 
         }
 
@@ -653,32 +755,35 @@ function loadImage(file) {
     }
 
 
-    selectedFile = file;
+    selectedFile =
+        file;
 
 
     if (previewURL) {
 
-        URL.revokeObjectURL(previewURL);
+        URL.revokeObjectURL(
+            previewURL
+        );
 
     }
 
 
     previewURL =
-        URL.createObjectURL(file);
+        URL.createObjectURL(
+            file
+        );
 
 
     previewImage.src =
         previewURL;
 
 
-    const sizeKB =
-        Math.round(file.size / 1024);
-
-
     filename.textContent =
         file.name +
         " • " +
-        sizeKB +
+        Math.round(
+            file.size / 1024
+        ) +
         " KB";
 
 
@@ -690,15 +795,33 @@ function loadImage(file) {
         "flex";
 
 
+    /*
+        Hide the giant upload box.
+    */
+
+    dropZone.style.display =
+        "none";
+
+
+    /*
+        Show a small replacement button.
+    */
+
+    changeImageBtn.style.display =
+        "inline-block";
+
+
     downloadBtn.style.display =
         "none";
 
 
-    downloadBtn.removeAttribute("href");
+    downloadBtn.removeAttribute(
+        "href"
+    );
 
 
     status.textContent =
-        "Image loaded.";
+        "Image loaded. Ready to upscale.";
 
 }
 
@@ -712,20 +835,28 @@ document
     .querySelectorAll(".scale")
     .forEach(function (button) {
 
+
         button.addEventListener(
             "click",
             function () {
 
+
                 document
                     .querySelectorAll(".scale")
-                    .forEach(function (btn) {
+                    .forEach(
+                        function (btn) {
 
-                        btn.classList.remove("active");
+                            btn.classList.remove(
+                                "active"
+                            );
 
-                    });
+                        }
+                    );
 
 
-                this.classList.add("active");
+                this.classList.add(
+                    "active"
+                );
 
 
                 selectedScale =
@@ -745,7 +876,7 @@ document
 
 
 /* ============================================================
-   LOAD AI MODEL
+   LOAD MODEL
 ============================================================ */
 
 
@@ -771,14 +902,64 @@ async function loadModel() {
 
 
         /*
-            Try WebGPU first.
-
-            WebGPU is supported in modern Chromium browsers
-            such as Chrome and Edge.
-
-            If WebGPU isn't available, ONNX Runtime will
-            fall back to WebAssembly CPU execution.
+            First try WebGPU.
         */
+
+
+        try {
+
+            if (
+                typeof navigator !== "undefined" &&
+                "gpu" in navigator
+            ) {
+
+                status.textContent =
+                    "Loading AI model with WebGPU...";
+
+
+                session =
+                    await ort.InferenceSession.create(
+                        MODEL_URL,
+                        {
+                            executionProviders: [
+                                "webgpu"
+                            ],
+
+                            graphOptimizationLevel:
+                                "all"
+                        }
+                    );
+
+
+                status.textContent =
+                    "AI model loaded using GPU.";
+
+                return session;
+
+            }
+
+        } catch (gpuError) {
+
+
+            console.warn(
+                "WebGPU failed. Falling back to WASM.",
+                gpuError
+            );
+
+
+            session =
+                null;
+
+        }
+
+
+        /*
+            CPU fallback.
+        */
+
+
+        status.textContent =
+            "GPU unavailable. Loading CPU AI engine...";
 
 
         session =
@@ -786,7 +967,6 @@ async function loadModel() {
                 MODEL_URL,
                 {
                     executionProviders: [
-                        "webgpu",
                         "wasm"
                     ],
 
@@ -796,15 +976,8 @@ async function loadModel() {
             );
 
 
-        console.log(
-            "FLUX AI model loaded.",
-            session.inputNames,
-            session.outputNames
-        );
-
-
         status.textContent =
-            "AI model ready.";
+            "AI model loaded using CPU.";
 
 
         return session;
@@ -813,20 +986,30 @@ async function loadModel() {
     } catch (error) {
 
 
-        console.error(error);
+        console.error(
+            "MODEL LOAD ERROR:",
+            error
+        );
 
 
-        session = null;
+        session =
+            null;
 
 
         status.textContent =
-            "Failed to load the AI model.";
+            "AI model failed to load: " +
+            error.message;
 
 
         throw error;
 
-    }
+    } finally {
 
+
+        upscaleBtn.disabled =
+            false;
+
+    }
 
 }
 
@@ -853,7 +1036,9 @@ async function imageToTensor(
 
 
     const canvas =
-        document.createElement("canvas");
+        document.createElement(
+            "canvas"
+        );
 
 
     canvas.width =
@@ -901,87 +1086,43 @@ async function imageToTensor(
         canvas.height;
 
 
-    /*
-        ONNX expects:
-
-        [1, 3, H, W]
-
-        rather than:
-
-        [H, W, 4]
-    */
+    const planeSize =
+        width * height;
 
 
-    const red =
+    const tensorData =
         new Float32Array(
-            width * height
-        );
-
-
-    const green =
-        new Float32Array(
-            width * height
-        );
-
-
-    const blue =
-        new Float32Array(
-            width * height
+            planeSize * 3
         );
 
 
     for (
         let i = 0;
-        i < width * height;
+        i < planeSize;
         i++
     ) {
+
 
         const pixel =
             i * 4;
 
 
-        red[i] =
+        tensorData[i] =
             pixels[pixel] / 255;
 
 
-        green[i] =
+        tensorData[
+            planeSize + i
+        ] =
             pixels[pixel + 1] / 255;
 
 
-        blue[i] =
+        tensorData[
+            planeSize * 2 + i
+        ] =
             pixels[pixel + 2] / 255;
 
     }
-
-
-    const tensorData =
-        new Float32Array(
-            width *
-            height *
-            3
-        );
-
-
-    const planeSize =
-        width * height;
-
-
-    tensorData.set(
-        red,
-        0
-    );
-
-
-    tensorData.set(
-        green,
-        planeSize
-    );
-
-
-    tensorData.set(
-        blue,
-        planeSize * 2
-    );
 
 
     return {
@@ -1008,7 +1149,7 @@ async function imageToTensor(
 
 
 /* ============================================================
-   TENSOR → IMAGE
+   TENSOR → CANVAS
 ============================================================ */
 
 
@@ -1019,13 +1160,6 @@ function tensorToCanvas(
 
     const dims =
         outputTensor.dims;
-
-
-    /*
-        Expected:
-
-        [1, 3, H, W]
-    */
 
 
     const height =
@@ -1040,8 +1174,14 @@ function tensorToCanvas(
         outputTensor.data;
 
 
+    const planeSize =
+        width * height;
+
+
     const canvas =
-        document.createElement("canvas");
+        document.createElement(
+            "canvas"
+        );
 
 
     canvas.width =
@@ -1053,7 +1193,9 @@ function tensorToCanvas(
 
 
     const context =
-        canvas.getContext("2d");
+        canvas.getContext(
+            "2d"
+        );
 
 
     const imageData =
@@ -1065,10 +1207,6 @@ function tensorToCanvas(
 
     const pixels =
         imageData.data;
-
-
-    const planeSize =
-        width * height;
 
 
     for (
@@ -1137,7 +1275,7 @@ function clampByte(value) {
 
 
 /* ============================================================
-   RUN ONE 2× PASS
+   ONE 2× PASS
 ============================================================ */
 
 
@@ -1161,7 +1299,15 @@ async function upscale2x(
 
 
     status.textContent =
-        "Running AI upscaling...";
+        "Running Real-ESRGAN AI...";
+
+
+    /*
+        The model explicitly uses:
+            input → output
+
+        according to its model contract.
+    */
 
 
     const results =
@@ -1173,12 +1319,17 @@ async function upscale2x(
         });
 
 
-    const outputName =
-        ai.outputNames[0];
-
-
     const output =
-        results[outputName];
+        results.output;
+
+
+    if (!output) {
+
+        throw new Error(
+            "The AI model returned no output."
+        );
+
+    }
 
 
     return tensorToCanvas(
@@ -1189,7 +1340,7 @@ async function upscale2x(
 
 
 /* ============================================================
-   UPSCALE BUTTON
+   UPSCALE
 ============================================================ */
 
 
@@ -1219,14 +1370,12 @@ upscaleBtn.addEventListener(
                 "none";
 
 
-            /*
-                Use the browser-created preview URL
-                as our source image.
-            */
-
-
             let resultCanvas;
 
+
+            /*
+                2×
+            */
 
             if (
                 selectedScale === 2
@@ -1239,21 +1388,20 @@ upscaleBtn.addEventListener(
                     );
 
 
-            } else {
+            }
 
 
-                /*
-                    4× is achieved by doing:
+            /*
+                4×
 
-                    2× → 2×
+                2× → 2×
+            */
 
-                    This avoids downloading another
-                    4× model.
-                */
+            else {
 
 
                 status.textContent =
-                    "Running first 2× pass...";
+                    "Running first 2× AI pass...";
 
 
                 const firstPass =
@@ -1263,7 +1411,7 @@ upscaleBtn.addEventListener(
 
 
                 status.textContent =
-                    "Running second 2× pass...";
+                    "Running second 2× AI pass...";
 
 
                 const firstPassURL =
@@ -1281,18 +1429,32 @@ upscaleBtn.addEventListener(
 
 
             /*
-                Create downloadable PNG.
+                Convert result to PNG.
             */
 
 
             status.textContent =
-                "Preparing download...";
+                "Preparing final image...";
 
 
             const resultURL =
                 resultCanvas.toDataURL(
                     "image/png"
                 );
+
+
+            /*
+                Update preview with result.
+            */
+
+
+            previewImage.src =
+                resultURL;
+
+
+            /*
+                Create download.
+            */
 
 
             downloadBtn.href =
@@ -1312,20 +1474,29 @@ upscaleBtn.addEventListener(
 
             status.textContent =
                 selectedScale +
-                "× upscale complete.";
+                "× AI upscale complete.";
 
 
         } catch (error) {
 
 
             console.error(
-                "Upscaling error:",
+                "FLUX UPSCALER ERROR:",
                 error
             );
 
 
+            /*
+                Give the user the actual reason.
+            */
+
             status.textContent =
-                "Upscaling failed. Check the browser console for details.";
+                "Upscaling failed: " +
+                (
+                    error.message ||
+                    String(error)
+                );
+
 
         } finally {
 
@@ -1340,7 +1511,7 @@ upscaleBtn.addEventListener(
 
 
 /* ============================================================
-   OUTPUT FILENAME
+   OUTPUT NAME
 ============================================================ */
 
 
@@ -1374,13 +1545,14 @@ function createOutputName(
 
 
 /* ============================================================
-   CLEAN UP
+   CLEANUP
 ============================================================ */
 
 
 window.addEventListener(
     "beforeunload",
     function () {
+
 
         if (previewURL) {
 

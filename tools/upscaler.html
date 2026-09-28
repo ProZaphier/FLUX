@@ -24,10 +24,6 @@
             min-height: 100vh;
         }
 
-        /* =========================
-           NAVIGATION
-        ========================= */
-
         .navbar {
             width: 100%;
             border-bottom: 1px solid rgba(255,255,255,0.08);
@@ -82,10 +78,6 @@
             background: rgba(40, 130, 255, 0.16);
         }
 
-        /* =========================
-           MAIN
-        ========================= */
-
         .container {
             width: min(900px, calc(100% - 32px));
             margin: 0 auto;
@@ -108,10 +100,6 @@
             color: #8792a7;
             font-size: 15px;
         }
-
-        /* =========================
-           UPLOAD
-        ========================= */
 
         .drop-zone {
             border: 1px dashed rgba(255,255,255,0.22);
@@ -143,10 +131,6 @@
             display: none;
         }
 
-        /* =========================
-           PREVIEW
-        ========================= */
-
         .preview-wrapper {
             display: none;
             margin-top: 25px;
@@ -167,10 +151,6 @@
             color: #7f8a9e;
             font-size: 13px;
         }
-
-        /* =========================
-           CONTROLS
-        ========================= */
 
         .controls {
             display: none;
@@ -241,10 +221,6 @@
             border-color: rgba(255,255,255,0.25);
         }
 
-        /* =========================
-           STATUS
-        ========================= */
-
         .status {
             min-height: 22px;
             margin-top: 20px;
@@ -278,10 +254,6 @@
             background: #3c8cff;
         }
 
-        /* =========================
-           MOBILE
-        ========================= */
-
         @media (max-width: 650px) {
             .nav-inner {
                 align-items: flex-start;
@@ -309,10 +281,6 @@
 </head>
 
 <body>
-
-    <!-- =========================
-         NAVIGATION
-    ========================= -->
 
     <nav class="navbar">
         <div class="nav-inner">
@@ -344,11 +312,6 @@
         </div>
     </nav>
 
-
-    <!-- =========================
-         MAIN
-    ========================= -->
-
     <main class="container">
 
         <div class="header">
@@ -360,11 +323,6 @@
             </p>
 
         </div>
-
-
-        <!-- =========================
-             UPLOAD
-        ========================= -->
 
         <div class="drop-zone" id="dropZone">
 
@@ -384,11 +342,6 @@
 
         </div>
 
-
-        <!-- =========================
-             PREVIEW
-        ========================= -->
-
         <div class="preview-wrapper" id="previewWrapper">
 
             <img
@@ -399,11 +352,6 @@
             <div class="image-info" id="imageInfo"></div>
 
         </div>
-
-
-        <!-- =========================
-             CONTROLS
-        ========================= -->
 
         <div class="controls" id="controls">
 
@@ -445,20 +393,10 @@
 
         </div>
 
-
-        <!-- =========================
-             STATUS
-        ========================= -->
-
         <div
             class="status"
             id="status"
         ></div>
-
-
-        <!-- =========================
-             DOWNLOAD
-        ========================= -->
 
         <div
             class="download-wrapper"
@@ -487,12 +425,6 @@
         const MODEL_URL =
             "https://huggingface.co/skillsafe-ai/realesrgan-x2plus/resolve/main/model.onnx";
 
-
-        /*
-         * ONNX Runtime loads its WASM binaries separately.
-         * Because the runtime itself comes from jsDelivr,
-         * explicitly tell it where those binaries are.
-         */
         ort.env.wasm.wasmPaths =
             "https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/";
 
@@ -555,9 +487,11 @@
 
         let originalHeight = 0;
 
+        let selectedObjectURL = null;
+
 
         /* ==========================================
-           STATUS HELPER
+           STATUS
         ========================================== */
 
         function setStatus(message, type = "") {
@@ -569,6 +503,7 @@
             if (type) {
                 status.classList.add(type);
             }
+
         }
 
 
@@ -620,14 +555,17 @@
 
             dropZone.classList.remove("dragging");
 
-            const file = event.dataTransfer.files[0];
+            const file =
+                event.dataTransfer.files[0];
 
             if (!file) {
                 return;
             }
 
-            if (!file.type.startsWith("image/") &&
-                !file.name.toLowerCase().endsWith(".jfif")) {
+            if (
+                !file.type.startsWith("image/") &&
+                !file.name.toLowerCase().endsWith(".jfif")
+            ) {
 
                 setStatus(
                     "Please select a valid image file.",
@@ -635,6 +573,7 @@
                 );
 
                 return;
+
             }
 
             loadImage(file);
@@ -654,45 +593,86 @@
 
             setStatus("Loading image...");
 
-            const objectURL =
+
+            /*
+             * Clean up the previous object URL.
+             */
+
+            if (selectedObjectURL) {
+
+                URL.revokeObjectURL(
+                    selectedObjectURL
+                );
+
+                selectedObjectURL = null;
+
+            }
+
+
+            /*
+             * Create a new object URL and KEEP IT ALIVE.
+             *
+             * This is important.
+             *
+             * The AI processor needs to use this
+             * same URL later.
+             */
+
+            selectedObjectURL =
                 URL.createObjectURL(file);
+
 
             const image =
                 new Image();
 
+
             image.onload = () => {
 
-                originalWidth = image.naturalWidth;
-                originalHeight = image.naturalHeight;
+                originalWidth =
+                    image.naturalWidth;
 
-                preview.src = objectURL;
+                originalHeight =
+                    image.naturalHeight;
 
-                previewWrapper.style.display = "block";
 
-                controls.style.display = "block";
+                preview.src =
+                    selectedObjectURL;
 
-                dropZone.style.display = "none";
+
+                previewWrapper.style.display =
+                    "block";
+
+
+                controls.style.display =
+                    "block";
+
+
+                dropZone.style.display =
+                    "none";
+
 
                 imageInfo.textContent =
                     `${originalWidth} × ${originalHeight}px`;
 
+
                 setStatus(
                     "Image ready. Choose a scale and upscale."
                 );
-
-                /*
-                 * Prevent the browser from keeping
-                 * an unnecessary reference to the
-                 * temporary object URL.
-                 */
-                URL.revokeObjectURL(objectURL);
 
             };
 
 
             image.onerror = () => {
 
-                URL.revokeObjectURL(objectURL);
+                if (selectedObjectURL) {
+
+                    URL.revokeObjectURL(
+                        selectedObjectURL
+                    );
+
+                    selectedObjectURL = null;
+
+                }
 
                 setStatus(
                     "This image could not be read by the browser.",
@@ -702,7 +682,8 @@
             };
 
 
-            image.src = objectURL;
+            image.src =
+                selectedObjectURL;
 
         }
 
@@ -729,6 +710,7 @@
             selectedScale = 2;
 
             scale2.classList.add("selected");
+
             scale4.classList.remove("selected");
 
         });
@@ -739,6 +721,7 @@
             selectedScale = 4;
 
             scale4.classList.add("selected");
+
             scale2.classList.remove("selected");
 
         });
@@ -761,12 +744,6 @@
 
             try {
 
-                /*
-                 * WASM is deliberately used first.
-                 *
-                 * ONNX Runtime documents WASM as the
-                 * broad compatibility execution provider.
-                 */
                 session =
                     await ort.InferenceSession.create(
                         MODEL_URL,
@@ -777,7 +754,10 @@
                     );
 
 
-                setStatus("AI model loaded.");
+                setStatus(
+                    "AI model loaded."
+                );
+
 
                 return session;
 
@@ -822,26 +802,14 @@
 
 
                         /*
-                         * REAL-ESRGAN internally performs
-                         * operations that require even
-                         * dimensions.
-                         *
-                         * If the image is odd-sized,
-                         * pad it by one pixel.
-                         *
-                         * Example:
-                         *
-                         * 1403 × 992
-                         *
-                         * becomes:
-                         *
-                         * 1404 × 992
+                         * The model needs even dimensions.
                          */
 
                         const paddedWidth =
                             width % 2 === 0
                                 ? width
                                 : width + 1;
+
 
                         const paddedHeight =
                             height % 2 === 0
@@ -850,7 +818,10 @@
 
 
                         const canvas =
-                            document.createElement("canvas");
+                            document.createElement(
+                                "canvas"
+                            );
+
 
                         canvas.width =
                             paddedWidth;
@@ -860,15 +831,16 @@
 
 
                         const ctx =
-                            canvas.getContext("2d", {
-                                willReadFrequently: true
-                            });
+                            canvas.getContext(
+                                "2d",
+                                {
+                                    willReadFrequently: true
+                                }
+                            );
 
 
                         /*
-                         * Black/transparent padding is
-                         * avoided by extending the edge
-                         * pixels instead.
+                         * Draw the original image.
                          */
 
                         ctx.drawImage(
@@ -880,7 +852,14 @@
                         );
 
 
-                        if (paddedWidth !== width) {
+                        /*
+                         * Extend the final column if
+                         * the width is odd.
+                         */
+
+                        if (
+                            paddedWidth !== width
+                        ) {
 
                             ctx.drawImage(
                                 canvas,
@@ -897,7 +876,14 @@
                         }
 
 
-                        if (paddedHeight !== height) {
+                        /*
+                         * Extend the final row if
+                         * the height is odd.
+                         */
+
+                        if (
+                            paddedHeight !== height
+                        ) {
 
                             ctx.drawImage(
                                 canvas,
@@ -928,18 +914,6 @@
                             paddedHeight;
 
 
-                        /*
-                         * ONNX model expects:
-                         *
-                         * [1, 3, H, W]
-                         *
-                         * RGB
-                         *
-                         * Float32
-                         *
-                         * Values from 0 to 1
-                         */
-
                         const tensorData =
                             new Float32Array(
                                 pixelCount * 3
@@ -965,19 +939,22 @@
                             tensorData[
                                 redOffset + i
                             ] =
-                                imageData.data[p] / 255;
+                                imageData.data[p] /
+                                255;
 
 
                             tensorData[
                                 greenOffset + i
                             ] =
-                                imageData.data[p + 1] / 255;
+                                imageData.data[p + 1] /
+                                255;
 
 
                             tensorData[
                                 blueOffset + i
                             ] =
-                                imageData.data[p + 2] / 255;
+                                imageData.data[p + 2] /
+                                255;
 
                         }
 
@@ -999,9 +976,11 @@
 
                             tensor,
 
-                            originalWidth: width,
+                            originalWidth:
+                                width,
 
-                            originalHeight: height,
+                            originalHeight:
+                                height,
 
                             paddedWidth,
 
@@ -1029,7 +1008,8 @@
                 };
 
 
-                image.src = imageSource;
+                image.src =
+                    imageSource;
 
             });
 
@@ -1060,13 +1040,6 @@
                 dims[3];
 
 
-            /*
-             * The model output is 2× the padded input.
-             *
-             * We crop it back to exactly 2×
-             * the original image dimensions.
-             */
-
             const finalWidth =
                 originalWidth * 2;
 
@@ -1076,6 +1049,7 @@
 
             const canvas =
                 document.createElement("canvas");
+
 
             canvas.width =
                 finalWidth;
@@ -1126,10 +1100,14 @@
                         y * outputWidth + x;
 
                     const targetIndex =
-                        (y * finalWidth + x) * 4;
+                        (
+                            y * finalWidth + x
+                        ) * 4;
 
 
-                    imageData.data[targetIndex] =
+                    imageData.data[
+                        targetIndex
+                    ] =
                         Math.max(
                             0,
                             Math.min(
@@ -1144,7 +1122,9 @@
                         );
 
 
-                    imageData.data[targetIndex + 1] =
+                    imageData.data[
+                        targetIndex + 1
+                    ] =
                         Math.max(
                             0,
                             Math.min(
@@ -1159,7 +1139,9 @@
                         );
 
 
-                    imageData.data[targetIndex + 2] =
+                    imageData.data[
+                        targetIndex + 2
+                    ] =
                         Math.max(
                             0,
                             Math.min(
@@ -1174,8 +1156,9 @@
                         );
 
 
-                    imageData.data[targetIndex + 3] =
-                        255;
+                    imageData.data[
+                        targetIndex + 3
+                    ] = 255;
 
                 }
 
@@ -1222,16 +1205,6 @@
             );
 
 
-            /*
-             * The model contract is:
-             *
-             * input:
-             * [1, 3, H, W]
-             *
-             * output:
-             * [1, 3, 2H, 2W]
-             */
-
             const results =
                 await ai.run({
                     input: prepared.tensor
@@ -1268,7 +1241,8 @@
             "click",
             async () => {
 
-                if (!selectedFile) {
+                if (!selectedFile ||
+                    !selectedObjectURL) {
 
                     setStatus(
                         "Please select an image first.",
@@ -1280,7 +1254,9 @@
                 }
 
 
-                upscaleButton.disabled = true;
+                upscaleButton.disabled =
+                    true;
+
 
                 downloadWrapper.style.display =
                     "none";
@@ -1288,27 +1264,21 @@
 
                 try {
 
-                    /*
-                     * Use the preview image directly.
-                     */
-
-                    const source =
-                        preview.src;
-
-
                     let resultCanvas;
 
 
+                    /*
+                     * 2×
+                     *
+                     * Use the original object URL,
+                     * which remains valid.
+                     */
+
                     if (selectedScale === 2) {
-
-                        setStatus(
-                            "Preparing image..."
-                        );
-
 
                         resultCanvas =
                             await upscale2x(
-                                source
+                                selectedObjectURL
                             );
 
                     } else {
@@ -1316,9 +1286,9 @@
                         /*
                          * 4× =
                          *
-                         * 2× pass
+                         * First 2× pass
                          * +
-                         * another 2× pass
+                         * second 2× pass
                          */
 
                         setStatus(
@@ -1328,7 +1298,7 @@
 
                         const firstPass =
                             await upscale2x(
-                                source
+                                selectedObjectURL
                             );
 
 
@@ -1352,7 +1322,7 @@
 
 
                     /*
-                     * Show final result.
+                     * Convert result to PNG.
                      */
 
                     const resultURL =
@@ -1416,6 +1386,25 @@
             }
         );
 
+
+        /* ==========================================
+           CLEANUP
+        ========================================== */
+
+        window.addEventListener(
+            "beforeunload",
+            () => {
+
+                if (selectedObjectURL) {
+
+                    URL.revokeObjectURL(
+                        selectedObjectURL
+                    );
+
+                }
+
+            }
+        );
 
     </script>
 

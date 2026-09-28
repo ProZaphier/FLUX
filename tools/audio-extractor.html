@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Audio Extractor — FLUX</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #05070c;
+            color: white;
+            font-family: Arial, Helvetica, sans-serif;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+
+            background:
+                radial-gradient(
+                    circle at 20% 20%,
+                    rgba(55, 110, 255, 0.15),
+                    transparent 30%
+                ),
+                radial-gradient(
+                    circle at 80% 70%,
+                    rgba(30, 90, 255, 0.08),
+                    transparent 30%
+                );
+        }
+
+        /* NAVIGATION */
+
+        nav {
+            height: 78px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 7vw;
+
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+
+            background: rgba(5,7,12,0.75);
+            backdrop-filter: blur(18px);
+        }
+
+        .logo {
+            color: white;
+            text-decoration: none;
+
+            font-size: 20px;
+            font-weight: 800;
+
+            letter-spacing: 0.16em;
+        }
+
+        .back {
+            color: #7f8ba0;
+            text-decoration: none;
+
+            font-size: 13px;
+
+            transition: 0.2s;
+        }
+
+        .back:hover {
+            color: white;
+        }
+
+        /* MAIN */
+
+        main {
+            max-width: 850px;
+
+            margin: auto;
+
+            padding: 110px 25px;
+        }
+
+        .eyebrow {
+            color: #6090ff;
+
+            font-size: 10px;
+            font-weight: bold;
+
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin-top: 12px;
+
+            font-size: clamp(42px, 7vw, 75px);
+
+            letter-spacing: -0.06em;
+        }
+
+        .description {
+            margin-top: 18px;
+
+            max-width: 600px;
+
+            color: #7d889b;
+
+            line-height: 1.7;
+            font-size: 15px;
+        }
+
+        /* UPLOAD */
+
+        .upload-box {
+            margin-top: 50px;
+
+            min-height: 300px;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+            padding: 40px;
+
+            border: 1px dashed rgba(100,145,255,0.4);
+            border-radius: 18px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(60,100,200,0.08),
+                    rgba(255,255,255,0.015)
+                );
+
+            text-align: center;
+
+            transition: 0.25s;
+        }
+
+        .upload-box:hover {
+            border-color: rgba(110,155,255,0.75);
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(60,100,200,0.13),
+                    rgba(255,255,255,0.025)
+                );
+        }
+
+        .upload-icon {
+            width: 60px;
+            height: 60px;
+
+            display: grid;
+            place-items: center;
+
+            border-radius: 16px;
+
+            background: rgba(65,110,255,0.12);
+
+            color: #78a0ff;
+
+            font-size: 26px;
+        }
+
+        .upload-box h2 {
+            margin-top: 25px;
+
+            font-size: 19px;
+        }
+
+        .upload-box p {
+            margin-top: 8px;
+
+            color: #697488;
+
+            font-size: 13px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .browse {
+            display: inline-block;
+
+            margin-top: 22px;
+
+            padding: 12px 20px;
+
+            border-radius: 9px;
+
+            background: #3269ed;
+
+            color: white;
+
+            font-size: 13px;
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+        }
+
+        .browse:hover {
+            background: #477dff;
+
+            transform: translateY(-2px);
+        }
+
+        /* FILE INFO */
+
+        #fileInfo {
+            display: none;
+
+            margin-top: 20px;
+
+            padding: 18px;
+
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 12px;
+
+            background: rgba(255,255,255,0.03);
+
+            color: #9aa5b8;
+
+            font-size: 13px;
+        }
+
+        /* FOOTER */
+
+        footer {
+            margin-top: 100px;
+
+            padding-top: 25px;
+
+            border-top: 1px solid rgba(255,255,255,0.06);
+
+            color: #4e596c;
+
+            font-size: 11px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+
+        <a href="../index.html" class="logo">
+            FLUX
+        </a>
+
+        <a href="../index.html" class="back">
+            ← Back to FLUX
+        </a>
+
+    </nav>
+
+
+    <main>
+
+        <div class="eyebrow">
+            FLUX / Media Tool
+        </div>
+
+        <h1>
+            Audio Extractor
+        </h1>
+
+        <p class="description">
+            Extract audio from your video files quickly and
+            prepare it for your editing workflow.
+        </p>
+
+
+        <div class="upload-box">
+
+            <div class="upload-icon">
+                ♪
+            </div>
+
+            <h2>
+                Drop your video here
+            </h2>
+
+            <p>
+                MP4, MOV, MKV, WebM and other common formats
+            </p>
+
+            <label class="browse">
+                Browse files
+
+                <input
+                    type="file"
+                    id="fileInput"
+                    accept="video/*"
+                >
+            </label>
+
+        </div>
+
+
+        <div id="fileInfo"></div>
+
+
+        <footer>
+            FLUX — Editor Toolkit
+        </footer>
+
+    </main>
+
+
+    <script>
+
+        const fileInput =
+            document.getElementById("fileInput");
+
+        const fileInfo =
+            document.getElementById("fileInfo");
+
+
+        fileInput.addEventListener("change", function() {
+
+            const file = this.files[0];
+
+            if (!file) return;
+
+            const size =
+                (file.size / 1024 / 1024).toFixed(2);
+
+
+            fileInfo.style.display = "block";
+
+            fileInfo.innerHTML = `
+                <strong>${file.name}</strong>
+                <br><br>
+                Size: ${size} MB
+                <br>
+                Type: ${file.type || "Unknown"}
+                <br><br>
+                File loaded successfully.
+            `;
+
+        });
+
+    </script>
+
+</body>
+</html>

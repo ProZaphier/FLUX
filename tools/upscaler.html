@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>FLUX Upscaler</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: #070b14;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: min(900px, 92%);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 42px;
+            margin-bottom: 8px;
+            color: #5dbbff;
+        }
+
+        .subtitle {
+            color: #8893a8;
+            margin-bottom: 35px;
+        }
+
+        .upload-box {
+            border: 2px dashed #315273;
+            border-radius: 18px;
+            padding: 60px 20px;
+            background: #0c1321;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .upload-box:hover {
+            border-color: #5dbbff;
+            background: #101a2b;
+        }
+
+        .upload-box.dragging {
+            border-color: #5dbbff;
+            background: #14243b;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .upload-title {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .upload-info {
+            color: #78859a;
+        }
+
+        .controls {
+            margin-top: 25px;
+            display: none;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            border: none;
+            border-radius: 10px;
+            padding: 13px 22px;
+            background: #16263c;
+            color: white;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        button:hover {
+            background: #21415f;
+        }
+
+        button.active {
+            background: #298bd1;
+        }
+
+        #upscaleBtn {
+            background: #298bd1;
+        }
+
+        #upscaleBtn:hover {
+            background: #3aa0ec;
+        }
+
+        .preview {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .preview img {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 12px;
+            border: 1px solid #25354b;
+        }
+
+        .filename {
+            margin-top: 12px;
+            color: #9ba8bc;
+        }
+
+        .status {
+            margin-top: 25px;
+            color: #65c4ff;
+            min-height: 24px;
+        }
+
+        #downloadBtn {
+            display: none;
+            margin-top: 20px;
+            background: #1d9b68;
+        }
+
+        #downloadBtn:hover {
+            background: #25b77b;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>FLUX UPSCALER</h1>
+
+    <div class="subtitle">
+        AI image upscaling, directly in your browser.
+    </div>
+
+    <label class="upload-box" id="dropZone">
+
+        <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp">
+
+        <div class="upload-title">
+            Drop an image here
+        </div>
+
+        <div class="upload-info">
+            or click to browse
+        </div>
+
+    </label>
+
+    <div class="controls" id="controls">
+
+        <button class="scale active" data-scale="2">
+            2×
+        </button>
+
+        <button class="scale" data-scale="4">
+            4×
+        </button>
+
+        <button id="upscaleBtn">
+            Upscale Image
+        </button>
+
+    </div>
+
+    <div class="preview" id="preview">
+
+        <img id="previewImage">
+
+        <div class="filename" id="filename"></div>
+
+    </div>
+
+    <div class="status" id="status"></div>
+
+    <a id="downloadBtn" download="flux-upscaled.png">
+        Download Upscaled Image
+    </a>
+
+</div>
+
+<script>
+
+    const fileInput = document.getElementById("fileInput");
+    const dropZone = document.getElementById("dropZone");
+    const preview = document.getElementById("preview");
+    const previewImage = document.getElementById("previewImage");
+    const filename = document.getElementById("filename");
+    const controls = document.getElementById("controls");
+    const status = document.getElementById("status");
+    const upscaleBtn = document.getElementById("upscaleBtn");
+    const downloadBtn = document.getElementById("downloadBtn");
+
+    let selectedFile = null;
+    let selectedScale = 2;
+
+    fileInput.addEventListener("change", function () {
+
+        if (this.files.length > 0) {
+            loadImage(this.files[0]);
+        }
+
+    });
+
+    dropZone.addEventListener("dragover", function (event) {
+
+        event.preventDefault();
+        dropZone.classList.add("dragging");
+
+    });
+
+    dropZone.addEventListener("dragleave", function () {
+
+        dropZone.classList.remove("dragging");
+
+    });
+
+    dropZone.addEventListener("drop", function (event) {
+
+        event.preventDefault();
+
+        dropZone.classList.remove("dragging");
+
+        if (event.dataTransfer.files.length > 0) {
+            loadImage(event.dataTransfer.files[0]);
+        }
+
+    });
+
+    function loadImage(file) {
+
+        if (!file.type.startsWith("image/")) {
+
+            status.textContent = "Please select an image file.";
+
+            return;
+        }
+
+        selectedFile = file;
+
+        const url = URL.createObjectURL(file);
+
+        previewImage.src = url;
+
+        filename.textContent =
+            file.name + " • " +
+            Math.round(file.size / 1024) + " KB";
+
+        preview.style.display = "block";
+        controls.style.display = "flex";
+
+        status.textContent = "Image loaded.";
+
+        downloadBtn.style.display = "none";
+    }
+
+    document.querySelectorAll(".scale").forEach(button => {
+
+        button.addEventListener("click", function () {
+
+            document.querySelectorAll(".scale")
+                .forEach(btn => btn.classList.remove("active"));
+
+            this.classList.add("active");
+
+            selectedScale = Number(this.dataset.scale);
+
+        });
+
+    });
+
+    upscaleBtn.addEventListener("click", async function () {
+
+        if (!selectedFile) {
+
+            status.textContent = "Please select an image first.";
+
+            return;
+        }
+
+        status.textContent =
+            "Preparing AI upscaler...";
+
+        /*
+            AI processing will be connected here.
+        */
+
+        setTimeout(() => {
+
+            status.textContent =
+                "AI model connection is ready to be added.";
+
+        }, 500);
+
+    });
+
+</script>
+
+</body>
+</html>

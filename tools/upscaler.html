@@ -6,8 +6,8 @@
 
     <title>FLUX Upscaler</title>
 
-    <!-- ONNX Runtime Web -->
-    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
+    <!-- ONNX Runtime WebGPU -->
+    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.webgpu.min.js"></script>
 
     <style>
         * {
@@ -312,6 +312,7 @@
         </div>
     </nav>
 
+
     <main class="container">
 
         <div class="header">
@@ -323,6 +324,7 @@
             </p>
 
         </div>
+
 
         <div class="drop-zone" id="dropZone">
 
@@ -342,6 +344,7 @@
 
         </div>
 
+
         <div class="preview-wrapper" id="previewWrapper">
 
             <img
@@ -352,6 +355,7 @@
             <div class="image-info" id="imageInfo"></div>
 
         </div>
+
 
         <div class="controls" id="controls">
 
@@ -393,10 +397,12 @@
 
         </div>
 
+
         <div
             class="status"
             id="status"
         ></div>
+
 
         <div
             class="download-wrapper"
@@ -424,9 +430,6 @@
 
         const MODEL_URL =
             "https://huggingface.co/skillsafe-ai/realesrgan-x2plus/resolve/main/model.onnx";
-
-        ort.env.wasm.wasmPaths =
-            "https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/";
 
 
         /* ==========================================
@@ -489,6 +492,8 @@
 
         let selectedObjectURL = null;
 
+        let usingWebGPU = false;
+
 
         /* ==========================================
            STATUS
@@ -520,7 +525,8 @@
 
         fileInput.addEventListener("change", (event) => {
 
-            const file = event.target.files[0];
+            const file =
+                event.target.files[0];
 
             if (file) {
                 loadImage(file);
@@ -594,10 +600,6 @@
             setStatus("Loading image...");
 
 
-            /*
-             * Clean up the previous object URL.
-             */
-
             if (selectedObjectURL) {
 
                 URL.revokeObjectURL(
@@ -608,15 +610,6 @@
 
             }
 
-
-            /*
-             * Create a new object URL and KEEP IT ALIVE.
-             *
-             * This is important.
-             *
-             * The AI processor needs to use this
-             * same URL later.
-             */
 
             selectedObjectURL =
                 URL.createObjectURL(file);
@@ -737,25 +730,88 @@
                 return session;
             }
 
-            setStatus(
-                "Loading AI model... This may take a moment on first use."
-            );
 
+            /*
+             * WebGPU should be the preferred path.
+             */
+
+            if (
+                "gpu" in navigator
+            ) {
+
+                try {
+
+                    setStatus(
+                        "Starting GPU acceleration..."
+                    );
+
+
+                    session =
+                        await ort.InferenceSession.create(
+                            MODEL_URL,
+                            {
+                                executionProviders: [
+                                    "webgpu"
+                                ],
+                                graphOptimizationLevel:
+                                    "all"
+                            }
+                        );
+
+
+                    usingWebGPU = true;
+
+
+                    setStatus(
+                        "GPU acceleration enabled."
+                    );
+
+
+                    return session;
+
+                } catch (webgpuError) {
+
+                    console.warn(
+                        "WebGPU unavailable. Falling back to WASM.",
+                        webgpuError
+                    );
+
+                    session = null;
+
+                }
+
+            }
+
+
+            /*
+             * CPU fallback.
+             */
 
             try {
+
+                setStatus(
+                    "GPU unavailable. Loading CPU fallback..."
+                );
+
 
                 session =
                     await ort.InferenceSession.create(
                         MODEL_URL,
                         {
-                            executionProviders: ["wasm"],
-                            graphOptimizationLevel: "all"
+                            executionProviders: [
+                                "wasm"
+                            ],
+                            graphOptimizationLevel:
+                                "all"
                         }
                     );
 
 
+                usingWebGPU = false;
+
+
                 setStatus(
-                    "AI model loaded."
+                    "CPU fallback enabled."
                 );
 
 
@@ -767,6 +823,7 @@
                     "Model loading error:",
                     error
                 );
+
 
                 throw new Error(
                     "Could not load the AI model: " +
@@ -799,6 +856,27 @@
 
                         let height =
                             image.naturalHeight;
+
+
+                        /*
+                         * Protect the browser from
+                         * extremely large images.
+                         */
+
+                        const megapixels =
+                            (
+                                width *
+                                height
+                            ) / 1000000;
+
+
+                        if (megapixels > 20) {
+
+                            throw new Error(
+                                "This image is too large for browser upscaling. Please use an image below 20 megapixels."
+                            );
+
+                        }
 
 
                         /*
@@ -839,9 +917,14 @@
                             );
 
 
-                        /*
-                         * Draw the original image.
-                         */
+                        if (!ctx) {
+
+                            throw new Error(
+                                "The browser could not create a canvas context."
+                            );
+
+                        }
+
 
                         ctx.drawImage(
                             image,
@@ -853,8 +936,7 @@
 
 
                         /*
-                         * Extend the final column if
-                         * the width is odd.
+                         * Extend final column.
                          */
 
                         if (
@@ -877,8 +959,7 @@
 
 
                         /*
-                         * Extend the final row if
-                         * the height is odd.
+                         * Extend final row.
                          */
 
                         if (
@@ -898,6 +979,11 @@
                             );
 
                         }
+
+
+                        setStatus(
+                            "Converting image for the AI..."
+                        );
 
 
                         const imageData =
@@ -1048,7 +1134,9 @@
 
 
             const canvas =
-                document.createElement("canvas");
+                document.createElement(
+                    "canvas"
+                );
 
 
             canvas.width =
@@ -1201,7 +1289,7 @@
 
 
             setStatus(
-                `Running AI upscaling on ${prepared.paddedWidth} × ${prepared.paddedHeight}px...`
+                `Running AI on ${prepared.paddedWidth} × ${prepared.paddedHeight}px using ${usingWebGPU ? "GPU" : "CPU"}...`
             );
 
 
@@ -1241,8 +1329,10 @@
             "click",
             async () => {
 
-                if (!selectedFile ||
-                    !selectedObjectURL) {
+                if (
+                    !selectedFile ||
+                    !selectedObjectURL
+                ) {
 
                     setStatus(
                         "Please select an image first.",
@@ -1267,14 +1357,9 @@
                     let resultCanvas;
 
 
-                    /*
-                     * 2×
-                     *
-                     * Use the original object URL,
-                     * which remains valid.
-                     */
-
-                    if (selectedScale === 2) {
+                    if (
+                        selectedScale === 2
+                    ) {
 
                         resultCanvas =
                             await upscale2x(
@@ -1282,14 +1367,6 @@
                             );
 
                     } else {
-
-                        /*
-                         * 4× =
-                         *
-                         * First 2× pass
-                         * +
-                         * second 2× pass
-                         */
 
                         setStatus(
                             "Running first 2× AI pass..."
@@ -1320,10 +1397,6 @@
 
                     }
 
-
-                    /*
-                     * Convert result to PNG.
-                     */
 
                     const resultURL =
                         resultCanvas.toDataURL(

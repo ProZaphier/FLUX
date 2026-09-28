@@ -254,6 +254,25 @@
             background: #3c8cff;
         }
 
+        .progress-container {
+            display: none;
+            width: 100%;
+            max-width: 400px;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            margin: 20px auto 0;
+            overflow: hidden;
+        }
+
+        .progess-bar {
+            width: 0%;
+            height: 100%;
+            background: #247cff;
+            border-radius: 10px;
+            transition: width 0.1s ease;
+        }
+
         @media (max-width: 650px) {
             .nav-inner {
                 align-items: flex-start;
@@ -398,6 +417,10 @@
         </div>
 
 
+        <div class="progress-container" id="progressContainer">
+            <div class="progess-bar" id="progressBar"></div>
+        </div>
+
         <div
             class="status"
             id="status"
@@ -430,6 +453,12 @@
 
         const MODEL_URL =
             "https://huggingface.co/skillsafe-ai/realesrgan-x2plus/resolve/main/model.onnx";
+
+        const MODEL_DB_NAME =
+            "flux-upscaler";
+
+        const MODEL_STORE_NAME =
+            "models";
 
 
         /* ==========================================
@@ -538,28 +567,26 @@
         /* ==========================================
            DRAG AND DROP
         ========================================== */
+        
+        ["dragenter", "dragover"].forEach(eventName => {
+            dropZone.addEventListener("dragover", (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                dropZone.classList.add("dragging");
 
-        dropZone.addEventListener("dragover", (event) => {
-
-            event.preventDefault();
-
-            dropZone.classList.add("dragging");
-
+            });
         });
 
-
-        dropZone.addEventListener("dragleave", () => {
-
-            dropZone.classList.remove("dragging");
-
+        ["dragleave", "drop"].forEach(eventName => {
+            dropZone.addEventListener("dragleave", () => {
+                event.preventDefault();
+                event.stopPropagation();
+                dropZone.classList.remove("dragging");
+            });
         });
 
 
         dropZone.addEventListener("drop", (event) => {
-
-            event.preventDefault();
-
-            dropZone.classList.remove("dragging");
 
             const file =
                 event.dataTransfer.files[0];
@@ -586,6 +613,14 @@
 
         });
 
+        /* ==========================================
+           FILE INPUT
+        ========================================== */
+
+        dropZone.addEventListener("click", () => {
+            fileInput.value = "";
+            fileInput.click();
+        });
 
         /* ==========================================
            LOAD IMAGE
@@ -719,6 +754,249 @@
 
         });
 
+        /* ==========================================
+            PROGRESS BAR
+        ========================================== */
+
+        async function fetchModel(url) {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('HTTP error! Status: ${response.status}')
+        
+            const contentLength = response.headers.get("content-length");
+            if (!contentLength) {
+                console.warn("Could not fetch content-length header, progress bar might not be precise.")
+            }
+            
+            const total = parseInt(contentLength, 10);
+            let loaded = 0;
+            
+            const reader = response.body.getReader();
+            const chunks = [];
+
+            const progressBar = document.getElementById("progressBar");
+            const progressContainer = document.getElementById("progressContainer");
+
+            progressContainer.style.display = "block";
+
+            let lastPercent = -1;
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                chunks.push(value);
+                loaded += value.length;
+            
+                if (total) {
+                    const percent = Math.round((loaded / total) * 100);
+                    if (percent !== lastPercent) {
+                        lastPercent = percent;
+                        progressBar.style.width = percent + "%"
+                        setStatus(`Loading model... ${percent}%`);
+                    }
+                } else {
+                        setStatus(`Loading model... (${(loaded / (1024 * 1024)).toFixed(1)} MB)`)
+                }
+            }
+            
+            const modelArray = new Uint8Array(loaded);
+            let offset = 0;
+            for (const chunk of chunks) {
+                modelArray.set(chunk, offset);
+                offset += chunk.length;
+            }
+
+            const modelBuffer =
+                modelArray.buffer;
+
+            /*
+             * Cache the freshly downloaded model in
+             * IndexedDB so future visits can skip the
+             * download entirely.
+             */
+
+            setStatus(
+                "Caching model in browser storage..."
+            );
+
+            await saveModelToDB(modelBuffer);
+
+            setStatus(
+                "Model cached. Ready to use."
+            );
+
+            return modelBuffer;
+        }
+
+        /* ==========================================
+           INDEXEDDB MODEL CACHE
+        ========================================== */
+
+        function openModelDB() {
+
+            return new Promise((resolve, reject) => {
+
+                const request =
+                    indexedDB.open(
+                        MODEL_DB_NAME,
+                        1
+                    );
+
+                request.onupgradeneeded = () => {
+
+                    const db =
+                        request.result;
+
+                    if (
+                        !db.objectStoreNames.contains(
+                            MODEL_STORE_NAME
+                        )
+                    ) {
+
+                        db.createObjectStore(
+                            MODEL_STORE_NAME
+                        );
+
+                    }
+
+                };
+
+                request.onsuccess = () => {
+
+                    resolve(
+                        request.result
+                    );
+
+                };
+
+                request.onerror = () => {
+
+                    reject(
+                        request.error
+                    );
+
+                };
+
+            });
+
+        }
+
+
+        async function getCachedModel() {
+
+            try {
+
+                const db =
+                    await openModelDB();
+
+                return new Promise((resolve) => {
+
+                    const transaction =
+                        db.transaction(
+                            MODEL_STORE_NAME,
+                            "readonly"
+                        );
+
+                    const store =
+                        transaction.objectStore(
+                            MODEL_STORE_NAME
+                        );
+
+                    const getRequest =
+                        store.get(MODEL_URL);
+
+                    getRequest.onsuccess = () => {
+
+                        resolve(
+                            getRequest.result || null
+                        );
+
+                    };
+
+                    getRequest.onerror = () => {
+
+                        resolve(null);
+
+                    };
+
+                });
+
+            } catch (error) {
+
+                console.warn(
+                    "IndexedDB unavailable, model cache disabled:",
+                    error
+                );
+
+                return null;
+
+            }
+
+        }
+
+
+        async function saveModelToDB(modelBuffer) {
+
+            try {
+
+                const db =
+                    await openModelDB();
+
+                return new Promise((resolve, reject) => {
+
+                    const transaction =
+                        db.transaction(
+                            MODEL_STORE_NAME,
+                            "readwrite"
+                        );
+
+                    const store =
+                        transaction.objectStore(
+                            MODEL_STORE_NAME
+                        );
+
+                    store.put(
+                        modelBuffer,
+                        MODEL_URL
+                    );
+
+                    transaction.oncomplete = () => {
+
+                        resolve(true);
+
+                    };
+
+                    transaction.onerror = () => {
+
+                        reject(
+                            transaction.error
+                        );
+
+                    };
+
+                    transaction.onabort = () => {
+
+                        reject(
+                            transaction.error
+                        );
+
+                    };
+
+                });
+
+            } catch (error) {
+
+                console.warn(
+                    "Could not cache the model in IndexedDB:",
+                    error
+                );
+
+                return false;
+
+            }
+
+        }
+
 
         /* ==========================================
            LOAD AI MODEL
@@ -728,6 +1006,42 @@
 
             if (session) {
                 return session;
+            }
+
+            let modelBuffer;
+
+            /*
+             * Use the IndexedDB copy if a previous visit
+             * already downloaded and cached the model.
+             */
+
+            modelBuffer =
+                await getCachedModel();
+
+            if (!modelBuffer) {
+
+                try {
+
+                    modelBuffer =
+                        await fetchModel(MODEL_URL);
+
+                } catch (downloadError) {
+
+                    console.error(
+                        "Failed to fetch model:",
+                        downloadError
+                    );
+
+                    setStatus(
+                        "Error fetching model."
+                    );
+
+                    document.getElementById("progressContainer").style.display = "none";
+
+                    return 0;
+
+                }
+
             }
 
 
@@ -748,7 +1062,7 @@
 
                     session =
                         await ort.InferenceSession.create(
-                            MODEL_URL,
+                            modelBuffer,
                             {
                                 executionProviders: [
                                     "webgpu"
@@ -796,7 +1110,7 @@
 
                 session =
                     await ort.InferenceSession.create(
-                        MODEL_URL,
+                        modelBuffer,
                         {
                             executionProviders: [
                                 "wasm"

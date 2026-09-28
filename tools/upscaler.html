@@ -6,6 +6,9 @@
 
     <title>FLUX Upscaler</title>
 
+    <!-- ONNX Runtime WebGPU -->
+    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.webgpu.min.js"></script>
+
     <style>
         * {
             box-sizing: border-box;
@@ -13,64 +16,114 @@
 
         body {
             margin: 0;
-            min-height: 100vh;
-            background: #090d14;
-            color: white;
+            background:
+                radial-gradient(circle at top, rgba(0, 120, 255, 0.12), transparent 40%),
+                #050912;
+            color: #ffffff;
             font-family: Arial, Helvetica, sans-serif;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            width: 100%;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            background: rgba(5, 9, 18, 0.92);
+            backdrop-filter: blur(14px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-inner {
+            max-width: 1200px;
+            margin: auto;
+            padding: 16px 24px;
             display: flex;
-            justify-content: center;
             align-items: center;
-            padding: 30px;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .logo {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 3px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #aab4c7;
+            text-decoration: none;
+            padding: 9px 13px;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            color: #ffffff;
+            background: rgba(255,255,255,0.07);
+        }
+
+        .nav-links a.active {
+            color: #ffffff;
+            background: rgba(40, 130, 255, 0.16);
         }
 
         .container {
-            width: min(850px, 100%);
+            width: min(900px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 60px 0 80px;
         }
 
-        h1 {
+        .header {
             text-align: center;
-            margin: 0 0 8px;
-            font-size: 40px;
-            letter-spacing: 2px;
+            margin-bottom: 35px;
         }
 
-        .subtitle {
-            text-align: center;
-            color: #8c98aa;
-            margin-bottom: 30px;
+        .header h1 {
+            margin: 0 0 10px;
+            font-size: clamp(32px, 6vw, 54px);
+            letter-spacing: 5px;
         }
 
-        .card {
-            background: #111722;
-            border: 1px solid #242d3c;
+        .header p {
+            margin: 0;
+            color: #8792a7;
+            font-size: 15px;
+        }
+
+        .drop-zone {
+            border: 1px dashed rgba(255,255,255,0.22);
             border-radius: 18px;
-            padding: 24px;
-        }
-
-        #dropZone {
-            min-height: 240px;
-            border: 2px dashed #3a4659;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            padding: 70px 30px;
             text-align: center;
+            background: rgba(255,255,255,0.025);
             cursor: pointer;
-            transition: 0.2s;
+            transition: 0.2s ease;
         }
 
-        #dropZone:hover,
-        #dropZone.dragging {
-            border-color: #4d8cff;
-            background: rgba(77, 140, 255, 0.06);
+        .drop-zone:hover,
+        .drop-zone.dragging {
+            border-color: #398cff;
+            background: rgba(40,130,255,0.07);
         }
 
-        #dropZone h2 {
-            margin-bottom: 8px;
+        .drop-zone h2 {
+            margin: 0 0 10px;
+            font-size: 20px;
         }
 
-        #dropZone p {
-            color: #8995a8;
+        .drop-zone p {
+            color: #7e899d;
             margin: 0;
         }
 
@@ -78,125 +131,150 @@
             display: none;
         }
 
-        #previewWrapper {
+        .preview-wrapper {
             display: none;
-            margin-top: 20px;
+            margin-top: 25px;
             text-align: center;
         }
 
-        #preview {
+        .preview-wrapper img {
             max-width: 100%;
-            max-height: 500px;
-            border-radius: 10px;
+            max-height: 600px;
+            border-radius: 14px;
             display: block;
             margin: auto;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.4);
         }
 
-        .buttons {
+        .image-info {
+            margin-top: 12px;
+            color: #7f8a9e;
+            font-size: 13px;
+        }
+
+        .controls {
+            display: none;
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 15px;
+            background: rgba(255,255,255,0.035);
+            border: 1px solid rgba(255,255,255,0.07);
+        }
+
+        .control-row {
             display: flex;
             gap: 10px;
+            justify-content: center;
             flex-wrap: wrap;
-            margin-top: 20px;
         }
 
         button,
-        #download {
+        .download-button {
             border: 0;
             border-radius: 9px;
-            padding: 13px 18px;
+            padding: 12px 18px;
             font-size: 14px;
-            font-weight: bold;
-            color: white;
-            background: #253044;
+            font-weight: 600;
             cursor: pointer;
             text-decoration: none;
+            transition: 0.2s ease;
         }
 
-        button:hover,
-        #download:hover {
-            background: #334159;
+        .scale-button {
+            background: rgba(255,255,255,0.08);
+            color: #ffffff;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
-        button.primary {
-            background: #3478f6;
+        .scale-button:hover {
+            background: rgba(255,255,255,0.14);
         }
 
-        button.primary:hover {
-            background: #2868dd;
+        .scale-button.selected {
+            background: #247cff;
+            border-color: #247cff;
         }
 
-        button:disabled {
-            opacity: 0.45;
+        .upscale-button {
+            background: #ffffff;
+            color: #050912;
+        }
+
+        .upscale-button:hover {
+            transform: translateY(-1px);
+        }
+
+        .upscale-button:disabled {
+            opacity: 0.5;
             cursor: not-allowed;
+            transform: none;
         }
 
-        #download {
-            display: none;
-            background: #253044;
+        .change-button {
+            background: transparent;
+            color: #9ba6b9;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
-        #status {
-            margin-top: 18px;
-            padding: 12px;
-            min-height: 42px;
-            border-radius: 9px;
-            background: #0b1019;
-            color: #aab5c7;
+        .change-button:hover {
+            color: #ffffff;
+            border-color: rgba(255,255,255,0.25);
+        }
+
+        .status {
+            min-height: 22px;
+            margin-top: 20px;
+            text-align: center;
+            color: #8e9ab0;
             font-size: 14px;
-        }
-
-        #timing {
-            margin-top: 10px;
-            color: #657187;
-            font-family: monospace;
-            font-size: 11px;
-            white-space: pre-wrap;
-        }
-
-        #progress {
-            display: none;
-            height: 5px;
-            margin-top: 15px;
-            background: #202938;
-            border-radius: 99px;
-            overflow: hidden;
-        }
-
-        #progressBar {
-            width: 0%;
-            height: 100%;
-            background: #4d8cff;
-            transition: width 0.15s;
-        }
-
-        .info {
-            margin-top: 18px;
-            font-size: 12px;
-            color: #657187;
             line-height: 1.5;
         }
 
-        @media (max-width: 600px) {
-            body {
-                padding: 15px;
-            }
+        .status.error {
+            color: #ff7d7d;
+        }
 
-            .card {
-                padding: 16px;
-            }
+        .status.success {
+            color: #8de0ae;
+        }
 
-            h1 {
-                font-size: 32px;
-            }
+        .download-wrapper {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
 
-            .buttons {
+        .download-button {
+            display: inline-block;
+            background: #247cff;
+            color: white;
+        }
+
+        .download-button:hover {
+            background: #3c8cff;
+        }
+
+        @media (max-width: 650px) {
+            .nav-inner {
+                align-items: flex-start;
                 flex-direction: column;
             }
 
-            button,
-            #download {
+            .nav-links {
                 width: 100%;
-                text-align: center;
+            }
+
+            .nav-links a {
+                padding: 8px 9px;
+                font-size: 13px;
+            }
+
+            .container {
+                padding-top: 40px;
+            }
+
+            .drop-zone {
+                padding: 55px 20px;
             }
         }
     </style>
@@ -204,1389 +282,1628 @@
 
 <body>
 
-<div class="container">
+    <nav class="navbar">
+        <div class="nav-inner">
 
-    <h1>FLUX UPSCALER</h1>
+            <a class="logo" href="../index.html">
+                FLUX
+            </a>
 
-    <div class="subtitle">
-        AI image upscaling powered by Real-ESRGAN
-    </div>
+            <div class="nav-links">
 
-    <div class="card">
+                <a href="../index.html">
+                    Home
+                </a>
 
-        <label id="dropZone">
+                <a href="../index.html#tools">
+                    Tools
+                </a>
+
+                <a href="audio-extractor.html">
+                    Audio Extractor
+                </a>
+
+                <a href="upscaler.html" class="active">
+                    Upscaler
+                </a>
+
+            </div>
+
+        </div>
+    </nav>
+
+
+    <main class="container">
+
+        <div class="header">
+
+            <h1>FLUX UPSCALER</h1>
+
+            <p>
+                AI image upscaling, directly in your browser.
+            </p>
+
+        </div>
+
+
+        <div class="drop-zone" id="dropZone">
+
+            <h2>
+                Drop an image here
+            </h2>
+
+            <p>
+                or click to browse
+            </p>
 
             <input
                 type="file"
                 id="fileInput"
-                accept="image/png,image/jpeg,image/webp"
-            >
-
-            <div>
-                <h2>Drop an image here</h2>
-                <p>or click to select an image</p>
-            </div>
-
-        </label>
-
-
-        <div id="previewWrapper">
-
-            <img
-                id="preview"
-                alt="Preview"
+                accept="image/*,.jfif"
             >
 
         </div>
 
 
-        <div class="buttons">
+        <div class="preview-wrapper" id="previewWrapper">
 
-            <button
-                id="upscale2x"
-                class="primary"
-                disabled
+            <img
+                id="preview"
+                alt="Selected image preview"
             >
-                Upscale 2×
-            </button>
 
-            <button
-                id="upscale4x"
-                disabled
-            >
-                Upscale 4×
-            </button>
+            <div class="image-info" id="imageInfo"></div>
 
-            <button
-                id="changeImage"
-                disabled
-            >
-                Change Image
-            </button>
+        </div>
+
+
+        <div class="controls" id="controls">
+
+            <div class="control-row">
+
+                <button
+                    class="scale-button selected"
+                    id="scale2"
+                    type="button"
+                >
+                    2×
+                </button>
+
+                <button
+                    class="scale-button"
+                    id="scale4"
+                    type="button"
+                >
+                    4×
+                </button>
+
+                <button
+                    class="upscale-button"
+                    id="upscaleButton"
+                    type="button"
+                >
+                    Upscale Image
+                </button>
+
+                <button
+                    class="change-button"
+                    id="changeImageButton"
+                    type="button"
+                >
+                    Change Image
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="status"
+            id="status"
+        ></div>
+
+
+        <div
+            class="download-wrapper"
+            id="downloadWrapper"
+        >
 
             <a
-                id="download"
-                download
+                class="download-button"
+                id="downloadButton"
+                download="flux-upscaled.png"
             >
-                Download Image
+                Download Upscaled Image
             </a>
 
         </div>
 
-
-        <div id="progress">
-            <div id="progressBar"></div>
-        </div>
+    </main>
 
 
-        <div id="status">
-            Loading FLUX...
-        </div>
+    <script>
+
+        /* ==========================================
+           FLUX AI UPSCALER
+        ========================================== */
+
+        const MODEL_URL =
+            "https://huggingface.co/skillsafe-ai/realesrgan-x2plus/resolve/main/model.onnx";
 
 
-        <div id="timing"></div>
+        /* ==========================================
+           ELEMENTS
+        ========================================== */
 
+        const dropZone =
+            document.getElementById("dropZone");
 
-        <div class="info">
-            Processing happens locally in your browser.
-            Images are not uploaded to a server.
-        </div>
+        const fileInput =
+            document.getElementById("fileInput");
 
-    </div>
+        const previewWrapper =
+            document.getElementById("previewWrapper");
 
-</div>
+        const preview =
+            document.getElementById("preview");
 
+        const imageInfo =
+            document.getElementById("imageInfo");
 
-<!--
-    IMPORTANT:
-    ONNX Runtime is loaded AFTER the page itself has rendered.
--->
-<script>
-    window.ortReady = false;
-    window.ortLoadError = null;
-
-    const ortScript = document.createElement("script");
-
-    ortScript.src =
-        "https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.webgpu.min.js";
-
-    ortScript.onload = () => {
-
-        console.log(
-            "[FLUX] ONNX Runtime loaded."
-        );
-
-        window.ortReady = true;
-
-        if (typeof initialiseFLUX === "function") {
-            initialiseFLUX();
-        }
-    };
-
-    ortScript.onerror = () => {
-
-        console.error(
-            "[FLUX] Could not load ONNX Runtime."
-        );
-
-        window.ortLoadError =
-            "Could not load ONNX Runtime.";
+        const controls =
+            document.getElementById("controls");
 
         const status =
             document.getElementById("status");
 
-        status.textContent =
-            "AI engine could not be loaded. Check your internet connection or browser console.";
-    };
+        const scale2 =
+            document.getElementById("scale2");
 
-    document.body.appendChild(
-        ortScript
-    );
-</script>
+        const scale4 =
+            document.getElementById("scale4");
 
+        const upscaleButton =
+            document.getElementById("upscaleButton");
 
-<script>
+        const changeImageButton =
+            document.getElementById("changeImageButton");
 
-let session = null;
-let selectedFile = null;
-let usingWebGPU = false;
-let deviceProfile = null;
-let busy = false;
+        const downloadWrapper =
+            document.getElementById("downloadWrapper");
 
-
-const fileInput =
-    document.getElementById("fileInput");
-
-const dropZone =
-    document.getElementById("dropZone");
-
-const preview =
-    document.getElementById("preview");
-
-const previewWrapper =
-    document.getElementById("previewWrapper");
-
-const status =
-    document.getElementById("status");
-
-const timing =
-    document.getElementById("timing");
-
-const progress =
-    document.getElementById("progress");
-
-const progressBar =
-    document.getElementById("progressBar");
-
-const upscale2xButton =
-    document.getElementById("upscale2x");
-
-const upscale4xButton =
-    document.getElementById("upscale4x");
-
-const changeImageButton =
-    document.getElementById("changeImage");
-
-const download =
-    document.getElementById("download");
+        const downloadButton =
+            document.getElementById("downloadButton");
 
 
-function setStatus(text) {
+        /* ==========================================
+           STATE
+        ========================================== */
 
-    status.textContent = text;
+        let selectedFile = null;
 
-    console.log("[FLUX]", text);
-}
+        let selectedScale = 2;
 
+        let session = null;
 
-function frame() {
+        let originalWidth = 0;
 
-    return new Promise(resolve => {
+        let originalHeight = 0;
 
-        requestAnimationFrame(resolve);
+        let selectedObjectURL = null;
 
-    });
-}
+        let downloadObjectURL = null;
 
-
-function setProgress(value) {
-
-    progress.style.display = "block";
-
-    progressBar.style.width =
-        value + "%";
-}
+        let usingWebGPU = false;
 
 
-/* =========================================================
-   DEVICE PROFILE
-   ========================================================= */
+        /* ==========================================
+           STATUS
+        ========================================== */
 
-function getDeviceProfile() {
+        function setStatus(message, type = "") {
 
-    const cores =
-        navigator.hardwareConcurrency || 4;
+            status.textContent = message;
 
-    const memory =
-        navigator.deviceMemory || 4;
+            status.className = "status";
 
-    const gpu =
-        "gpu" in navigator;
-
-
-    if (
-        gpu &&
-        (
-            cores >= 8 ||
-            memory >= 8
-        )
-    ) {
-
-        return {
-            name: "high",
-            tileSize: 768,
-            fullImageLimitMP: 8
-        };
-    }
-
-
-    if (
-        gpu &&
-        (
-            cores >= 6 ||
-            memory >= 6
-        )
-    ) {
-
-        return {
-            name: "medium",
-            tileSize: 512,
-            fullImageLimitMP: 4
-        };
-    }
-
-
-    return {
-        name: "safe",
-        tileSize: 384,
-        fullImageLimitMP: 1.5
-    };
-}
-
-
-/* =========================================================
-   MODEL
-   ========================================================= */
-
-async function loadModel() {
-
-    if (session) {
-        return;
-    }
-
-
-    if (!window.ortReady) {
-
-        setStatus(
-            "Waiting for AI engine..."
-        );
-
-
-        /*
-         * Wait for ONNX Runtime to load.
-         */
-
-        for (
-            let i = 0;
-            i < 100;
-            i++
-        ) {
-
-            if (window.ortReady) {
-                break;
+            if (type) {
+                status.classList.add(type);
             }
 
-            if (window.ortLoadError) {
+        }
+
+
+        /* ==========================================
+           SMALL BROWSER YIELD
+           Keeps the page responsive while doing
+           large pixel conversions.
+        ========================================== */
+
+        function yieldToBrowser() {
+
+            return new Promise(resolve => {
+
+                requestAnimationFrame(() => {
+                    resolve();
+                });
+
+            });
+
+        }
+
+
+        /* ==========================================
+           FILE INPUT
+        ========================================== */
+
+        dropZone.addEventListener("click", () => {
+
+            fileInput.click();
+
+        });
+
+
+        fileInput.addEventListener("change", (event) => {
+
+            const file =
+                event.target.files[0];
+
+            if (file) {
+                loadImage(file);
+            }
+
+        });
+
+
+        /* ==========================================
+           DRAG AND DROP
+        ========================================== */
+
+        dropZone.addEventListener("dragover", (event) => {
+
+            event.preventDefault();
+
+            dropZone.classList.add("dragging");
+
+        });
+
+
+        dropZone.addEventListener("dragleave", () => {
+
+            dropZone.classList.remove("dragging");
+
+        });
+
+
+        dropZone.addEventListener("drop", (event) => {
+
+            event.preventDefault();
+
+            dropZone.classList.remove("dragging");
+
+            const file =
+                event.dataTransfer.files[0];
+
+            if (!file) {
+                return;
+            }
+
+            if (
+                !file.type.startsWith("image/") &&
+                !file.name.toLowerCase().endsWith(".jfif")
+            ) {
+
+                setStatus(
+                    "Please select a valid image file.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+            loadImage(file);
+
+        });
+
+
+        /* ==========================================
+           LOAD IMAGE
+        ========================================== */
+
+        function loadImage(file) {
+
+            selectedFile = file;
+
+            downloadWrapper.style.display = "none";
+
+            if (downloadObjectURL) {
+
+                URL.revokeObjectURL(
+                    downloadObjectURL
+                );
+
+                downloadObjectURL = null;
+
+            }
+
+            setStatus("Loading image...");
+
+
+            if (selectedObjectURL) {
+
+                URL.revokeObjectURL(
+                    selectedObjectURL
+                );
+
+                selectedObjectURL = null;
+
+            }
+
+
+            selectedObjectURL =
+                URL.createObjectURL(file);
+
+
+            const image =
+                new Image();
+
+
+            image.onload = () => {
+
+                originalWidth =
+                    image.naturalWidth;
+
+                originalHeight =
+                    image.naturalHeight;
+
+
+                preview.src =
+                    selectedObjectURL;
+
+
+                previewWrapper.style.display =
+                    "block";
+
+
+                controls.style.display =
+                    "block";
+
+
+                dropZone.style.display =
+                    "none";
+
+
+                imageInfo.textContent =
+                    `${originalWidth} × ${originalHeight}px`;
+
+
+                setStatus(
+                    "Image ready. Choose a scale and upscale."
+                );
+
+            };
+
+
+            image.onerror = () => {
+
+                if (selectedObjectURL) {
+
+                    URL.revokeObjectURL(
+                        selectedObjectURL
+                    );
+
+                    selectedObjectURL = null;
+
+                }
+
+                setStatus(
+                    "This image could not be read by the browser.",
+                    "error"
+                );
+
+            };
+
+
+            image.src =
+                selectedObjectURL;
+
+        }
+
+
+        /* ==========================================
+           CHANGE IMAGE
+        ========================================== */
+
+        changeImageButton.addEventListener("click", () => {
+
+            fileInput.value = "";
+
+            fileInput.click();
+
+        });
+
+
+        /* ==========================================
+           SCALE BUTTONS
+        ========================================== */
+
+        scale2.addEventListener("click", () => {
+
+            selectedScale = 2;
+
+            scale2.classList.add("selected");
+
+            scale4.classList.remove("selected");
+
+        });
+
+
+        scale4.addEventListener("click", () => {
+
+            selectedScale = 4;
+
+            scale4.classList.add("selected");
+
+            scale2.classList.remove("selected");
+
+        });
+
+
+        /* ==========================================
+           LOAD AI MODEL
+        ========================================== */
+
+        async function loadModel() {
+
+            if (session) {
+                return session;
+            }
+
+
+            /*
+             * Prefer WebGPU.
+             */
+
+            if ("gpu" in navigator) {
+
+                try {
+
+                    setStatus(
+                        "Starting GPU acceleration..."
+                    );
+
+
+                    const startTime =
+                        performance.now();
+
+
+                    session =
+                        await ort.InferenceSession.create(
+                            MODEL_URL,
+                            {
+                                executionProviders: [
+                                    "webgpu"
+                                ],
+                                graphOptimizationLevel:
+                                    "all"
+                            }
+                        );
+
+
+                    usingWebGPU = true;
+
+
+                    console.log(
+                        `FLUX WebGPU model loaded in ${(
+                            performance.now() -
+                            startTime
+                        ).toFixed(0)} ms`
+                    );
+
+
+                    setStatus(
+                        "GPU acceleration enabled."
+                    );
+
+
+                    return session;
+
+                } catch (webgpuError) {
+
+                    console.warn(
+                        "WebGPU unavailable. Falling back to WASM.",
+                        webgpuError
+                    );
+
+                    session = null;
+
+                }
+
+            }
+
+
+            /*
+             * CPU fallback.
+             */
+
+            try {
+
+                setStatus(
+                    "GPU unavailable. Loading CPU fallback..."
+                );
+
+
+                const startTime =
+                    performance.now();
+
+
+                session =
+                    await ort.InferenceSession.create(
+                        MODEL_URL,
+                        {
+                            executionProviders: [
+                                "wasm"
+                            ],
+                            graphOptimizationLevel:
+                                "all"
+                        }
+                    );
+
+
+                usingWebGPU = false;
+
+
+                console.log(
+                    `FLUX WASM model loaded in ${(
+                        performance.now() -
+                        startTime
+                    ).toFixed(0)} ms`
+                );
+
+
+                setStatus(
+                    "CPU fallback enabled."
+                );
+
+
+                return session;
+
+            } catch (error) {
+
+                console.error(
+                    "Model loading error:",
+                    error
+                );
+
 
                 throw new Error(
-                    window.ortLoadError
+                    "Could not load the AI model: " +
+                    error.message
                 );
+
             }
 
-            await new Promise(
-                resolve =>
-                    setTimeout(
-                        resolve,
-                        100
-                    )
-            );
         }
-    }
 
 
-    if (
-        !window.ortReady ||
-        typeof ort === "undefined"
-    ) {
+        /* ==========================================
+           IMAGE → TENSOR
+           
+           This version intentionally does NOT tile
+           normal images. A 1000×1000 image is only
+           1 megapixel and should be handled as one
+           inference on a capable GPU.
+        ========================================== */
 
-        throw new Error(
-            "ONNX Runtime did not load."
-        );
-    }
+        async function imageToTensor(imageSource) {
 
-
-    deviceProfile =
-        getDeviceProfile();
-
-
-    console.log(
-        "[FLUX] Device profile:",
-        deviceProfile
-    );
+            const startTime =
+                performance.now();
 
 
-    /*
-     * WebGPU first.
-     */
-
-    if ("gpu" in navigator) {
-
-        try {
+            /*
+             * Decode image.
+             */
 
             setStatus(
-                "Initialising GPU..."
+                "Preparing image: decoding..."
             );
 
 
-            session =
-                await ort.InferenceSession.create(
-                    "https://huggingface.co/skillsafe-ai/realesrgan-x2plus/resolve/main/model.onnx",
+            const image =
+                new Image();
+
+
+            image.decoding = "async";
+
+
+            const loadedImage =
+                await new Promise((resolve, reject) => {
+
+                    image.onload = () => resolve(image);
+
+                    image.onerror = () => reject(
+                        new Error(
+                            "The selected image could not be decoded."
+                        )
+                    );
+
+                    image.src = imageSource;
+
+                });
+
+
+            let width =
+                loadedImage.naturalWidth;
+
+            let height =
+                loadedImage.naturalHeight;
+
+
+            const megapixels =
+                (
+                    width *
+                    height
+                ) / 1000000;
+
+
+            if (megapixels > 20) {
+
+                throw new Error(
+                    "This image is too large for browser upscaling. Please use an image below 20 megapixels."
+                );
+
+            }
+
+
+            /*
+             * The model needs even dimensions.
+             */
+
+            const paddedWidth =
+                width % 2 === 0
+                    ? width
+                    : width + 1;
+
+
+            const paddedHeight =
+                height % 2 === 0
+                    ? height
+                    : height + 1;
+
+
+            setStatus(
+                `Preparing image: ${paddedWidth} × ${paddedHeight}px...`
+            );
+
+
+            /*
+             * Canvas.
+             */
+
+            const canvas =
+                document.createElement(
+                    "canvas"
+                );
+
+
+            canvas.width =
+                paddedWidth;
+
+            canvas.height =
+                paddedHeight;
+
+
+            const ctx =
+                canvas.getContext(
+                    "2d",
                     {
-                        executionProviders: [
-                            "webgpu"
-                        ],
-                        graphOptimizationLevel:
-                            "all"
+                        willReadFrequently: true
                     }
                 );
 
 
-            usingWebGPU = true;
+            if (!ctx) {
+
+                throw new Error(
+                    "The browser could not create a canvas context."
+                );
+
+            }
+
+
+            /*
+             * Draw original image.
+             */
+
+            ctx.drawImage(
+                loadedImage,
+                0,
+                0,
+                width,
+                height
+            );
+
+
+            /*
+             * If dimensions are odd, duplicate the
+             * final column and/or row.
+             */
+
+            if (paddedWidth !== width) {
+
+                ctx.drawImage(
+                    canvas,
+                    width - 1,
+                    0,
+                    1,
+                    height,
+                    width,
+                    0,
+                    1,
+                    height
+                );
+
+            }
+
+
+            if (paddedHeight !== height) {
+
+                ctx.drawImage(
+                    canvas,
+                    0,
+                    height - 1,
+                    paddedWidth,
+                    1,
+                    0,
+                    height,
+                    paddedWidth,
+                    1
+                );
+
+            }
+
+
+            await yieldToBrowser();
+
+
+            /*
+             * Read pixels.
+             */
+
+            setStatus(
+                "Preparing image: reading pixels..."
+            );
+
+
+            const imageData =
+                ctx.getImageData(
+                    0,
+                    0,
+                    paddedWidth,
+                    paddedHeight
+                );
+
+
+            const pixelCount =
+                paddedWidth *
+                paddedHeight;
+
+
+            /*
+             * Float32 planar RGB tensor.
+             *
+             * [1, 3, H, W]
+             */
+
+            const tensorData =
+                new Float32Array(
+                    pixelCount * 3
+                );
+
+
+            const redOffset =
+                0;
+
+            const greenOffset =
+                pixelCount;
+
+            const blueOffset =
+                pixelCount * 2;
+
+
+            /*
+             * Process in chunks instead of one enormous
+             * blocking loop. This keeps the browser
+             * responsive on weaker machines.
+             */
+
+            const CHUNK_PIXELS =
+                250000;
+
+
+            for (
+                let start = 0;
+                start < pixelCount;
+                start += CHUNK_PIXELS
+            ) {
+
+                const end =
+                    Math.min(
+                        start + CHUNK_PIXELS,
+                        pixelCount
+                    );
+
+
+                for (
+                    let i = start;
+                    i < end;
+                    i++
+                ) {
+
+                    const p =
+                        i * 4;
+
+
+                    tensorData[
+                        redOffset + i
+                    ] =
+                        imageData.data[p] / 255;
+
+
+                    tensorData[
+                        greenOffset + i
+                    ] =
+                        imageData.data[p + 1] / 255;
+
+
+                    tensorData[
+                        blueOffset + i
+                    ] =
+                        imageData.data[p + 2] / 255;
+
+                }
+
+
+                const percent =
+                    Math.round(
+                        (end / pixelCount) * 100
+                    );
+
+
+                setStatus(
+                    `Preparing image: ${percent}%...`
+                );
+
+
+                await yieldToBrowser();
+
+            }
+
+
+            const tensor =
+                new ort.Tensor(
+                    "float32",
+                    tensorData,
+                    [
+                        1,
+                        3,
+                        paddedHeight,
+                        paddedWidth
+                    ]
+                );
+
+
+            /*
+             * The canvas and ImageData are no longer
+             * needed after the tensor is created.
+             */
+
+            canvas.width = 1;
+            canvas.height = 1;
 
 
             console.log(
-                "[FLUX] WebGPU ready."
+                `Tensor preparation: ${(
+                    performance.now() -
+                    startTime
+                ).toFixed(0)} ms`
             );
 
 
-            setStatus(
-                "GPU acceleration ready."
-            );
+            return {
 
+                tensor,
 
-            return;
+                originalWidth:
+                    width,
 
-        } catch (error) {
+                originalHeight:
+                    height,
 
-            console.warn(
-                "[FLUX] WebGPU failed:",
-                error
-            );
+                paddedWidth,
 
+                paddedHeight
 
-            session = null;
-            usingWebGPU = false;
+            };
+
         }
-    }
 
 
-    /*
-     * WASM fallback.
-     */
+        /* ==========================================
+           TENSOR → CANVAS
+        ========================================== */
 
-    setStatus(
-        "Using CPU engine..."
-    );
-
-
-    session =
-        await ort.InferenceSession.create(
-            "https://huggingface.co/skillsafe-ai/realesrgan-x2plus/resolve/main/model.onnx",
-            {
-                executionProviders: [
-                    "wasm"
-                ],
-                graphOptimizationLevel:
-                    "all"
-            }
-        );
-
-
-    usingWebGPU = false;
-
-
-    setStatus(
-        "CPU engine ready."
-    );
-}
-
-
-/* =========================================================
-   INITIALISE
-   ========================================================= */
-
-async function initialiseFLUX() {
-
-    console.log(
-        "[FLUX] Initialising..."
-    );
-
-
-    setStatus(
-        "AI engine loaded. Select an image."
-    );
-}
-
-
-/* =========================================================
-   FILE HANDLING
-   ========================================================= */
-
-function handleFile(file) {
-
-    if (!file) {
-        return;
-    }
-
-
-    if (!file.type.startsWith("image/")) {
-
-        setStatus(
-            "Please select an image."
-        );
-
-        return;
-    }
-
-
-    selectedFile =
-        file;
-
-
-    const url =
-        URL.createObjectURL(file);
-
-
-    preview.src =
-        url;
-
-
-    previewWrapper.style.display =
-        "block";
-
-
-    preview.onload = () => {
-
-        URL.revokeObjectURL(url);
-
-    };
-
-
-    upscale2xButton.disabled =
-        false;
-
-    upscale4xButton.disabled =
-        false;
-
-    changeImageButton.disabled =
-        false;
-
-
-    download.style.display =
-        "none";
-
-
-    timing.textContent =
-        "";
-
-
-    setStatus(
-        file.name + " ready."
-    );
-}
-
-
-/* =========================================================
-   IMAGE → TENSOR
-   ========================================================= */
-
-function imageToTensor(
-    source,
-    width,
-    height
-) {
-
-    const canvas =
-        document.createElement("canvas");
-
-
-    canvas.width =
-        width;
-
-    canvas.height =
-        height;
-
-
-    const ctx =
-        canvas.getContext(
-            "2d",
-            {
-                willReadFrequently: true
-            }
-        );
-
-
-    ctx.drawImage(
-        source,
-        0,
-        0,
-        width,
-        height
-    );
-
-
-    const imageData =
-        ctx.getImageData(
-            0,
-            0,
-            width,
-            height
-        );
-
-
-    const pixels =
-        imageData.data;
-
-
-    const pixelCount =
-        width * height;
-
-
-    const tensorData =
-        new Float32Array(
-            pixelCount * 3
-        );
-
-
-    for (
-        let i = 0;
-        i < pixelCount;
-        i++
-    ) {
-
-        const p =
-            i * 4;
-
-
-        tensorData[i] =
-            pixels[p] / 255;
-
-
-        tensorData[
-            pixelCount + i
-        ] =
-            pixels[p + 1] / 255;
-
-
-        tensorData[
-            pixelCount * 2 + i
-        ] =
-            pixels[p + 2] / 255;
-    }
-
-
-    canvas.width = 1;
-    canvas.height = 1;
-
-
-    return new ort.Tensor(
-        "float32",
-        tensorData,
-        [
-            1,
-            3,
-            height,
-            width
-        ]
-    );
-}
-
-
-/* =========================================================
-   TENSOR → CANVAS
-   ========================================================= */
-
-function tensorToCanvas(
-    tensor
-) {
-
-    const width =
-        tensor.dims[3];
-
-    const height =
-        tensor.dims[2];
-
-
-    const data =
-        tensor.data;
-
-
-    const pixels =
-        new Uint8ClampedArray(
-            width * height * 4
-        );
-
-
-    const pixelCount =
-        width * height;
-
-
-    for (
-        let i = 0;
-        i < pixelCount;
-        i++
-    ) {
-
-        pixels[i * 4] =
-            Math.max(
-                0,
-                Math.min(
-                    255,
-                    data[i] * 255
-                )
-            );
-
-
-        pixels[i * 4 + 1] =
-            Math.max(
-                0,
-                Math.min(
-                    255,
-                    data[
-                        pixelCount + i
-                    ] * 255
-                )
-            );
-
-
-        pixels[i * 4 + 2] =
-            Math.max(
-                0,
-                Math.min(
-                    255,
-                    data[
-                        pixelCount * 2 + i
-                    ] * 255
-                )
-            );
-
-
-        pixels[i * 4 + 3] =
-            255;
-    }
-
-
-    const canvas =
-        document.createElement("canvas");
-
-
-    canvas.width =
-        width;
-
-    canvas.height =
-        height;
-
-
-    const ctx =
-        canvas.getContext("2d");
-
-
-    const imageData =
-        new ImageData(
-            pixels,
-            width,
-            height
-        );
-
-
-    ctx.putImageData(
-        imageData,
-        0,
-        0
-    );
-
-
-    return canvas;
-}
-
-
-/* =========================================================
-   FULL IMAGE
-   ========================================================= */
-
-async function upscaleFullImage(
-    source,
-    width,
-    height
-) {
-
-    setStatus(
-        "Preparing image..."
-    );
-
-
-    await frame();
-
-
-    const preparationStart =
-        performance.now();
-
-
-    const tensor =
-        imageToTensor(
-            source,
-            width,
-            height
-        );
-
-
-    const preparationTime =
-        (
-            performance.now() -
-            preparationStart
-        ) / 1000;
-
-
-    console.log(
-        "[FLUX] Tensor:",
-        preparationTime,
-        "seconds"
-    );
-
-
-    setStatus(
-        "Running AI upscaling..."
-    );
-
-
-    await frame();
-
-
-    const inferenceStart =
-        performance.now();
-
-
-    const result =
-        await session.run({
-            input: tensor
-        });
-
-
-    const inferenceTime =
-        (
-            performance.now() -
-            inferenceStart
-        ) / 1000;
-
-
-    console.log(
-        "[FLUX] Inference:",
-        inferenceTime,
-        "seconds"
-    );
-
-
-    setStatus(
-        "Rendering..."
-    );
-
-
-    const output =
-        tensorToCanvas(
-            result.output
-        );
-
-
-    timing.textContent =
-        `Preparation: ${preparationTime.toFixed(2)}s\n` +
-        `AI inference: ${inferenceTime.toFixed(2)}s`;
-
-
-    return output;
-}
-
-
-/* =========================================================
-   TILE
-   ========================================================= */
-
-async function upscaleTile(
-    source,
-    x,
-    y,
-    width,
-    height
-) {
-
-    const tile =
-        document.createElement("canvas");
-
-
-    tile.width =
-        width;
-
-    tile.height =
-        height;
-
-
-    const ctx =
-        tile.getContext("2d");
-
-
-    ctx.drawImage(
-        source,
-        x,
-        y,
-        width,
-        height,
-        0,
-        0,
-        width,
-        height
-    );
-
-
-    const tensor =
-        imageToTensor(
-            tile,
-            width,
-            height
-        );
-
-
-    const result =
-        await session.run({
-            input: tensor
-        });
-
-
-    tile.width = 1;
-    tile.height = 1;
-
-
-    return tensorToCanvas(
-        result.output
-    );
-}
-
-
-/* =========================================================
-   TILED MODE
-   ========================================================= */
-
-async function upscaleTiled(
-    source,
-    width,
-    height
-) {
-
-    const tileSize =
-        deviceProfile.tileSize;
-
-
-    const output =
-        document.createElement("canvas");
-
-
-    output.width =
-        width * 2;
-
-    output.height =
-        height * 2;
-
-
-    const outputCtx =
-        output.getContext("2d");
-
-
-    const columns =
-        Math.ceil(
-            width / tileSize
-        );
-
-
-    const rows =
-        Math.ceil(
-            height / tileSize
-        );
-
-
-    const total =
-        columns * rows;
-
-
-    let completed = 0;
-
-
-    for (
-        let y = 0;
-        y < height;
-        y += tileSize
-    ) {
-
-        for (
-            let x = 0;
-            x < width;
-            x += tileSize
+        async function tensorToCanvas(
+            outputTensor,
+            originalWidth,
+            originalHeight
         ) {
 
-            const tileWidth =
-                Math.min(
-                    tileSize,
-                    width - x
+            const startTime =
+                performance.now();
+
+
+            const dims =
+                outputTensor.dims;
+
+            const data =
+                outputTensor.data;
+
+
+            const outputHeight =
+                dims[2];
+
+            const outputWidth =
+                dims[3];
+
+
+            /*
+             * Because the model is 2×, the output
+             * dimensions are twice the original.
+             *
+             * Crop any padding from the odd input.
+             */
+
+            const finalWidth =
+                originalWidth * 2;
+
+            const finalHeight =
+                originalHeight * 2;
+
+
+            const canvas =
+                document.createElement(
+                    "canvas"
                 );
 
 
-            const tileHeight =
-                Math.min(
-                    tileSize,
-                    height - y
+            canvas.width =
+                finalWidth;
+
+            canvas.height =
+                finalHeight;
+
+
+            const ctx =
+                canvas.getContext("2d");
+
+
+            if (!ctx) {
+
+                throw new Error(
+                    "Could not create output canvas."
                 );
 
-
-            completed++;
-
-
-            setStatus(
-                `Upscaling tile ${completed}/${total}...`
-            );
-
-
-            setProgress(
-                completed / total * 100
-            );
-
-
-            await frame();
-
-
-            const result =
-                await upscaleTile(
-                    source,
-                    x,
-                    y,
-                    tileWidth,
-                    tileHeight
-                );
-
-
-            outputCtx.drawImage(
-                result,
-                x * 2,
-                y * 2
-            );
-
-
-            result.width = 1;
-            result.height = 1;
-        }
-    }
-
-
-    return output;
-}
-
-
-/* =========================================================
-   UPSCALE
-   ========================================================= */
-
-async function performUpscale(
-    scale
-) {
-
-    if (busy) {
-        return;
-    }
-
-
-    if (!selectedFile) {
-
-        setStatus(
-            "Select an image first."
-        );
-
-        return;
-    }
-
-
-    busy = true;
-
-
-    upscale2xButton.disabled = true;
-    upscale4xButton.disabled = true;
-    changeImageButton.disabled = true;
-
-
-    try {
-
-        await loadModel();
-
-
-        setProgress(0);
-
-
-        setStatus(
-            "Decoding image..."
-        );
-
-
-        const bitmap =
-            await createImageBitmap(
-                selectedFile
-            );
-
-
-        const width =
-            bitmap.width;
-
-
-        const height =
-            bitmap.height;
-
-
-        const megapixels =
-            width * height / 1000000;
-
-
-        if (megapixels > 20) {
-
-            bitmap.close();
-
-            throw new Error(
-                "Image exceeds the 20 MP limit."
-            );
-        }
-
-
-        /*
-         * 2×
-         */
-
-        if (scale === 2) {
-
-            let output;
-
-
-            if (
-                usingWebGPU &&
-                megapixels <=
-                    deviceProfile.fullImageLimitMP
-            ) {
-
-                output =
-                    await upscaleFullImage(
-                        bitmap,
-                        width,
-                        height
-                    );
-
-            } else {
-
-                output =
-                    await upscaleTiled(
-                        bitmap,
-                        width,
-                        height
-                    );
             }
 
 
-            bitmap.close();
+            const imageData =
+                ctx.createImageData(
+                    finalWidth,
+                    finalHeight
+                );
 
 
-            showOutput(
-                output,
-                "flux-upscaled-2x.png"
-            );
-        }
+            const planeSize =
+                outputWidth *
+                outputHeight;
 
 
-        /*
-         * 4×
-         */
+            const redOffset =
+                0;
 
-        else {
+            const greenOffset =
+                planeSize;
 
-            setStatus(
-                "Running first 2× pass..."
-            );
-
-
-            const first =
-                usingWebGPU &&
-                megapixels <=
-                    deviceProfile.fullImageLimitMP
-                    ? await upscaleFullImage(
-                        bitmap,
-                        width,
-                        height
-                    )
-                    : await upscaleTiled(
-                        bitmap,
-                        width,
-                        height
-                    );
+            const blueOffset =
+                planeSize * 2;
 
 
-            bitmap.close();
+            const totalPixels =
+                finalWidth *
+                finalHeight;
 
 
-            await frame();
+            const CHUNK_PIXELS =
+                250000;
 
 
-            setStatus(
-                "Running second 2× pass..."
-            );
-
-
-            const secondWidth =
-                first.width;
-
-
-            const secondHeight =
-                first.height;
-
-
-            const secondMP =
-                secondWidth *
-                secondHeight /
-                1000000;
-
-
-            let second;
-
-
-            if (
-                usingWebGPU &&
-                secondMP <=
-                    deviceProfile.fullImageLimitMP
+            for (
+                let start = 0;
+                start < totalPixels;
+                start += CHUNK_PIXELS
             ) {
 
-                second =
-                    await upscaleFullImage(
-                        first,
-                        secondWidth,
-                        secondHeight
+                const end =
+                    Math.min(
+                        start + CHUNK_PIXELS,
+                        totalPixels
                     );
 
-            } else {
 
-                second =
-                    await upscaleTiled(
-                        first,
-                        secondWidth,
-                        secondHeight
+                for (
+                    let i = start;
+                    i < end;
+                    i++
+                ) {
+
+                    const y =
+                        Math.floor(
+                            i / finalWidth
+                        );
+
+                    const x =
+                        i -
+                        (
+                            y *
+                            finalWidth
+                        );
+
+
+                    const sourceIndex =
+                        y *
+                        outputWidth +
+                        x;
+
+
+                    const targetIndex =
+                        i * 4;
+
+
+                    imageData.data[
+                        targetIndex
+                    ] =
+                        Math.max(
+                            0,
+                            Math.min(
+                                255,
+                                Math.round(
+                                    data[
+                                        redOffset +
+                                        sourceIndex
+                                    ] * 255
+                                )
+                            )
+                        );
+
+
+                    imageData.data[
+                        targetIndex + 1
+                    ] =
+                        Math.max(
+                            0,
+                            Math.min(
+                                255,
+                                Math.round(
+                                    data[
+                                        greenOffset +
+                                        sourceIndex
+                                    ] * 255
+                                )
+                            )
+                        );
+
+
+                    imageData.data[
+                        targetIndex + 2
+                    ] =
+                        Math.max(
+                            0,
+                            Math.min(
+                                255,
+                                Math.round(
+                                    data[
+                                        blueOffset +
+                                        sourceIndex
+                                    ] * 255
+                                )
+                            )
+                        );
+
+
+                    imageData.data[
+                        targetIndex + 3
+                    ] = 255;
+
+                }
+
+
+                const percent =
+                    Math.round(
+                        (end / totalPixels) * 100
                     );
-            }
 
-
-            first.width = 1;
-            first.height = 1;
-
-
-            showOutput(
-                second,
-                "flux-upscaled-4x.png"
-            );
-        }
-
-
-        setProgress(100);
-
-
-        setStatus(
-            "Upscaling complete."
-        );
-
-    } catch (error) {
-
-        console.error(
-            "[FLUX ERROR]",
-            error
-        );
-
-
-        setStatus(
-            "Error: " +
-            error.message
-        );
-
-
-        timing.textContent =
-            error.stack ||
-            error.message;
-    }
-
-
-    busy = false;
-
-
-    upscale2xButton.disabled = false;
-    upscale4xButton.disabled = false;
-    changeImageButton.disabled = false;
-}
-
-
-/* =========================================================
-   OUTPUT
-   ========================================================= */
-
-function showOutput(
-    canvas,
-    filename
-) {
-
-    canvas.toBlob(
-        blob => {
-
-            if (!blob) {
 
                 setStatus(
-                    "Could not create output."
+                    `Preparing result: ${percent}%...`
                 );
 
-                return;
+
+                await yieldToBrowser();
+
             }
 
 
-            const url =
-                URL.createObjectURL(blob);
+            ctx.putImageData(
+                imageData,
+                0,
+                0
+            );
 
 
-            preview.src =
-                url;
+            console.log(
+                `Output conversion: ${(
+                    performance.now() -
+                    startTime
+                ).toFixed(0)} ms`
+            );
 
 
-            previewWrapper.style.display =
-                "block";
+            return canvas;
+
+        }
 
 
-            download.href =
-                url;
+        /* ==========================================
+           CANVAS → BLOB URL
+           
+           Much cheaper than toDataURL().
+        ========================================== */
+
+        async function canvasToObjectURL(canvas) {
+
+            const blob =
+                await new Promise(
+                    (resolve, reject) => {
+
+                        canvas.toBlob(
+                            result => {
+
+                                if (result) {
+                                    resolve(result);
+                                } else {
+                                    reject(
+                                        new Error(
+                                            "Could not encode the output image."
+                                        )
+                                    );
+                                }
+
+                            },
+                            "image/png"
+                        );
+
+                    }
+                );
 
 
-            download.download =
-                filename;
+            return URL.createObjectURL(blob);
+
+        }
 
 
-            download.style.display =
-                "inline-block";
-        },
-        "image/png"
-    );
-}
+        /* ==========================================
+           ONE 2× PASS
+        ========================================== */
+
+        async function upscale2x(
+            imageSource
+        ) {
+
+            const ai =
+                await loadModel();
 
 
-/* =========================================================
-   EVENTS
-   ========================================================= */
+            setStatus(
+                "Preparing image..."
+            );
 
-fileInput.addEventListener(
-    "change",
-    event => {
 
-        handleFile(
-            event.target.files[0]
+            const prepared =
+                await imageToTensor(
+                    imageSource
+                );
+
+
+            setStatus(
+                `Running AI on ${prepared.paddedWidth} × ${prepared.paddedHeight}px using ${usingWebGPU ? "GPU" : "CPU"}...`
+            );
+
+
+            const inferenceStart =
+                performance.now();
+
+
+            let results;
+
+
+            try {
+
+                results =
+                    await ai.run({
+                        input:
+                            prepared.tensor
+                    });
+
+            } catch (error) {
+
+                console.error(
+                    "ONNX inference error:",
+                    error
+                );
+
+                throw new Error(
+                    "AI inference failed: " +
+                    (
+                        error.message ||
+                        "Unknown error"
+                    )
+                );
+
+            }
+
+
+            console.log(
+                `AI inference: ${(
+                    performance.now() -
+                    inferenceStart
+                ).toFixed(0)} ms`
+            );
+
+
+            const output =
+                results.output;
+
+
+            if (!output) {
+
+                throw new Error(
+                    "The AI model returned no output."
+                );
+
+            }
+
+
+            setStatus(
+                "Converting AI result..."
+            );
+
+
+            const resultCanvas =
+                await tensorToCanvas(
+                    output,
+                    prepared.originalWidth,
+                    prepared.originalHeight
+                );
+
+
+            /*
+             * Help release references to the large
+             * intermediate tensor data.
+             */
+
+            prepared.tensor =
+                null;
+
+            results =
+                null;
+
+
+            return resultCanvas;
+
+        }
+
+
+        /* ==========================================
+           UPSCALE BUTTON
+        ========================================== */
+
+        upscaleButton.addEventListener(
+            "click",
+            async () => {
+
+                if (
+                    !selectedFile ||
+                    !selectedObjectURL
+                ) {
+
+                    setStatus(
+                        "Please select an image first.",
+                        "error"
+                    );
+
+                    return;
+
+                }
+
+
+                upscaleButton.disabled =
+                    true;
+
+
+                scale2.disabled =
+                    true;
+
+                scale4.disabled =
+                    true;
+
+                changeImageButton.disabled =
+                    true;
+
+
+                downloadWrapper.style.display =
+                    "none";
+
+
+                if (downloadObjectURL) {
+
+                    URL.revokeObjectURL(
+                        downloadObjectURL
+                    );
+
+                    downloadObjectURL = null;
+
+                }
+
+
+                try {
+
+                    let resultCanvas;
+
+
+                    /*
+                     * 2×
+                     */
+
+                    if (
+                        selectedScale === 2
+                    ) {
+
+                        resultCanvas =
+                            await upscale2x(
+                                selectedObjectURL
+                            );
+
+                    }
+
+
+                    /*
+                     * 4×
+                     *
+                     * Two separate 2× passes.
+                     */
+
+                    else {
+
+                        setStatus(
+                            "Running first 2× AI pass..."
+                        );
+
+
+                        const firstPass =
+                            await upscale2x(
+                                selectedObjectURL
+                            );
+
+
+                        setStatus(
+                            "Preparing second 2× pass..."
+                        );
+
+
+                        /*
+                         * Convert the first pass to a
+                         * Blob rather than a massive
+                         * base64 data URL.
+                         */
+
+                        const firstPassBlob =
+                            await new Promise(
+                                (resolve, reject) => {
+
+                                    firstPass.toBlob(
+                                        blob => {
+
+                                            if (blob) {
+                                                resolve(blob);
+                                            } else {
+                                                reject(
+                                                    new Error(
+                                                        "Could not prepare the first upscale pass."
+                                                    )
+                                                );
+                                            }
+
+                                        },
+                                        "image/png"
+                                    );
+
+                                }
+                            );
+
+
+                        const firstPassURL =
+                            URL.createObjectURL(
+                                firstPassBlob
+                            );
+
+
+                        try {
+
+                            setStatus(
+                                "Running second 2× AI pass..."
+                            );
+
+
+                            resultCanvas =
+                                await upscale2x(
+                                    firstPassURL
+                                );
+
+                        } finally {
+
+                            URL.revokeObjectURL(
+                                firstPassURL
+                            );
+
+                        }
+
+
+                        /*
+                         * Release first-pass canvas.
+                         */
+
+                        firstPass.width = 1;
+                        firstPass.height = 1;
+
+                    }
+
+
+                    /*
+                     * Create final downloadable
+                     * Blob URL.
+                     */
+
+                    setStatus(
+                        "Encoding final image..."
+                    );
+
+
+                    downloadObjectURL =
+                        await canvasToObjectURL(
+                            resultCanvas
+                        );
+
+
+                    /*
+                     * Show result.
+                     */
+
+                    preview.src =
+                        downloadObjectURL;
+
+
+                    imageInfo.textContent =
+                        `${resultCanvas.width} × ${resultCanvas.height}px`;
+
+
+                    downloadButton.href =
+                        downloadObjectURL;
+
+
+                    downloadButton.download =
+                        selectedScale === 2
+                            ? "flux-upscaled-2x.png"
+                            : "flux-upscaled-4x.png";
+
+
+                    downloadWrapper.style.display =
+                        "block";
+
+
+                    setStatus(
+                        `Upscaling complete: ${resultCanvas.width} × ${resultCanvas.height}px`,
+                        "success"
+                    );
+
+
+                    /*
+                     * Release canvas memory.
+                     */
+
+                    resultCanvas.width = 1;
+                    resultCanvas.height = 1;
+
+
+                } catch (error) {
+
+                    console.error(
+                        "FLUX Upscaler error:",
+                        error
+                    );
+
+
+                    setStatus(
+                        "Upscaling failed: " +
+                        (
+                            error.message ||
+                            "Unknown error"
+                        ),
+                        "error"
+                    );
+
+                } finally {
+
+                    upscaleButton.disabled =
+                        false;
+
+                    scale2.disabled =
+                        false;
+
+                    scale4.disabled =
+                        false;
+
+                    changeImageButton.disabled =
+                        false;
+
+                }
+
+            }
         );
-    }
-);
 
 
-dropZone.addEventListener(
-    "dragover",
-    event => {
+        /* ==========================================
+           CLEANUP
+        ========================================== */
 
-        event.preventDefault();
+        window.addEventListener(
+            "beforeunload",
+            () => {
 
-        dropZone.classList.add(
-            "dragging"
-        );
-    }
-);
+                if (selectedObjectURL) {
 
+                    URL.revokeObjectURL(
+                        selectedObjectURL
+                    );
 
-dropZone.addEventListener(
-    "dragleave",
-    () => {
-
-        dropZone.classList.remove(
-            "dragging"
-        );
-    }
-);
+                }
 
 
-dropZone.addEventListener(
-    "drop",
-    event => {
+                if (downloadObjectURL) {
 
-        event.preventDefault();
+                    URL.revokeObjectURL(
+                        downloadObjectURL
+                    );
 
-        dropZone.classList.remove(
-            "dragging"
+                }
+
+            }
         );
 
-
-        handleFile(
-            event.dataTransfer.files[0]
-        );
-    }
-);
-
-
-upscale2xButton.addEventListener(
-    "click",
-    () => {
-
-        performUpscale(2);
-    }
-);
-
-
-upscale4xButton.addEventListener(
-    "click",
-    () => {
-
-        performUpscale(4);
-    }
-);
-
-
-changeImageButton.addEventListener(
-    "click",
-    () => {
-
-        fileInput.click();
-    }
-);
-
-
-setStatus(
-    "Loading AI engine..."
-);
-
-</script>
+    </script>
 
 </body>
 </html>

@@ -14,267 +14,530 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --bg: #070a12;
+            --panel: #0d111c;
+            --panel-2: #111725;
+            --border: rgba(255,255,255,0.08);
+            --text: #f4f7ff;
+            --muted: #8c95a8;
+            --blue: #4d8dff;
+            --blue-2: #76aaff;
+            --danger: #ff5c72;
+        }
+
         body {
             margin: 0;
-            background:
-                radial-gradient(circle at top, rgba(0, 120, 255, 0.12), transparent 40%),
-                #050912;
-            color: #ffffff;
-            font-family: Arial, Helvetica, sans-serif;
             min-height: 100vh;
+            background:
+                radial-gradient(circle at 50% -10%, rgba(55,105,220,0.16), transparent 40%),
+                var(--bg);
+            color: var(--text);
+            font-family: Arial, Helvetica, sans-serif;
         }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        /* NAVBAR */
 
         .navbar {
+            height: 72px;
             width: 100%;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            background: rgba(5, 9, 18, 0.92);
-            backdrop-filter: blur(14px);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .nav-inner {
-            max-width: 1200px;
-            margin: auto;
-            padding: 16px 24px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 20px;
+            padding: 0 7%;
+            border-bottom: 1px solid var(--border);
+            background: rgba(7,10,18,0.88);
+            backdrop-filter: blur(18px);
+            position: sticky;
+            top: 0;
+            z-index: 50;
         }
 
         .logo {
-            color: #ffffff;
-            text-decoration: none;
             font-size: 22px;
-            font-weight: 800;
-            letter-spacing: 3px;
+            font-weight: 900;
+            letter-spacing: 5px;
         }
 
         .nav-links {
             display: flex;
+            gap: 30px;
             align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
         }
 
         .nav-links a {
-            color: #aab4c7;
-            text-decoration: none;
-            padding: 9px 13px;
-            border-radius: 8px;
+            color: var(--muted);
             font-size: 14px;
-            transition: 0.2s ease;
+            transition: 0.2s;
         }
 
         .nav-links a:hover {
-            color: #ffffff;
-            background: rgba(255,255,255,0.07);
+            color: white;
         }
 
-        .nav-links a.active {
-            color: #ffffff;
-            background: rgba(40, 130, 255, 0.16);
+        .menu-button {
+            display: none;
+            border: 0;
+            background: none;
+            color: white;
+            font-size: 25px;
+            cursor: pointer;
         }
 
-        .container {
-            width: min(900px, calc(100% - 32px));
+        /* SIDE MENU */
+
+        .side-menu {
+            position: fixed;
+            right: -310px;
+            top: 0;
+            width: 290px;
+            height: 100vh;
+            background: #0a0e18;
+            border-left: 1px solid var(--border);
+            z-index: 100;
+            padding: 90px 30px 30px;
+            transition: right 0.3s ease;
+        }
+
+        .side-menu.open {
+            right: 0;
+        }
+
+        .side-menu a {
+            display: block;
+            padding: 15px 0;
+            color: var(--muted);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .side-menu a:hover {
+            color: white;
+        }
+
+        .close-menu {
+            position: absolute;
+            top: 24px;
+            right: 25px;
+            background: none;
+            border: 0;
+            color: white;
+            font-size: 25px;
+            cursor: pointer;
+        }
+
+        /* MAIN */
+
+        main {
+            width: min(1050px, 92%);
             margin: 0 auto;
-            padding: 60px 0 80px;
+            padding: 75px 0 100px;
         }
 
-        .header {
+        .page-header {
             text-align: center;
-            margin-bottom: 35px;
+            margin-bottom: 45px;
         }
 
-        .header h1 {
-            margin: 0 0 10px;
-            font-size: clamp(32px, 6vw, 54px);
-            letter-spacing: 5px;
+        .eyebrow {
+            color: var(--blue-2);
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 15px;
         }
 
-        .header p {
+        h1 {
+            font-size: clamp(38px, 6vw, 65px);
             margin: 0;
-            color: #8792a7;
+            letter-spacing: -2px;
+        }
+
+        .subtitle {
+            max-width: 650px;
+            margin: 18px auto 0;
+            color: var(--muted);
+            line-height: 1.7;
             font-size: 15px;
         }
 
+        /* CARD */
+
+        .upscaler-card {
+            background:
+                linear-gradient(145deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015));
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 30px;
+            box-shadow: 0 30px 100px rgba(0,0,0,0.25);
+        }
+
+        /* DROP ZONE */
+
         .drop-zone {
-            border: 1px dashed rgba(255,255,255,0.22);
+            min-height: 330px;
+            border: 1px dashed rgba(118,170,255,0.35);
             border-radius: 18px;
-            padding: 70px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             text-align: center;
-            background: rgba(255,255,255,0.025);
             cursor: pointer;
-            transition: 0.2s ease;
+            background:
+                radial-gradient(circle at center, rgba(77,141,255,0.08), transparent 55%),
+                rgba(255,255,255,0.015);
+            transition: 0.25s;
+            padding: 30px;
         }
 
         .drop-zone:hover,
         .drop-zone.dragging {
-            border-color: #398cff;
-            background: rgba(40,130,255,0.07);
+            border-color: var(--blue);
+            background:
+                radial-gradient(circle at center, rgba(77,141,255,0.14), transparent 60%),
+                rgba(255,255,255,0.025);
+            transform: translateY(-1px);
+        }
+
+        .upload-icon {
+            width: 65px;
+            height: 65px;
+            border-radius: 18px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(77,141,255,0.1);
+            color: var(--blue-2);
+            font-size: 28px;
         }
 
         .drop-zone h2 {
-            margin: 0 0 10px;
+            margin: 0 0 9px;
             font-size: 20px;
         }
 
         .drop-zone p {
-            color: #7e899d;
             margin: 0;
+            color: var(--muted);
+            font-size: 14px;
         }
 
-        #fileInput {
+        .drop-zone .formats {
+            margin-top: 14px;
+            font-size: 11px;
+            color: #697287;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        input[type="file"] {
             display: none;
+        }
+
+        /* PREVIEW */
+
+        .preview-section {
+            display: none;
+            margin-top: 25px;
+        }
+
+        .preview-section.visible {
+            display: block;
         }
 
         .preview-wrapper {
-            display: none;
-            margin-top: 25px;
-            text-align: center;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: #05070c;
+            position: relative;
         }
 
         .preview-wrapper img {
-            max-width: 100%;
-            max-height: 600px;
-            border-radius: 14px;
             display: block;
-            margin: auto;
-            box-shadow: 0 15px 50px rgba(0,0,0,0.4);
+            width: 100%;
+            max-height: 520px;
+            object-fit: contain;
         }
 
         .image-info {
-            margin-top: 12px;
-            color: #7f8a9e;
-            font-size: 13px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
         }
+
+        .info-box {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+        }
+
+        .info-label {
+            display: block;
+            color: #697287;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .info-value {
+            font-size: 13px;
+            color: white;
+            word-break: break-word;
+        }
+
+        /* CONTROLS */
 
         .controls {
-            display: none;
             margin-top: 25px;
-            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .control-box {
+            background: var(--panel);
+            border: 1px solid var(--border);
             border-radius: 15px;
-            background: rgba(255,255,255,0.035);
-            border: 1px solid rgba(255,255,255,0.07);
+            padding: 17px;
         }
 
-        .control-row {
-            display: flex;
+        .control-title {
+            color: var(--muted);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .scale-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 10px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        button,
-        .download-button {
-            border: 0;
-            border-radius: 9px;
-            padding: 12px 18px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            transition: 0.2s ease;
         }
 
         .scale-button {
-            background: rgba(255,255,255,0.08);
-            color: #ffffff;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid var(--border);
+            background: #121827;
+            color: var(--muted);
+            border-radius: 10px;
+            padding: 13px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: 0.2s;
         }
 
         .scale-button:hover {
-            background: rgba(255,255,255,0.14);
-        }
-
-        .scale-button.selected {
-            background: #247cff;
-            border-color: #247cff;
-        }
-
-        .upscale-button {
-            background: #ffffff;
-            color: #050912;
-        }
-
-        .upscale-button:hover {
-            transform: translateY(-1px);
-        }
-
-        .upscale-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .change-button {
-            background: transparent;
-            color: #9ba6b9;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .change-button:hover {
-            color: #ffffff;
-            border-color: rgba(255,255,255,0.25);
-        }
-
-        .status {
-            min-height: 22px;
-            margin-top: 20px;
-            text-align: center;
-            color: #8e9ab0;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-
-        .status.error {
-            color: #ff7d7d;
-        }
-
-        .status.success {
-            color: #8de0ae;
-        }
-
-        .download-wrapper {
-            display: none;
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .download-button {
-            display: inline-block;
-            background: #247cff;
+            border-color: rgba(118,170,255,0.4);
             color: white;
         }
 
-        .download-button:hover {
-            background: #3c8cff;
+        .scale-button.active {
+            background: rgba(77,141,255,0.13);
+            border-color: var(--blue);
+            color: white;
         }
 
-        @media (max-width: 650px) {
-            .nav-inner {
-                align-items: flex-start;
-                flex-direction: column;
+        .engine-info {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .engine-status {
+            color: var(--blue-2);
+            font-weight: 700;
+        }
+
+        /* ACTION BUTTON */
+
+        .upscale-button {
+            width: 100%;
+            margin-top: 20px;
+            border: 0;
+            border-radius: 13px;
+            padding: 17px;
+            background: linear-gradient(135deg, #397cf0, #5e9aff);
+            color: white;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .upscale-button:hover:not(:disabled) {
+            transform: translateY(-1px);
+            filter: brightness(1.08);
+        }
+
+        .upscale-button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        /* PROGRESS */
+
+        .progress-container {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .progress-container.visible {
+            display: block;
+        }
+
+        .progress-top {
+            display: flex;
+            justify-content: space-between;
+            color: var(--muted);
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .progress-track {
+            height: 7px;
+            background: #161c2a;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #397cf0, #76aaff);
+            transition: width 0.15s ease;
+        }
+
+        .status-text {
+            text-align: center;
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 10px;
+            min-height: 17px;
+        }
+
+        /* RESULT */
+
+        .result-section {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .result-section.visible {
+            display: block;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .result-header h2 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .result-image-wrapper {
+            background: #05070c;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .result-image-wrapper canvas {
+            width: 100%;
+            height: auto;
+            max-height: 650px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .download-button {
+            margin-top: 15px;
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: #121827;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .download-button:hover {
+            border-color: var(--blue);
+            background: #172033;
+        }
+
+        /* WARNING */
+
+        .warning {
+            margin-top: 20px;
+            padding: 13px 15px;
+            border: 1px solid rgba(255,180,80,0.18);
+            background: rgba(255,180,80,0.05);
+            border-radius: 12px;
+            color: #aaa;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        /* FOOTER */
+
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 30px 7%;
+            color: #626b7d;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 700px) {
+            .navbar {
+                padding: 0 5%;
             }
 
             .nav-links {
-                width: 100%;
+                display: none;
             }
 
-            .nav-links a {
-                padding: 8px 9px;
-                font-size: 13px;
+            .menu-button {
+                display: block;
             }
 
-            .container {
-                padding-top: 40px;
+            main {
+                width: 92%;
+                padding-top: 50px;
+            }
+
+            .upscaler-card {
+                padding: 18px;
             }
 
             .drop-zone {
-                padding: 55px 20px;
+                min-height: 270px;
+            }
+
+            .controls {
+                grid-template-columns: 1fr;
+            }
+
+            .image-info {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -283,551 +546,946 @@
 <body>
 
     <nav class="navbar">
-        <div class="nav-inner">
+        <a href="../index.html" class="logo">FLUX</a>
 
-            <a class="logo" href="../index.html">
-                FLUX
-            </a>
-
-            <div class="nav-links">
-
-                <a href="../index.html">
-                    Home
-                </a>
-
-                <a href="../index.html#tools">
-                    Tools
-                </a>
-
-                <a href="audio-extractor.html">
-                    Audio Extractor
-                </a>
-
-                <a href="upscaler.html" class="active">
-                    Upscaler
-                </a>
-
-            </div>
-
+        <div class="nav-links">
+            <a href="../index.html">Home</a>
+            <a href="../index.html#tools">Tools</a>
+            <a href="../index.html#utilities">Utilities</a>
+            <a href="../index.html#community">Community</a>
+            <a href="#">Discord</a>
         </div>
+
+        <button class="menu-button" id="menuButton">☰</button>
     </nav>
 
+    <div class="side-menu" id="sideMenu">
+        <button class="close-menu" id="closeMenu">×</button>
 
-    <main class="container">
+        <a href="../index.html">Home</a>
+        <a href="../index.html#tools">Tools</a>
+        <a href="../index.html#utilities">Utilities</a>
+        <a href="../index.html#community">Community</a>
+        <a href="#">Discord</a>
+    </div>
 
-        <div class="header">
+    <main>
 
-            <h1>FLUX UPSCALER</h1>
-
-            <p>
-                AI image upscaling, directly in your browser.
+        <div class="page-header">
+            <div class="eyebrow">FLUX TOOL</div>
+            <h1>Image Upscaler</h1>
+            <p class="subtitle">
+                Upscale images locally in your browser using Real-ESRGAN.
+                Your image is processed on your device and is never uploaded to a server.
             </p>
-
         </div>
 
+        <div class="upscaler-card">
 
-        <div class="drop-zone" id="dropZone">
+            <!-- UPLOAD -->
 
-            <h2>
-                Drop an image here
-            </h2>
+            <div class="drop-zone" id="dropZone">
 
-            <p>
-                or click to browse
-            </p>
+                <div>
+                    <div class="upload-icon">↑</div>
+
+                    <h2>Drop an image here</h2>
+
+                    <p>or click to browse your files</p>
+
+                    <div class="formats">
+                        PNG · JPG · JPEG · WEBP
+                    </div>
+                </div>
+
+            </div>
 
             <input
                 type="file"
                 id="fileInput"
-                accept="image/*,.jfif"
+                accept="image/png,image/jpeg,image/webp"
             >
 
-        </div>
+            <!-- PREVIEW -->
 
+            <div class="preview-section" id="previewSection">
 
-        <div class="preview-wrapper" id="previewWrapper">
+                <div class="preview-wrapper">
+                    <img id="previewImage" alt="Image preview">
+                </div>
 
-            <img
-                id="preview"
-                alt="Selected image preview"
-            >
+                <div class="image-info">
 
-            <div class="image-info" id="imageInfo"></div>
+                    <div class="info-box">
+                        <span class="info-label">File</span>
+                        <span class="info-value" id="fileName">-</span>
+                    </div>
 
-        </div>
+                    <div class="info-box">
+                        <span class="info-label">Dimensions</span>
+                        <span class="info-value" id="imageDimensions">-</span>
+                    </div>
 
+                    <div class="info-box">
+                        <span class="info-label">File size</span>
+                        <span class="info-value" id="fileSize">-</span>
+                    </div>
 
-        <div class="controls" id="controls">
+                </div>
 
-            <div class="control-row">
+                <!-- CONTROLS -->
 
-                <button
-                    class="scale-button selected"
-                    id="scale2"
-                    type="button"
-                >
-                    2×
-                </button>
+                <div class="controls">
 
-                <button
-                    class="scale-button"
-                    id="scale4"
-                    type="button"
-                >
-                    4×
-                </button>
+                    <div class="control-box">
+
+                        <div class="control-title">
+                            Upscale amount
+                        </div>
+
+                        <div class="scale-buttons">
+
+                            <button
+                                class="scale-button active"
+                                data-scale="2"
+                            >
+                                2×
+                            </button>
+
+                            <button
+                                class="scale-button"
+                                data-scale="4"
+                            >
+                                4×
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <div class="control-box">
+
+                        <div class="control-title">
+                            Processing engine
+                        </div>
+
+                        <div class="engine-info">
+                            <span class="engine-status" id="engineStatus">
+                                Detecting GPU...
+                            </span>
+                            <br>
+                            Real-ESRGAN x2plus
+                        </div>
+
+                    </div>
+
+                </div>
 
                 <button
                     class="upscale-button"
                     id="upscaleButton"
-                    type="button"
+                    disabled
                 >
                     Upscale Image
                 </button>
 
-                <button
-                    class="change-button"
-                    id="changeImageButton"
-                    type="button"
-                >
-                    Change Image
-                </button>
+                <!-- PROGRESS -->
+
+                <div class="progress-container" id="progressContainer">
+
+                    <div class="progress-top">
+                        <span id="progressLabel">Preparing...</span>
+                        <span id="progressPercent">0%</span>
+                    </div>
+
+                    <div class="progress-track">
+                        <div
+                            class="progress-bar"
+                            id="progressBar"
+                        ></div>
+                    </div>
+
+                    <div
+                        class="status-text"
+                        id="statusText"
+                    ></div>
+
+                </div>
+
+                <div class="warning">
+                    Large images and 4× upscaling require significantly more
+                    processing time and memory. FLUX uses tiled inference to
+                    prevent the browser from loading the entire image into the
+                    GPU at once.
+                </div>
 
             </div>
 
-        </div>
+            <!-- RESULT -->
 
+            <div class="result-section" id="resultSection">
 
-        <div
-            class="status"
-            id="status"
-        ></div>
+                <div class="result-header">
+                    <h2>Upscaled Result</h2>
+                </div>
 
+                <div class="result-image-wrapper">
+                    <canvas id="resultCanvas"></canvas>
+                </div>
 
-        <div
-            class="download-wrapper"
-            id="downloadWrapper"
-        >
+                <button
+                    class="download-button"
+                    id="downloadButton"
+                >
+                    Download PNG
+                </button>
 
-            <a
-                class="download-button"
-                id="downloadButton"
-                download="flux-upscaled.png"
-            >
-                Download Upscaled Image
-            </a>
+            </div>
 
         </div>
 
     </main>
 
-
-    <script>
-
-        /* ==========================================
-           FLUX AI UPSCALER
-        ========================================== */
-
-        const MODEL_URL =
-            "https://huggingface.co/skillsafe-ai/realesrgan-x2plus/resolve/main/model.onnx";
+    <footer>
+        FLUX · Built for editors
+    </footer>
 
 
-        /* ==========================================
-           ELEMENTS
-        ========================================== */
+<script>
 
-        const dropZone =
-            document.getElementById("dropZone");
+    /* =========================================================
+       FLUX IMAGE UPSCALER
+       ========================================================= */
 
-        const fileInput =
-            document.getElementById("fileInput");
+    const MODEL_URL =
+        "https://huggingface.co/skillsafe-ai/realesrgan-x2plus/resolve/main/model.onnx";
 
-        const previewWrapper =
-            document.getElementById("previewWrapper");
+    /*
+     * Smaller tiles use less GPU memory.
+     *
+     * 256 is intentionally conservative.
+     * If this works comfortably on your PC, it can later be
+     * increased to 384 or 512 for better speed.
+     */
+    const TILE_SIZE = 256;
 
-        const preview =
-            document.getElementById("preview");
+    /*
+     * Extra pixels around each tile give the neural network
+     * surrounding context and reduce visible seams.
+     */
+    const TILE_OVERLAP = 16;
 
-        const imageInfo =
-            document.getElementById("imageInfo");
+    const MAX_OUTPUT_PIXELS = 80_000_000;
+    const MAX_OUTPUT_DIMENSION = 16384;
 
-        const controls =
-            document.getElementById("controls");
+    let selectedFile = null;
+    let selectedImage = null;
+    let selectedScale = 2;
 
-        const status =
-            document.getElementById("status");
+    let session = null;
+    let modelBuffer = null;
 
-        const scale2 =
-            document.getElementById("scale2");
+    let resultCanvas = null;
 
-        const scale4 =
-            document.getElementById("scale4");
+    const dropZone = document.getElementById("dropZone");
+    const fileInput = document.getElementById("fileInput");
 
-        const upscaleButton =
-            document.getElementById("upscaleButton");
+    const previewSection = document.getElementById("previewSection");
+    const previewImage = document.getElementById("previewImage");
 
-        const changeImageButton =
-            document.getElementById("changeImageButton");
+    const fileName = document.getElementById("fileName");
+    const imageDimensions = document.getElementById("imageDimensions");
+    const fileSize = document.getElementById("fileSize");
 
-        const downloadWrapper =
-            document.getElementById("downloadWrapper");
+    const upscaleButton = document.getElementById("upscaleButton");
 
-        const downloadButton =
-            document.getElementById("downloadButton");
+    const progressContainer =
+        document.getElementById("progressContainer");
+
+    const progressBar =
+        document.getElementById("progressBar");
+
+    const progressLabel =
+        document.getElementById("progressLabel");
+
+    const progressPercent =
+        document.getElementById("progressPercent");
+
+    const statusText =
+        document.getElementById("statusText");
+
+    const engineStatus =
+        document.getElementById("engineStatus");
+
+    const resultSection =
+        document.getElementById("resultSection");
+
+    const resultCanvasElement =
+        document.getElementById("resultCanvas");
+
+    const downloadButton =
+        document.getElementById("downloadButton");
 
 
-        /* ==========================================
-           STATE
-        ========================================== */
+    /* =========================================================
+       SIDE MENU
+       ========================================================= */
 
-        let selectedFile = null;
+    const menuButton =
+        document.getElementById("menuButton");
 
-        let selectedScale = 2;
+    const closeMenu =
+        document.getElementById("closeMenu");
 
-        let session = null;
+    const sideMenu =
+        document.getElementById("sideMenu");
 
-        let originalWidth = 0;
+    menuButton.addEventListener("click", () => {
+        sideMenu.classList.add("open");
+    });
 
-        let originalHeight = 0;
-
-        let selectedObjectURL = null;
-
-        let usingWebGPU = false;
+    closeMenu.addEventListener("click", () => {
+        sideMenu.classList.remove("open");
+    });
 
 
-        /* ==========================================
-           STATUS
-        ========================================== */
+    /* =========================================================
+       ENGINE DETECTION
+       ========================================================= */
 
-        function setStatus(message, type = "") {
+    if ("gpu" in navigator) {
+        engineStatus.textContent =
+            "WebGPU acceleration available";
+    } else {
+        engineStatus.textContent =
+            "CPU/WASM mode";
+    }
 
-            status.textContent = message;
 
-            status.className = "status";
+    /* =========================================================
+       FILE INPUT
+       ========================================================= */
 
-            if (type) {
-                status.classList.add(type);
-            }
+    dropZone.addEventListener("click", () => {
+        fileInput.value = "";
+        fileInput.click();
+    });
 
+    fileInput.addEventListener("change", (event) => {
+
+        const file = event.target.files?.[0];
+
+        if (file) {
+            loadImage(file);
         }
 
-
-        /* ==========================================
-           FILE INPUT
-        ========================================== */
-
-        dropZone.addEventListener("click", () => {
-
-            fileInput.click();
-
-        });
+    });
 
 
-        fileInput.addEventListener("change", (event) => {
+    /* =========================================================
+       DRAG + DROP
+       ========================================================= */
 
-            const file =
-                event.target.files[0];
+    ["dragenter", "dragover"].forEach(eventName => {
 
-            if (file) {
-                loadImage(file);
-            }
-
-        });
-
-
-        /* ==========================================
-           DRAG AND DROP
-        ========================================== */
-
-        dropZone.addEventListener("dragover", (event) => {
+        dropZone.addEventListener(eventName, (event) => {
 
             event.preventDefault();
+            event.stopPropagation();
 
             dropZone.classList.add("dragging");
 
         });
 
+    });
 
-        dropZone.addEventListener("dragleave", () => {
+    ["dragleave", "drop"].forEach(eventName => {
 
-            dropZone.classList.remove("dragging");
-
-        });
-
-
-        dropZone.addEventListener("drop", (event) => {
+        dropZone.addEventListener(eventName, (event) => {
 
             event.preventDefault();
+            event.stopPropagation();
 
             dropZone.classList.remove("dragging");
 
-            const file =
-                event.dataTransfer.files[0];
+        });
 
-            if (!file) {
-                return;
-            }
+    });
 
-            if (
-                !file.type.startsWith("image/") &&
-                !file.name.toLowerCase().endsWith(".jfif")
-            ) {
+    dropZone.addEventListener("drop", (event) => {
 
-                setStatus(
-                    "Please select a valid image file.",
-                    "error"
-                );
+        const file = event.dataTransfer.files?.[0];
 
-                return;
-
-            }
-
+        if (file) {
             loadImage(file);
+        }
+
+    });
+
+
+    /* =========================================================
+       SCALE BUTTONS
+       ========================================================= */
+
+    document.querySelectorAll(".scale-button").forEach(button => {
+
+        button.addEventListener("click", () => {
+
+            document
+                .querySelectorAll(".scale-button")
+                .forEach(btn => btn.classList.remove("active"));
+
+            button.classList.add("active");
+
+            selectedScale =
+                Number(button.dataset.scale);
+
+            updateOutputLimit();
 
         });
 
-
-        /* ==========================================
-           LOAD IMAGE
-        ========================================== */
-
-        function loadImage(file) {
-
-            selectedFile = file;
-
-            downloadWrapper.style.display = "none";
-
-            setStatus("Loading image...");
+    });
 
 
-            if (selectedObjectURL) {
+    /* =========================================================
+       IMAGE LOADING
+       ========================================================= */
 
-                URL.revokeObjectURL(
-                    selectedObjectURL
-                );
+    async function loadImage(file) {
 
-                selectedObjectURL = null;
+        if (!file.type.startsWith("image/")) {
 
-            }
+            alert("Please select a valid image file.");
 
+            return;
+        }
 
-            selectedObjectURL =
-                URL.createObjectURL(file);
+        selectedFile = file;
 
+        resultSection.classList.remove("visible");
 
-            const image =
-                new Image();
+        const objectURL =
+            URL.createObjectURL(file);
 
+        try {
 
-            image.onload = () => {
+            const img =
+                await loadImageElement(objectURL);
 
-                originalWidth =
-                    image.naturalWidth;
+            selectedImage = img;
 
-                originalHeight =
-                    image.naturalHeight;
+            previewImage.src = objectURL;
 
+            previewSection.classList.add("visible");
 
-                preview.src =
-                    selectedObjectURL;
+            fileName.textContent =
+                file.name;
 
+            imageDimensions.textContent =
+                `${img.naturalWidth} × ${img.naturalHeight}`;
 
-                previewWrapper.style.display =
-                    "block";
+            fileSize.textContent =
+                formatFileSize(file.size);
 
+            upscaleButton.disabled = false;
 
-                controls.style.display =
-                    "block";
+            updateOutputLimit();
 
+        } catch (error) {
 
-                dropZone.style.display =
-                    "none";
+            console.error(error);
 
+            alert(
+                "FLUX could not read this image."
+            );
 
-                imageInfo.textContent =
-                    `${originalWidth} × ${originalHeight}px`;
-
-
-                setStatus(
-                    "Image ready. Choose a scale and upscale."
-                );
-
-            };
-
-
-            image.onerror = () => {
-
-                if (selectedObjectURL) {
-
-                    URL.revokeObjectURL(
-                        selectedObjectURL
-                    );
-
-                    selectedObjectURL = null;
-
-                }
-
-                setStatus(
-                    "This image could not be read by the browser.",
-                    "error"
-                );
-
-            };
-
-
-            image.src =
-                selectedObjectURL;
+            selectedFile = null;
+            selectedImage = null;
 
         }
 
-
-        /* ==========================================
-           CHANGE IMAGE
-        ========================================== */
-
-        changeImageButton.addEventListener("click", () => {
-
-            fileInput.value = "";
-
-            fileInput.click();
-
-        });
+    }
 
 
-        /* ==========================================
-           SCALE BUTTONS
-        ========================================== */
+    function loadImageElement(url) {
 
-        scale2.addEventListener("click", () => {
+        return new Promise((resolve, reject) => {
 
-            selectedScale = 2;
+            const img = new Image();
 
-            scale2.classList.add("selected");
+            img.onload = () => resolve(img);
 
-            scale4.classList.remove("selected");
+            img.onerror = () =>
+                reject(
+                    new Error("Could not decode image.")
+                );
+
+            img.src = url;
 
         });
 
-
-        scale4.addEventListener("click", () => {
-
-            selectedScale = 4;
-
-            scale4.classList.add("selected");
-
-            scale2.classList.remove("selected");
-
-        });
+    }
 
 
-        /* ==========================================
-           LOAD AI MODEL
-        ========================================== */
+    function formatFileSize(bytes) {
 
-        async function loadModel() {
+        if (bytes < 1024) {
+            return `${bytes} B`;
+        }
 
-            if (session) {
-                return session;
-            }
+        if (bytes < 1024 * 1024) {
+            return `${(bytes / 1024).toFixed(1)} KB`;
+        }
+
+        return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+
+    }
 
 
-            /*
-             * WebGPU should be the preferred path.
-             */
+    /* =========================================================
+       OUTPUT LIMIT
+       ========================================================= */
 
-            if (
-                "gpu" in navigator
-            ) {
+    function updateOutputLimit() {
 
-                try {
+        if (!selectedImage) {
+            return;
+        }
 
-                    setStatus(
-                        "Starting GPU acceleration..."
+        const width =
+            selectedImage.naturalWidth;
+
+        const height =
+            selectedImage.naturalHeight;
+
+        const outputWidth =
+            width * selectedScale;
+
+        const outputHeight =
+            height * selectedScale;
+
+        const outputPixels =
+            outputWidth * outputHeight;
+
+        if (
+            outputPixels > MAX_OUTPUT_PIXELS ||
+            outputWidth > MAX_OUTPUT_DIMENSION ||
+            outputHeight > MAX_OUTPUT_DIMENSION
+        ) {
+
+            upscaleButton.disabled = true;
+
+            upscaleButton.textContent =
+                "Image too large for this scale";
+
+        } else {
+
+            upscaleButton.disabled = false;
+
+            upscaleButton.textContent =
+                "Upscale Image";
+
+        }
+
+    }
+
+
+    /* =========================================================
+       PROGRESS
+       ========================================================= */
+
+    function setProgress(
+        percent,
+        label,
+        status = ""
+    ) {
+
+        const safePercent =
+            Math.max(
+                0,
+                Math.min(100, percent)
+            );
+
+        progressBar.style.width =
+            `${safePercent}%`;
+
+        progressPercent.textContent =
+            `${Math.round(safePercent)}%`;
+
+        progressLabel.textContent =
+            label;
+
+        statusText.textContent =
+            status;
+
+    }
+
+
+    function showProgress() {
+
+        progressContainer.classList.add("visible");
+
+        setProgress(
+            0,
+            "Preparing...",
+            ""
+        );
+
+    }
+
+
+    /* =========================================================
+       INDEXEDDB MODEL CACHE
+       ========================================================= */
+
+    const DB_NAME =
+        "flux-upscaler-cache";
+
+    const DB_VERSION = 1;
+
+    const STORE_NAME =
+        "models";
+
+
+    function openDatabase() {
+
+        return new Promise((resolve, reject) => {
+
+            const request =
+                indexedDB.open(
+                    DB_NAME,
+                    DB_VERSION
+                );
+
+            request.onupgradeneeded = () => {
+
+                const db =
+                    request.result;
+
+                if (!db.objectStoreNames.contains(STORE_NAME)) {
+
+                    db.createObjectStore(
+                        STORE_NAME
                     );
-
-
-                    session =
-                        await ort.InferenceSession.create(
-                            MODEL_URL,
-                            {
-                                executionProviders: [
-                                    "webgpu"
-                                ],
-                                graphOptimizationLevel:
-                                    "all"
-                            }
-                        );
-
-
-                    usingWebGPU = true;
-
-
-                    setStatus(
-                        "GPU acceleration enabled."
-                    );
-
-
-                    return session;
-
-                } catch (webgpuError) {
-
-                    console.warn(
-                        "WebGPU unavailable. Falling back to WASM.",
-                        webgpuError
-                    );
-
-                    session = null;
 
                 }
 
+            };
+
+            request.onsuccess = () =>
+                resolve(request.result);
+
+            request.onerror = () =>
+                reject(request.error);
+
+        });
+
+    }
+
+
+    async function getCachedModel() {
+
+        try {
+
+            const db =
+                await openDatabase();
+
+            return await new Promise(
+                (resolve, reject) => {
+
+                    const transaction =
+                        db.transaction(
+                            STORE_NAME,
+                            "readonly"
+                        );
+
+                    const store =
+                        transaction.objectStore(
+                            STORE_NAME
+                        );
+
+                    const request =
+                        store.get("realesrgan-x2plus");
+
+                    request.onsuccess = () =>
+                        resolve(request.result || null);
+
+                    request.onerror = () =>
+                        reject(request.error);
+
+                }
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "Could not access model cache:",
+                error
+            );
+
+            return null;
+
+        }
+
+    }
+
+
+    async function cacheModel(buffer) {
+
+        try {
+
+            const db =
+                await openDatabase();
+
+            await new Promise(
+                (resolve, reject) => {
+
+                    const transaction =
+                        db.transaction(
+                            STORE_NAME,
+                            "readwrite"
+                        );
+
+                    const store =
+                        transaction.objectStore(
+                            STORE_NAME
+                        );
+
+                    const request =
+                        store.put(
+                            {
+                                url: MODEL_URL,
+                                buffer: buffer
+                            },
+                            "realesrgan-x2plus"
+                        );
+
+                    request.onsuccess =
+                        () => resolve();
+
+                    request.onerror =
+                        () => reject(request.error);
+
+                }
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "Could not cache model:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /* =========================================================
+       MODEL DOWNLOAD
+       ========================================================= */
+
+    async function downloadModel() {
+
+        setProgress(
+            2,
+            "Downloading AI model...",
+            "First use requires a model download."
+        );
+
+        const response =
+            await fetch(MODEL_URL);
+
+        if (!response.ok) {
+
+            throw new Error(
+                `Model download failed. HTTP ${response.status}`
+            );
+
+        }
+
+        const contentLength =
+            Number(
+                response.headers.get("content-length")
+            );
+
+        if (!response.body) {
+
+            const buffer =
+                await response.arrayBuffer();
+
+            setProgress(
+                18,
+                "Model downloaded",
+                "Preparing AI engine..."
+            );
+
+            return buffer;
+
+        }
+
+        const reader =
+            response.body.getReader();
+
+        const chunks = [];
+
+        let received = 0;
+
+        while (true) {
+
+            const { done, value } =
+                await reader.read();
+
+            if (done) {
+                break;
             }
 
+            chunks.push(value);
 
-            /*
-             * CPU fallback.
-             */
+            received += value.byteLength;
+
+            if (contentLength) {
+
+                const percent =
+                    2 +
+                    (received / contentLength) * 16;
+
+                setProgress(
+                    percent,
+                    "Downloading AI model...",
+                    `${formatFileSize(received)} downloaded`
+                );
+
+            } else {
+
+                setProgress(
+                    8,
+                    "Downloading AI model...",
+                    `${formatFileSize(received)} downloaded`
+                );
+
+            }
+
+        }
+
+        const combined =
+            new Uint8Array(received);
+
+        let offset = 0;
+
+        for (const chunk of chunks) {
+
+            combined.set(
+                chunk,
+                offset
+            );
+
+            offset += chunk.length;
+
+        }
+
+        setProgress(
+            18,
+            "Model downloaded",
+            "Saving model locally..."
+        );
+
+        return combined.buffer;
+
+    }
+
+
+    /* =========================================================
+       LOAD AI MODEL
+       ========================================================= */
+
+    async function loadModel() {
+
+        if (session) {
+            return session;
+        }
+
+        setProgress(
+            0,
+            "Preparing AI engine...",
+            ""
+        );
+
+        let cached =
+            await getCachedModel();
+
+        let buffer;
+
+        if (
+            cached &&
+            cached.url === MODEL_URL &&
+            cached.buffer
+        ) {
+
+            buffer = cached.buffer;
+
+            setProgress(
+                18,
+                "Loading cached AI model...",
+                "No model download required."
+            );
+
+        } else {
+
+            buffer =
+                await downloadModel();
+
+            await cacheModel(buffer);
+
+        }
+
+        modelBuffer =
+            new Uint8Array(buffer);
+
+        const options = {
+
+            executionProviders:
+                ["webgpu"],
+
+            graphOptimizationLevel:
+                "all",
+
+            enableMemPattern:
+                true
+
+        };
+
+
+        /*
+         * Try WebGPU first.
+         */
+
+        if ("gpu" in navigator) {
 
             try {
 
-                setStatus(
-                    "GPU unavailable. Loading CPU fallback..."
+                setProgress(
+                    20,
+                    "Starting WebGPU...",
+                    "Using your GPU for AI inference."
                 );
-
 
                 session =
                     await ort.InferenceSession.create(
-                        MODEL_URL,
-                        {
-                            executionProviders: [
-                                "wasm"
-                            ],
-                            graphOptimizationLevel:
-                                "all"
-                        }
+                        modelBuffer,
+                        options
                     );
 
-
-                usingWebGPU = false;
-
-
-                setStatus(
-                    "CPU fallback enabled."
-                );
-
+                engineStatus.textContent =
+                    "WebGPU acceleration active";
 
                 return session;
 
-            } catch (error) {
+            } catch (gpuError) {
 
-                console.error(
-                    "Model loading error:",
-                    error
-                );
-
-
-                throw new Error(
-                    "Could not load the AI model: " +
-                    error.message
+                console.warn(
+                    "WebGPU failed. Falling back to WASM.",
+                    gpuError
                 );
 
             }
@@ -835,651 +1493,892 @@
         }
 
 
-        /* ==========================================
-           IMAGE → TENSOR
-        ========================================== */
-
-        async function imageToTensor(imageSource) {
-
-            return new Promise((resolve, reject) => {
-
-                const image =
-                    new Image();
-
-
-                image.onload = () => {
-
-                    try {
-
-                        let width =
-                            image.naturalWidth;
-
-                        let height =
-                            image.naturalHeight;
-
-
-                        /*
-                         * Protect the browser from
-                         * extremely large images.
-                         */
-
-                        const megapixels =
-                            (
-                                width *
-                                height
-                            ) / 1000000;
-
-
-                        if (megapixels > 20) {
-
-                            throw new Error(
-                                "This image is too large for browser upscaling. Please use an image below 20 megapixels."
-                            );
-
-                        }
-
-
-                        /*
-                         * The model needs even dimensions.
-                         */
-
-                        const paddedWidth =
-                            width % 2 === 0
-                                ? width
-                                : width + 1;
-
-
-                        const paddedHeight =
-                            height % 2 === 0
-                                ? height
-                                : height + 1;
-
-
-                        const canvas =
-                            document.createElement(
-                                "canvas"
-                            );
-
-
-                        canvas.width =
-                            paddedWidth;
-
-                        canvas.height =
-                            paddedHeight;
-
-
-                        const ctx =
-                            canvas.getContext(
-                                "2d",
-                                {
-                                    willReadFrequently: true
-                                }
-                            );
-
-
-                        if (!ctx) {
-
-                            throw new Error(
-                                "The browser could not create a canvas context."
-                            );
-
-                        }
-
-
-                        ctx.drawImage(
-                            image,
-                            0,
-                            0,
-                            width,
-                            height
-                        );
-
-
-                        /*
-                         * Extend final column.
-                         */
-
-                        if (
-                            paddedWidth !== width
-                        ) {
-
-                            ctx.drawImage(
-                                canvas,
-                                width - 1,
-                                0,
-                                1,
-                                height,
-                                width,
-                                0,
-                                1,
-                                height
-                            );
-
-                        }
-
-
-                        /*
-                         * Extend final row.
-                         */
-
-                        if (
-                            paddedHeight !== height
-                        ) {
-
-                            ctx.drawImage(
-                                canvas,
-                                0,
-                                height - 1,
-                                paddedWidth,
-                                1,
-                                0,
-                                height,
-                                paddedWidth,
-                                1
-                            );
-
-                        }
-
-
-                        setStatus(
-                            "Converting image for the AI..."
-                        );
-
-
-                        const imageData =
-                            ctx.getImageData(
-                                0,
-                                0,
-                                paddedWidth,
-                                paddedHeight
-                            );
-
-
-                        const pixelCount =
-                            paddedWidth *
-                            paddedHeight;
-
-
-                        const tensorData =
-                            new Float32Array(
-                                pixelCount * 3
-                            );
-
-
-                        const redOffset =
-                            0;
-
-                        const greenOffset =
-                            pixelCount;
-
-                        const blueOffset =
-                            pixelCount * 2;
-
-
-                        for (
-                            let i = 0, p = 0;
-                            i < pixelCount;
-                            i++, p += 4
-                        ) {
-
-                            tensorData[
-                                redOffset + i
-                            ] =
-                                imageData.data[p] /
-                                255;
-
-
-                            tensorData[
-                                greenOffset + i
-                            ] =
-                                imageData.data[p + 1] /
-                                255;
-
-
-                            tensorData[
-                                blueOffset + i
-                            ] =
-                                imageData.data[p + 2] /
-                                255;
-
-                        }
-
-
-                        const tensor =
-                            new ort.Tensor(
-                                "float32",
-                                tensorData,
-                                [
-                                    1,
-                                    3,
-                                    paddedHeight,
-                                    paddedWidth
-                                ]
-                            );
-
-
-                        resolve({
-
-                            tensor,
-
-                            originalWidth:
-                                width,
-
-                            originalHeight:
-                                height,
-
-                            paddedWidth,
-
-                            paddedHeight
-
-                        });
-
-                    } catch (error) {
-
-                        reject(error);
-
-                    }
-
-                };
-
-
-                image.onerror = () => {
-
-                    reject(
-                        new Error(
-                            "The selected image could not be decoded."
-                        )
-                    );
-
-                };
-
-
-                image.src =
-                    imageSource;
-
-            });
-
-        }
-
-
-        /* ==========================================
-           TENSOR → CANVAS
-        ========================================== */
-
-        function tensorToCanvas(
-            outputTensor,
-            originalWidth,
-            originalHeight
+        /*
+         * CPU/WASM fallback.
+         */
+
+        setProgress(
+            20,
+            "Starting CPU engine...",
+            "WebGPU unavailable, using WASM."
+        );
+
+        session =
+            await ort.InferenceSession.create(
+                modelBuffer,
+                {
+                    executionProviders:
+                        ["wasm"],
+
+                    graphOptimizationLevel:
+                        "all"
+                }
+            );
+
+        engineStatus.textContent =
+            "CPU/WASM mode active";
+
+        return session;
+
+    }
+
+
+    /* =========================================================
+       CANVAS CREATION
+       ========================================================= */
+
+    function createCanvas(width, height) {
+
+        if (
+            width <= 0 ||
+            height <= 0 ||
+            width > MAX_OUTPUT_DIMENSION ||
+            height > MAX_OUTPUT_DIMENSION
         ) {
 
-            const dims =
-                outputTensor.dims;
+            throw new Error(
+                `Canvas dimensions are too large: ${width} × ${height}`
+            );
 
-            const data =
-                outputTensor.data;
+        }
+
+        const canvas =
+            document.createElement("canvas");
+
+        canvas.width =
+            width;
+
+        canvas.height =
+            height;
+
+        return canvas;
+
+    }
 
 
-            const outputHeight =
-                dims[2];
+    /* =========================================================
+       CANVAS -> ONNX TENSOR
+       ========================================================= */
 
-            const outputWidth =
-                dims[3];
+    function imageToTensor(canvas) {
+
+        const width =
+            canvas.width;
+
+        const height =
+            canvas.height;
+
+        const ctx =
+            canvas.getContext(
+                "2d",
+                {
+                    willReadFrequently: true
+                }
+            );
+
+        const imageData =
+            ctx.getImageData(
+                0,
+                0,
+                width,
+                height
+            );
+
+        const rgba =
+            imageData.data;
+
+        const floatData =
+            new Float32Array(
+                width * height * 3
+            );
+
+        const planeSize =
+            width * height;
+
+        for (let i = 0; i < planeSize; i++) {
+
+            const src =
+                i * 4;
+
+            floatData[i] =
+                rgba[src] / 255;
+
+            floatData[planeSize + i] =
+                rgba[src + 1] / 255;
+
+            floatData[(planeSize * 2) + i] =
+                rgba[src + 2] / 255;
+
+        }
+
+        return new ort.Tensor(
+            "float32",
+            floatData,
+            [
+                1,
+                3,
+                height,
+                width
+            ]
+        );
+
+    }
 
 
-            const finalWidth =
-                originalWidth * 2;
+    /* =========================================================
+       ONNX TENSOR -> CANVAS
+       ========================================================= */
 
-            const finalHeight =
-                originalHeight * 2;
+    function tensorToCanvas(
+        tensor,
+        width,
+        height
+    ) {
 
+        const output =
+            tensor.data;
 
-            const canvas =
-                document.createElement(
-                    "canvas"
+        const canvas =
+            createCanvas(
+                width,
+                height
+            );
+
+        const ctx =
+            canvas.getContext("2d");
+
+        const imageData =
+            ctx.createImageData(
+                width,
+                height
+            );
+
+        const rgba =
+            imageData.data;
+
+        const planeSize =
+            width * height;
+
+        for (let i = 0; i < planeSize; i++) {
+
+            rgba[i * 4] =
+                Math.max(
+                    0,
+                    Math.min(
+                        255,
+                        output[i] * 255
+                    )
                 );
 
+            rgba[(i * 4) + 1] =
+                Math.max(
+                    0,
+                    Math.min(
+                        255,
+                        output[planeSize + i] * 255
+                    )
+                );
 
-            canvas.width =
-                finalWidth;
+            rgba[(i * 4) + 2] =
+                Math.max(
+                    0,
+                    Math.min(
+                        255,
+                        output[(planeSize * 2) + i] * 255
+                    )
+                );
 
-            canvas.height =
-                finalHeight;
+            rgba[(i * 4) + 3] =
+                255;
 
+        }
+
+        ctx.putImageData(
+            imageData,
+            0,
+            0
+        );
+
+        return canvas;
+
+    }
+
+
+    /* =========================================================
+       RUN ONE TILE
+       ========================================================= */
+
+    async function runTile(tileCanvas) {
+
+        const inputWidth =
+            tileCanvas.width;
+
+        const inputHeight =
+            tileCanvas.height;
+
+        /*
+         * Make dimensions even just in case a tile lands on
+         * an odd edge dimension.
+         */
+
+        let workingCanvas =
+            tileCanvas;
+
+        if (
+            inputWidth % 2 !== 0 ||
+            inputHeight % 2 !== 0
+        ) {
+
+            const paddedWidth =
+                inputWidth % 2 === 0
+                    ? inputWidth
+                    : inputWidth + 1;
+
+            const paddedHeight =
+                inputHeight % 2 === 0
+                    ? inputHeight
+                    : inputHeight + 1;
+
+            workingCanvas =
+                createCanvas(
+                    paddedWidth,
+                    paddedHeight
+                );
 
             const ctx =
-                canvas.getContext("2d");
+                workingCanvas.getContext("2d");
 
-
-            const imageData =
-                ctx.createImageData(
-                    finalWidth,
-                    finalHeight
-                );
-
-
-            const planeSize =
-                outputWidth *
-                outputHeight;
-
-
-            const redOffset =
-                0;
-
-            const greenOffset =
-                planeSize;
-
-            const blueOffset =
-                planeSize * 2;
-
-
-            for (
-                let y = 0;
-                y < finalHeight;
-                y++
-            ) {
-
-                for (
-                    let x = 0;
-                    x < finalWidth;
-                    x++
-                ) {
-
-                    const sourceIndex =
-                        y * outputWidth + x;
-
-                    const targetIndex =
-                        (
-                            y * finalWidth + x
-                        ) * 4;
-
-
-                    imageData.data[
-                        targetIndex
-                    ] =
-                        Math.max(
-                            0,
-                            Math.min(
-                                255,
-                                Math.round(
-                                    data[
-                                        redOffset +
-                                        sourceIndex
-                                    ] * 255
-                                )
-                            )
-                        );
-
-
-                    imageData.data[
-                        targetIndex + 1
-                    ] =
-                        Math.max(
-                            0,
-                            Math.min(
-                                255,
-                                Math.round(
-                                    data[
-                                        greenOffset +
-                                        sourceIndex
-                                    ] * 255
-                                )
-                            )
-                        );
-
-
-                    imageData.data[
-                        targetIndex + 2
-                    ] =
-                        Math.max(
-                            0,
-                            Math.min(
-                                255,
-                                Math.round(
-                                    data[
-                                        blueOffset +
-                                        sourceIndex
-                                    ] * 255
-                                )
-                            )
-                        );
-
-
-                    imageData.data[
-                        targetIndex + 3
-                    ] = 255;
-
-                }
-
-            }
-
-
-            ctx.putImageData(
-                imageData,
+            ctx.drawImage(
+                tileCanvas,
                 0,
                 0
             );
 
+        }
 
-            return canvas;
+        const tensor =
+            imageToTensor(
+                workingCanvas
+            );
+
+        const results =
+            await session.run({
+                input: tensor
+            });
+
+        const output =
+            results.output;
+
+        const outputWidth =
+            workingCanvas.width * 2;
+
+        const outputHeight =
+            workingCanvas.height * 2;
+
+        return {
+            canvas:
+                tensorToCanvas(
+                    output,
+                    outputWidth,
+                    outputHeight
+                ),
+
+            originalWidth:
+                tileCanvas.width,
+
+            originalHeight:
+                tileCanvas.height,
+
+            paddedWidth:
+                workingCanvas.width,
+
+            paddedHeight:
+                workingCanvas.height
+        };
+
+    }
+
+
+    /* =========================================================
+       GET TILE POSITIONS
+       ========================================================= */
+
+    function getTilePositions(
+        width,
+        height
+    ) {
+
+        const positions = [];
+
+        for (
+            let y = 0;
+            y < height;
+            y += TILE_SIZE
+        ) {
+
+            for (
+                let x = 0;
+                x < width;
+                x += TILE_SIZE
+            ) {
+
+                positions.push({
+                    x,
+                    y,
+
+                    width:
+                        Math.min(
+                            TILE_SIZE,
+                            width - x
+                        ),
+
+                    height:
+                        Math.min(
+                            TILE_SIZE,
+                            height - y
+                        )
+                });
+
+            }
 
         }
 
+        return positions;
 
-        /* ==========================================
-           ONE 2× PASS
-        ========================================== */
+    }
 
-        async function upscale2x(
-            imageSource
-        ) {
 
-            const ai =
+    /* =========================================================
+       TILED 2X UPSCALE
+       ========================================================= */
+
+    async function upscaleTiled(
+        sourceCanvas,
+        progressStart,
+        progressEnd
+    ) {
+
+        const sourceWidth =
+            sourceCanvas.width;
+
+        const sourceHeight =
+            sourceCanvas.height;
+
+        const outputWidth =
+            sourceWidth * 2;
+
+        const outputHeight =
+            sourceHeight * 2;
+
+        const output =
+            createCanvas(
+                outputWidth,
+                outputHeight
+            );
+
+        const outputCtx =
+            output.getContext("2d");
+
+        /*
+         * Disable smoothing when stitching AI output.
+         */
+        outputCtx.imageSmoothingEnabled =
+            false;
+
+        const tiles =
+            getTilePositions(
+                sourceWidth,
+                sourceHeight
+            );
+
+        let completed =
+            0;
+
+        for (const tile of tiles) {
+
+            /*
+             * Add context around each tile.
+             */
+
+            const leftContext =
+                Math.min(
+                    TILE_OVERLAP,
+                    tile.x
+                );
+
+            const topContext =
+                Math.min(
+                    TILE_OVERLAP,
+                    tile.y
+                );
+
+            const rightContext =
+                Math.min(
+                    TILE_OVERLAP,
+                    sourceWidth -
+                    (tile.x + tile.width)
+                );
+
+            const bottomContext =
+                Math.min(
+                    TILE_OVERLAP,
+                    sourceHeight -
+                    (tile.y + tile.height)
+                );
+
+            const sourceX =
+                tile.x -
+                leftContext;
+
+            const sourceY =
+                tile.y -
+                topContext;
+
+            const sourceTileWidth =
+                tile.width +
+                leftContext +
+                rightContext;
+
+            const sourceTileHeight =
+                tile.height +
+                topContext +
+                bottomContext;
+
+            const tileCanvas =
+                createCanvas(
+                    sourceTileWidth,
+                    sourceTileHeight
+                );
+
+            const tileCtx =
+                tileCanvas.getContext("2d");
+
+            tileCtx.drawImage(
+                sourceCanvas,
+
+                sourceX,
+                sourceY,
+                sourceTileWidth,
+                sourceTileHeight,
+
+                0,
+                0,
+                sourceTileWidth,
+                sourceTileHeight
+            );
+
+            /*
+             * Run the neural network on this small tile.
+             */
+
+            const result =
+                await runTile(
+                    tileCanvas
+                );
+
+            const resultCanvas =
+                result.canvas;
+
+            /*
+             * Remove the overlap from the AI output.
+             *
+             * Everything is 2x now, so the overlap is also
+             * multiplied by 2.
+             */
+
+            const cropLeft =
+                leftContext * 2;
+
+            const cropTop =
+                topContext * 2;
+
+            const cropWidth =
+                tile.width * 2;
+
+            const cropHeight =
+                tile.height * 2;
+
+            /*
+             * Stitch the central portion of the processed
+             * tile into the final image.
+             */
+
+            outputCtx.drawImage(
+                resultCanvas,
+
+                cropLeft,
+                cropTop,
+                cropWidth,
+                cropHeight,
+
+                tile.x * 2,
+                tile.y * 2,
+                cropWidth,
+                cropHeight
+            );
+
+            completed++;
+
+            const tileProgress =
+                completed / tiles.length;
+
+            const percent =
+                progressStart +
+                tileProgress *
+                (progressEnd - progressStart);
+
+            setProgress(
+                percent,
+                "Upscaling image...",
+                `Processing tile ${completed} of ${tiles.length}`
+            );
+
+            /*
+             * Give the browser a chance to breathe between
+             * GPU jobs. Humans apparently expect browsers
+             * not to freeze solid during computation.
+             */
+
+            await new Promise(
+                resolve =>
+                    requestAnimationFrame(resolve)
+            );
+
+        }
+
+        return output;
+
+    }
+
+
+    /* =========================================================
+       MAIN UPSCALE
+       ========================================================= */
+
+    upscaleButton.addEventListener(
+        "click",
+        async () => {
+
+            if (
+                !selectedImage ||
+                !selectedFile
+            ) {
+                return;
+            }
+
+            upscaleButton.disabled = true;
+
+            resultSection.classList.remove(
+                "visible"
+            );
+
+            showProgress();
+
+            try {
+
+                const sourceWidth =
+                    selectedImage.naturalWidth;
+
+                const sourceHeight =
+                    selectedImage.naturalHeight;
+
+                const finalWidth =
+                    sourceWidth *
+                    selectedScale;
+
+                const finalHeight =
+                    sourceHeight *
+                    selectedScale;
+
+                const finalPixels =
+                    finalWidth *
+                    finalHeight;
+
+                if (
+                    finalPixels >
+                    MAX_OUTPUT_PIXELS
+                ) {
+
+                    throw new Error(
+                        `The ${selectedScale}× result would contain ` +
+                        `${formatNumber(finalPixels)} pixels, which is too large for browser processing.`
+                    );
+
+                }
+
+                if (
+                    finalWidth >
+                    MAX_OUTPUT_DIMENSION ||
+                    finalHeight >
+                    MAX_OUTPUT_DIMENSION
+                ) {
+
+                    throw new Error(
+                        `The final image would be ${finalWidth} × ${finalHeight}, which exceeds the browser safety limit.`
+                    );
+
+                }
+
+
+                /*
+                 * Load model.
+                 */
+
                 await loadModel();
 
 
-            setStatus(
-                "Preparing image..."
-            );
+                /*
+                 * Build the initial source canvas.
+                 */
 
+                setProgress(
+                    20,
+                    "Preparing image...",
+                    "Creating source canvas."
+                );
 
-            const prepared =
-                await imageToTensor(
-                    imageSource
+                const sourceCanvas =
+                    createCanvas(
+                        sourceWidth,
+                        sourceHeight
+                    );
+
+                const sourceCtx =
+                    sourceCanvas.getContext("2d");
+
+                sourceCtx.drawImage(
+                    selectedImage,
+                    0,
+                    0
                 );
 
 
-            setStatus(
-                `Running AI on ${prepared.paddedWidth} × ${prepared.paddedHeight}px using ${usingWebGPU ? "GPU" : "CPU"}...`
-            );
+                /*
+                 * 2X
+                 */
+
+                if (
+                    selectedScale === 2
+                ) {
+
+                    resultCanvas =
+                        await upscaleTiled(
+                            sourceCanvas,
+                            20,
+                            100
+                        );
+
+                }
 
 
-            const results =
-                await ai.run({
-                    input: prepared.tensor
-                });
+                /*
+                 * 4X
+                 *
+                 * We deliberately do this as two separate
+                 * tiled 2x passes instead of one massive
+                 * 4x operation.
+                 */
+
+                else {
+
+                    setProgress(
+                        20,
+                        "Upscaling image...",
+                        "Pass 1 of 2"
+                    );
+
+                    const firstPass =
+                        await upscaleTiled(
+                            sourceCanvas,
+                            20,
+                            60
+                        );
+
+                    /*
+                     * Let the browser clean up temporary
+                     * memory before beginning pass 2.
+                     */
+
+                    await new Promise(
+                        resolve =>
+                            setTimeout(
+                                resolve,
+                                50
+                            )
+                    );
+
+                    setProgress(
+                        60,
+                        "Upscaling image...",
+                        "Pass 2 of 2"
+                    );
+
+                    resultCanvas =
+                        await upscaleTiled(
+                            firstPass,
+                            60,
+                            100
+                        );
+
+                }
 
 
-            const output =
-                results.output;
+                /*
+                 * Show result.
+                 */
 
+                resultCanvasElement.width =
+                    resultCanvas.width;
 
-            if (!output) {
+                resultCanvasElement.height =
+                    resultCanvas.height;
 
-                throw new Error(
-                    "The AI model returned no output."
+                const resultCtx =
+                    resultCanvasElement.getContext(
+                        "2d"
+                    );
+
+                resultCtx.clearRect(
+                    0,
+                    0,
+                    resultCanvasElement.width,
+                    resultCanvasElement.height
                 );
+
+                resultCtx.drawImage(
+                    resultCanvas,
+                    0,
+                    0
+                );
+
+                resultSection.classList.add(
+                    "visible"
+                );
+
+                setProgress(
+                    100,
+                    "Complete",
+                    `${resultCanvas.width} × ${resultCanvas.height}`
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "FLUX Upscaler error:",
+                    error
+                );
+
+                setProgress(
+                    0,
+                    "Upscaling failed",
+                    error.message ||
+                    "An unknown error occurred."
+                );
+
+                alert(
+                    "FLUX Upscaler error:\n\n" +
+                    (
+                        error.message ||
+                        "Something went wrong."
+                    )
+                );
+
+            } finally {
+
+                upscaleButton.disabled =
+                    false;
+
+                updateOutputLimit();
 
             }
 
+        }
+    );
 
-            return tensorToCanvas(
-                output,
-                prepared.originalWidth,
-                prepared.originalHeight
+
+    /* =========================================================
+       DOWNLOAD
+       ========================================================= */
+
+    downloadButton.addEventListener(
+        "click",
+        () => {
+
+            if (!resultCanvas) {
+                return;
+            }
+
+            resultCanvas.toBlob(
+                (blob) => {
+
+                    if (!blob) {
+
+                        alert(
+                            "Could not create the PNG."
+                        );
+
+                        return;
+                    }
+
+                    const url =
+                        URL.createObjectURL(
+                            blob
+                        );
+
+                    const link =
+                        document.createElement("a");
+
+                    const originalName =
+                        selectedFile
+                            ? selectedFile.name
+                                .replace(
+                                    /\.[^/.]+$/,
+                                    ""
+                                )
+                            : "flux-upscaled";
+
+                    link.href =
+                        url;
+
+                    link.download =
+                        `${originalName}-${selectedScale}x.png`;
+
+                    document.body.appendChild(
+                        link
+                    );
+
+                    link.click();
+
+                    link.remove();
+
+                    setTimeout(
+                        () =>
+                            URL.revokeObjectURL(url),
+                        1000
+                    );
+
+                },
+                "image/png"
             );
 
         }
+    );
 
 
-        /* ==========================================
-           UPSCALE BUTTON
-        ========================================== */
+    /* =========================================================
+       HELPERS
+       ========================================================= */
 
-        upscaleButton.addEventListener(
-            "click",
-            async () => {
+    function formatNumber(number) {
 
-                if (
-                    !selectedFile ||
-                    !selectedObjectURL
-                ) {
+        return new Intl.NumberFormat(
+            "en-US"
+        ).format(number);
 
-                    setStatus(
-                        "Please select an image first.",
-                        "error"
-                    );
-
-                    return;
-
-                }
+    }
 
 
-                upscaleButton.disabled =
-                    true;
-
-
-                downloadWrapper.style.display =
-                    "none";
-
-
-                try {
-
-                    let resultCanvas;
-
-
-                    if (
-                        selectedScale === 2
-                    ) {
-
-                        resultCanvas =
-                            await upscale2x(
-                                selectedObjectURL
-                            );
-
-                    } else {
-
-                        setStatus(
-                            "Running first 2× AI pass..."
-                        );
-
-
-                        const firstPass =
-                            await upscale2x(
-                                selectedObjectURL
-                            );
-
-
-                        setStatus(
-                            "Running second 2× AI pass..."
-                        );
-
-
-                        const firstPassURL =
-                            firstPass.toDataURL(
-                                "image/png"
-                            );
-
-
-                        resultCanvas =
-                            await upscale2x(
-                                firstPassURL
-                            );
-
-                    }
-
-
-                    const resultURL =
-                        resultCanvas.toDataURL(
-                            "image/png"
-                        );
-
-
-                    preview.src =
-                        resultURL;
-
-
-                    imageInfo.textContent =
-                        `${resultCanvas.width} × ${resultCanvas.height}px`;
-
-
-                    downloadButton.href =
-                        resultURL;
-
-
-                    downloadButton.download =
-                        selectedScale === 2
-                            ? "flux-upscaled-2x.png"
-                            : "flux-upscaled-4x.png";
-
-
-                    downloadWrapper.style.display =
-                        "block";
-
-
-                    setStatus(
-                        `Upscaling complete: ${resultCanvas.width} × ${resultCanvas.height}px`,
-                        "success"
-                    );
-
-
-                } catch (error) {
-
-                    console.error(
-                        "FLUX Upscaler error:",
-                        error
-                    );
-
-
-                    setStatus(
-                        "Upscaling failed: " +
-                        (
-                            error.message ||
-                            "Unknown error"
-                        ),
-                        "error"
-                    );
-
-                } finally {
-
-                    upscaleButton.disabled =
-                        false;
-
-                }
-
-            }
-        );
-
-
-        /* ==========================================
-           CLEANUP
-        ========================================== */
-
-        window.addEventListener(
-            "beforeunload",
-            () => {
-
-                if (selectedObjectURL) {
-
-                    URL.revokeObjectURL(
-                        selectedObjectURL
-                    );
-
-                }
-
-            }
-        );
-
-    </script>
+</script>
 
 </body>
 </html>

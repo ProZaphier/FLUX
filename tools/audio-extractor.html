@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Audio Extractor — FLUX</title>
+    <title>Audio Extractor | FLUX</title>
 
     <style>
         * {
@@ -14,349 +14,477 @@
         }
 
         body {
-            min-height: 100vh;
-            background: #05070c;
-            color: white;
             font-family: Arial, Helvetica, sans-serif;
-            overflow-x: hidden;
+            background: #07090f;
+            color: #ffffff;
+            min-height: 100vh;
         }
 
-        body::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            z-index: -1;
-
-            background:
-                radial-gradient(
-                    circle at 20% 20%,
-                    rgba(55, 110, 255, 0.15),
-                    transparent 30%
-                ),
-                radial-gradient(
-                    circle at 80% 70%,
-                    rgba(30, 90, 255, 0.08),
-                    transparent 30%
-                );
-        }
-
-        /* NAVIGATION */
+        /* NAVBAR */
 
         nav {
-            height: 78px;
-
+            height: 70px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-
-            padding: 0 7vw;
-
-            border-bottom: 1px solid rgba(255,255,255,0.07);
-
-            background: rgba(5,7,12,0.75);
-            backdrop-filter: blur(18px);
+            padding: 0 7%;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            background: rgba(7,9,15,0.9);
         }
 
         .logo {
-            color: white;
+            font-size: 25px;
+            font-weight: 900;
+            letter-spacing: 5px;
+            color: #ffffff;
             text-decoration: none;
-
-            font-size: 20px;
-            font-weight: 800;
-
-            letter-spacing: 0.16em;
         }
 
         .back {
-            color: #7f8ba0;
+            color: #aab2c5;
             text-decoration: none;
-
-            font-size: 13px;
-
+            font-size: 14px;
             transition: 0.2s;
         }
 
         .back:hover {
-            color: white;
+            color: #ffffff;
         }
 
         /* MAIN */
 
         main {
-            max-width: 850px;
-
-            margin: auto;
-
-            padding: 110px 25px;
+            width: min(900px, 90%);
+            margin: 80px auto;
         }
 
-        .eyebrow {
-            color: #6090ff;
+        .heading {
+            text-align: center;
+            margin-bottom: 45px;
+        }
 
-            font-size: 10px;
+        .heading .tag {
+            color: #5da9ff;
+            font-size: 12px;
             font-weight: bold;
-
-            letter-spacing: 0.18em;
+            letter-spacing: 3px;
             text-transform: uppercase;
+            margin-bottom: 15px;
         }
 
         h1 {
-            margin-top: 12px;
-
-            font-size: clamp(42px, 7vw, 75px);
-
-            letter-spacing: -0.06em;
+            font-size: clamp(42px, 7vw, 72px);
+            letter-spacing: -3px;
+            margin-bottom: 15px;
         }
 
-        .description {
-            margin-top: 18px;
-
-            max-width: 600px;
-
-            color: #7d889b;
-
-            line-height: 1.7;
-            font-size: 15px;
+        .heading p {
+            color: #9299aa;
+            font-size: 16px;
+            line-height: 1.6;
         }
 
-        /* UPLOAD */
+        /* EXTRACTOR */
 
-        .upload-box {
-            margin-top: 50px;
+        .extractor {
+            background: #0d111c;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 22px;
+            padding: 35px;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.35);
+        }
 
-            min-height: 300px;
-
+        .upload {
+            border: 2px dashed #27344d;
+            border-radius: 16px;
+            min-height: 280px;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-
-            padding: 40px;
-
-            border: 1px dashed rgba(100,145,255,0.4);
-            border-radius: 18px;
-
-            background:
-                linear-gradient(
-                    145deg,
-                    rgba(60,100,200,0.08),
-                    rgba(255,255,255,0.015)
-                );
-
             text-align: center;
-
+            cursor: pointer;
             transition: 0.25s;
+            padding: 30px;
         }
 
-        .upload-box:hover {
-            border-color: rgba(110,155,255,0.75);
-
-            background:
-                linear-gradient(
-                    145deg,
-                    rgba(60,100,200,0.13),
-                    rgba(255,255,255,0.025)
-                );
+        .upload:hover {
+            border-color: #5da9ff;
+            background: rgba(93,169,255,0.03);
         }
 
         .upload-icon {
-            width: 60px;
-            height: 60px;
-
-            display: grid;
-            place-items: center;
-
-            border-radius: 16px;
-
-            background: rgba(65,110,255,0.12);
-
-            color: #78a0ff;
-
-            font-size: 26px;
+            font-size: 45px;
+            margin-bottom: 15px;
         }
 
-        .upload-box h2 {
-            margin-top: 25px;
-
-            font-size: 19px;
+        .upload h2 {
+            font-size: 20px;
+            margin-bottom: 8px;
         }
 
-        .upload-box p {
-            margin-top: 8px;
-
-            color: #697488;
-
-            font-size: 13px;
+        .upload p {
+            color: #777f91;
+            font-size: 14px;
         }
 
-        input[type="file"] {
+        #fileInput {
             display: none;
-        }
-
-        .browse {
-            display: inline-block;
-
-            margin-top: 22px;
-
-            padding: 12px 20px;
-
-            border-radius: 9px;
-
-            background: #3269ed;
-
-            color: white;
-
-            font-size: 13px;
-            font-weight: bold;
-
-            cursor: pointer;
-
-            transition: 0.2s;
-        }
-
-        .browse:hover {
-            background: #477dff;
-
-            transform: translateY(-2px);
         }
 
         /* FILE INFO */
 
-        #fileInfo {
+        .file-info {
             display: none;
-
-            margin-top: 20px;
-
-            padding: 18px;
-
+            margin-top: 25px;
+            padding: 20px;
+            background: #090c14;
+            border-radius: 14px;
             border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 12px;
+        }
 
-            background: rgba(255,255,255,0.03);
+        .file-name {
+            font-weight: bold;
+            margin-bottom: 8px;
+            word-break: break-all;
+        }
 
-            color: #9aa5b8;
-
+        .file-details {
+            color: #7f8798;
             font-size: 13px;
         }
 
-        /* FOOTER */
+        /* BUTTON */
 
-        footer {
-            margin-top: 100px;
+        .extract-btn {
+            width: 100%;
+            margin-top: 20px;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            background: #ffffff;
+            color: #05070b;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
 
-            padding-top: 25px;
+        .extract-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255,255,255,0.08);
+        }
 
-            border-top: 1px solid rgba(255,255,255,0.06);
+        .extract-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
 
-            color: #4e596c;
+        /* STATUS */
 
-            font-size: 11px;
+        .status {
+            margin-top: 20px;
+            text-align: center;
+            color: #7f8798;
+            font-size: 14px;
+            min-height: 20px;
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 600px) {
+            main {
+                margin: 50px auto;
+            }
+
+            .extractor {
+                padding: 20px;
+            }
+
+            .upload {
+                min-height: 220px;
+            }
+
+            h1 {
+                letter-spacing: -2px;
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <nav>
+<nav>
+    <a href="../index.html" class="logo">FLUX</a>
+    <a href="../index.html" class="back">← Back to FLUX</a>
+</nav>
 
-        <a href="../index.html" class="logo">
-            FLUX
-        </a>
+<main>
 
-        <a href="../index.html" class="back">
-            ← Back to FLUX
-        </a>
+    <div class="heading">
+        <div class="tag">FLUX TOOLKIT</div>
 
-    </nav>
+        <h1>Audio Extractor</h1>
 
-
-    <main>
-
-        <div class="eyebrow">
-            FLUX / Media Tool
-        </div>
-
-        <h1>
-            Audio Extractor
-        </h1>
-
-        <p class="description">
-            Extract audio from your video files quickly and
-            prepare it for your editing workflow.
+        <p>
+            Extract the audio from a video directly in your browser.
+            No uploads. No servers. No mysterious internet wizardry.
         </p>
+    </div>
 
+    <section class="extractor">
 
-        <div class="upload-box">
+        <label class="upload" for="fileInput">
 
-            <div class="upload-icon">
-                ♪
+            <div>
+                <div class="upload-icon">↥</div>
+
+                <h2>Select a video</h2>
+
+                <p>
+                    MP4, MOV, WebM and other browser-supported formats
+                </p>
             </div>
 
-            <h2>
-                Drop your video here
-            </h2>
+        </label>
 
-            <p>
-                MP4, MOV, MKV, WebM and other common formats
-            </p>
+        <input
+            type="file"
+            id="fileInput"
+            accept="video/*"
+        >
 
-            <label class="browse">
-                Browse files
+        <div class="file-info" id="fileInfo">
 
-                <input
-                    type="file"
-                    id="fileInput"
-                    accept="video/*"
-                >
-            </label>
+            <div class="file-name" id="fileName"></div>
+
+            <div class="file-details" id="fileDetails"></div>
 
         </div>
 
+        <button
+            class="extract-btn"
+            id="extractBtn"
+            disabled
+        >
+            Extract Audio
+        </button>
 
-        <div id="fileInfo"></div>
+        <div class="status" id="status"></div>
 
+    </section>
 
-        <footer>
-            FLUX — Editor Toolkit
-        </footer>
+</main>
 
-    </main>
+<script>
 
+const fileInput = document.getElementById("fileInput");
+const fileInfo = document.getElementById("fileInfo");
+const fileName = document.getElementById("fileName");
+const fileDetails = document.getElementById("fileDetails");
+const extractBtn = document.getElementById("extractBtn");
+const status = document.getElementById("status");
 
-    <script>
-
-        const fileInput =
-            document.getElementById("fileInput");
-
-        const fileInfo =
-            document.getElementById("fileInfo");
-
-
-        fileInput.addEventListener("change", function() {
-
-            const file = this.files[0];
-
-            if (!file) return;
-
-            const size =
-                (file.size / 1024 / 1024).toFixed(2);
+let selectedFile = null;
 
 
-            fileInfo.style.display = "block";
+/* FILE SELECTION */
 
-            fileInfo.innerHTML = `
-                <strong>${file.name}</strong>
-                <br><br>
-                Size: ${size} MB
-                <br>
-                Type: ${file.type || "Unknown"}
-                <br><br>
-                File loaded successfully.
-            `;
+fileInput.addEventListener("change", function () {
 
-        });
+    selectedFile = this.files[0];
 
-    </script>
+    if (!selectedFile) {
+        return;
+    }
+
+    fileInfo.style.display = "block";
+
+    fileName.textContent = selectedFile.name;
+
+    const sizeMB = (selectedFile.size / 1024 / 1024).toFixed(2);
+
+    fileDetails.textContent =
+        `${sizeMB} MB • ${selectedFile.type || "Unknown format"}`;
+
+    extractBtn.disabled = false;
+
+    status.textContent = "";
+
+});
+
+
+/* AUDIO EXTRACTION */
+
+extractBtn.addEventListener("click", async function () {
+
+    if (!selectedFile) {
+        return;
+    }
+
+    extractBtn.disabled = true;
+
+    status.textContent = "Reading video...";
+
+    try {
+
+        const arrayBuffer = await selectedFile.arrayBuffer();
+
+        status.textContent = "Extracting audio...";
+
+        const audioContext = new AudioContext();
+
+        const audioBuffer =
+            await audioContext.decodeAudioData(arrayBuffer);
+
+        status.textContent = "Creating WAV file...";
+
+        const wavBlob = audioBufferToWav(audioBuffer);
+
+        const url = URL.createObjectURL(wavBlob);
+
+        const link = document.createElement("a");
+
+        link.href = url;
+
+        const originalName =
+            selectedFile.name.replace(/\.[^/.]+$/, "");
+
+        link.download = originalName + ".wav";
+
+        document.body.appendChild(link);
+
+        link.click();
+
+        link.remove();
+
+        URL.revokeObjectURL(url);
+
+        status.textContent = "Audio extracted successfully.";
+
+        await audioContext.close();
+
+    } catch (error) {
+
+        console.error(error);
+
+        status.textContent =
+            "This video format could not be processed by your browser.";
+
+    }
+
+    extractBtn.disabled = false;
+
+});
+
+
+/* WAV ENCODER */
+
+function audioBufferToWav(buffer) {
+
+    const numberOfChannels = buffer.numberOfChannels;
+    const sampleRate = buffer.sampleRate;
+    const format = 1;
+    const bitDepth = 16;
+
+    const channelData = [];
+
+    for (let channel = 0; channel < numberOfChannels; channel++) {
+        channelData.push(buffer.getChannelData(channel));
+    }
+
+    const length =
+        buffer.length * numberOfChannels * 2;
+
+    const arrayBuffer =
+        new ArrayBuffer(44 + length);
+
+    const view =
+        new DataView(arrayBuffer);
+
+
+    /* RIFF HEADER */
+
+    writeString(view, 0, "RIFF");
+
+    view.setUint32(4, 36 + length, true);
+
+    writeString(view, 8, "WAVE");
+
+    writeString(view, 12, "fmt ");
+
+    view.setUint32(16, 16, true);
+
+    view.setUint16(20, format, true);
+
+    view.setUint16(22, numberOfChannels, true);
+
+    view.setUint32(24, sampleRate, true);
+
+    view.setUint32(
+        28,
+        sampleRate * numberOfChannels * 2,
+        true
+    );
+
+    view.setUint16(
+        32,
+        numberOfChannels * 2,
+        true
+    );
+
+    view.setUint16(34, bitDepth, true);
+
+    writeString(view, 36, "data");
+
+    view.setUint32(40, length, true);
+
+
+    /* AUDIO DATA */
+
+    let offset = 44;
+
+    for (let i = 0; i < buffer.length; i++) {
+
+        for (let channel = 0; channel < numberOfChannels; channel++) {
+
+            let sample = channelData[channel][i];
+
+            sample = Math.max(-1, Math.min(1, sample));
+
+            const value =
+                sample < 0
+                    ? sample * 0x8000
+                    : sample * 0x7FFF;
+
+            view.setInt16(offset, value, true);
+
+            offset += 2;
+        }
+    }
+
+    return new Blob(
+        [arrayBuffer],
+        { type: "audio/wav" }
+    );
+}
+
+
+function writeString(view, offset, string) {
+
+    for (let i = 0; i < string.length; i++) {
+
+        view.setUint8(
+            offset + i,
+            string.charCodeAt(i)
+        );
+
+    }
+
+}
+
+</script>
 
 </body>
 </html>

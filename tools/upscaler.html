@@ -492,8 +492,6 @@
 
         let selectedObjectURL = null;
 
-        let downloadObjectURL = null;
-
         let usingWebGPU = false;
 
 
@@ -510,25 +508,6 @@
             if (type) {
                 status.classList.add(type);
             }
-
-        }
-
-
-        /* ==========================================
-           SMALL BROWSER YIELD
-           Keeps the page responsive while doing
-           large pixel conversions.
-        ========================================== */
-
-        function yieldToBrowser() {
-
-            return new Promise(resolve => {
-
-                requestAnimationFrame(() => {
-                    resolve();
-                });
-
-            });
 
         }
 
@@ -617,16 +596,6 @@
             selectedFile = file;
 
             downloadWrapper.style.display = "none";
-
-            if (downloadObjectURL) {
-
-                URL.revokeObjectURL(
-                    downloadObjectURL
-                );
-
-                downloadObjectURL = null;
-
-            }
 
             setStatus("Loading image...");
 
@@ -763,20 +732,18 @@
 
 
             /*
-             * Prefer WebGPU.
+             * WebGPU should be the preferred path.
              */
 
-            if ("gpu" in navigator) {
+            if (
+                "gpu" in navigator
+            ) {
 
                 try {
 
                     setStatus(
                         "Starting GPU acceleration..."
                     );
-
-
-                    const startTime =
-                        performance.now();
 
 
                     session =
@@ -793,14 +760,6 @@
 
 
                     usingWebGPU = true;
-
-
-                    console.log(
-                        `FLUX WebGPU model loaded in ${(
-                            performance.now() -
-                            startTime
-                        ).toFixed(0)} ms`
-                    );
 
 
                     setStatus(
@@ -835,10 +794,6 @@
                 );
 
 
-                const startTime =
-                    performance.now();
-
-
                 session =
                     await ort.InferenceSession.create(
                         MODEL_URL,
@@ -853,14 +808,6 @@
 
 
                 usingWebGPU = false;
-
-
-                console.log(
-                    `FLUX WASM model loaded in ${(
-                        performance.now() -
-                        startTime
-                    ).toFixed(0)} ms`
-                );
 
 
                 setStatus(
@@ -890,344 +837,267 @@
 
         /* ==========================================
            IMAGE → TENSOR
-           
-           This version intentionally does NOT tile
-           normal images. A 1000×1000 image is only
-           1 megapixel and should be handled as one
-           inference on a capable GPU.
         ========================================== */
 
         async function imageToTensor(imageSource) {
 
-            const startTime =
-                performance.now();
+            return new Promise((resolve, reject) => {
+
+                const image =
+                    new Image();
 
 
-            /*
-             * Decode image.
-             */
+                image.onload = () => {
 
-            setStatus(
-                "Preparing image: decoding..."
-            );
+                    try {
 
+                        let width =
+                            image.naturalWidth;
 
-            const image =
-                new Image();
+                        let height =
+                            image.naturalHeight;
 
 
-            image.decoding = "async";
+                        /*
+                         * Protect the browser from
+                         * extremely large images.
+                         */
+
+                        const megapixels =
+                            (
+                                width *
+                                height
+                            ) / 1000000;
 
 
-            const loadedImage =
-                await new Promise((resolve, reject) => {
+                        if (megapixels > 20) {
 
-                    image.onload = () => resolve(image);
+                            throw new Error(
+                                "This image is too large for browser upscaling. Please use an image below 20 megapixels."
+                            );
 
-                    image.onerror = () => reject(
+                        }
+
+
+                        /*
+                         * The model needs even dimensions.
+                         */
+
+                        const paddedWidth =
+                            width % 2 === 0
+                                ? width
+                                : width + 1;
+
+
+                        const paddedHeight =
+                            height % 2 === 0
+                                ? height
+                                : height + 1;
+
+
+                        const canvas =
+                            document.createElement(
+                                "canvas"
+                            );
+
+
+                        canvas.width =
+                            paddedWidth;
+
+                        canvas.height =
+                            paddedHeight;
+
+
+                        const ctx =
+                            canvas.getContext(
+                                "2d",
+                                {
+                                    willReadFrequently: true
+                                }
+                            );
+
+
+                        if (!ctx) {
+
+                            throw new Error(
+                                "The browser could not create a canvas context."
+                            );
+
+                        }
+
+
+                        ctx.drawImage(
+                            image,
+                            0,
+                            0,
+                            width,
+                            height
+                        );
+
+
+                        /*
+                         * Extend final column.
+                         */
+
+                        if (
+                            paddedWidth !== width
+                        ) {
+
+                            ctx.drawImage(
+                                canvas,
+                                width - 1,
+                                0,
+                                1,
+                                height,
+                                width,
+                                0,
+                                1,
+                                height
+                            );
+
+                        }
+
+
+                        /*
+                         * Extend final row.
+                         */
+
+                        if (
+                            paddedHeight !== height
+                        ) {
+
+                            ctx.drawImage(
+                                canvas,
+                                0,
+                                height - 1,
+                                paddedWidth,
+                                1,
+                                0,
+                                height,
+                                paddedWidth,
+                                1
+                            );
+
+                        }
+
+
+                        setStatus(
+                            "Converting image for the AI..."
+                        );
+
+
+                        const imageData =
+                            ctx.getImageData(
+                                0,
+                                0,
+                                paddedWidth,
+                                paddedHeight
+                            );
+
+
+                        const pixelCount =
+                            paddedWidth *
+                            paddedHeight;
+
+
+                        const tensorData =
+                            new Float32Array(
+                                pixelCount * 3
+                            );
+
+
+                        const redOffset =
+                            0;
+
+                        const greenOffset =
+                            pixelCount;
+
+                        const blueOffset =
+                            pixelCount * 2;
+
+
+                        for (
+                            let i = 0, p = 0;
+                            i < pixelCount;
+                            i++, p += 4
+                        ) {
+
+                            tensorData[
+                                redOffset + i
+                            ] =
+                                imageData.data[p] /
+                                255;
+
+
+                            tensorData[
+                                greenOffset + i
+                            ] =
+                                imageData.data[p + 1] /
+                                255;
+
+
+                            tensorData[
+                                blueOffset + i
+                            ] =
+                                imageData.data[p + 2] /
+                                255;
+
+                        }
+
+
+                        const tensor =
+                            new ort.Tensor(
+                                "float32",
+                                tensorData,
+                                [
+                                    1,
+                                    3,
+                                    paddedHeight,
+                                    paddedWidth
+                                ]
+                            );
+
+
+                        resolve({
+
+                            tensor,
+
+                            originalWidth:
+                                width,
+
+                            originalHeight:
+                                height,
+
+                            paddedWidth,
+
+                            paddedHeight
+
+                        });
+
+                    } catch (error) {
+
+                        reject(error);
+
+                    }
+
+                };
+
+
+                image.onerror = () => {
+
+                    reject(
                         new Error(
                             "The selected image could not be decoded."
                         )
                     );
 
-                    image.src = imageSource;
+                };
 
-                });
 
+                image.src =
+                    imageSource;
 
-            let width =
-                loadedImage.naturalWidth;
-
-            let height =
-                loadedImage.naturalHeight;
-
-
-            const megapixels =
-                (
-                    width *
-                    height
-                ) / 1000000;
-
-
-            if (megapixels > 20) {
-
-                throw new Error(
-                    "This image is too large for browser upscaling. Please use an image below 20 megapixels."
-                );
-
-            }
-
-
-            /*
-             * The model needs even dimensions.
-             */
-
-            const paddedWidth =
-                width % 2 === 0
-                    ? width
-                    : width + 1;
-
-
-            const paddedHeight =
-                height % 2 === 0
-                    ? height
-                    : height + 1;
-
-
-            setStatus(
-                `Preparing image: ${paddedWidth} × ${paddedHeight}px...`
-            );
-
-
-            /*
-             * Canvas.
-             */
-
-            const canvas =
-                document.createElement(
-                    "canvas"
-                );
-
-
-            canvas.width =
-                paddedWidth;
-
-            canvas.height =
-                paddedHeight;
-
-
-            const ctx =
-                canvas.getContext(
-                    "2d",
-                    {
-                        willReadFrequently: true
-                    }
-                );
-
-
-            if (!ctx) {
-
-                throw new Error(
-                    "The browser could not create a canvas context."
-                );
-
-            }
-
-
-            /*
-             * Draw original image.
-             */
-
-            ctx.drawImage(
-                loadedImage,
-                0,
-                0,
-                width,
-                height
-            );
-
-
-            /*
-             * If dimensions are odd, duplicate the
-             * final column and/or row.
-             */
-
-            if (paddedWidth !== width) {
-
-                ctx.drawImage(
-                    canvas,
-                    width - 1,
-                    0,
-                    1,
-                    height,
-                    width,
-                    0,
-                    1,
-                    height
-                );
-
-            }
-
-
-            if (paddedHeight !== height) {
-
-                ctx.drawImage(
-                    canvas,
-                    0,
-                    height - 1,
-                    paddedWidth,
-                    1,
-                    0,
-                    height,
-                    paddedWidth,
-                    1
-                );
-
-            }
-
-
-            await yieldToBrowser();
-
-
-            /*
-             * Read pixels.
-             */
-
-            setStatus(
-                "Preparing image: reading pixels..."
-            );
-
-
-            const imageData =
-                ctx.getImageData(
-                    0,
-                    0,
-                    paddedWidth,
-                    paddedHeight
-                );
-
-
-            const pixelCount =
-                paddedWidth *
-                paddedHeight;
-
-
-            /*
-             * Float32 planar RGB tensor.
-             *
-             * [1, 3, H, W]
-             */
-
-            const tensorData =
-                new Float32Array(
-                    pixelCount * 3
-                );
-
-
-            const redOffset =
-                0;
-
-            const greenOffset =
-                pixelCount;
-
-            const blueOffset =
-                pixelCount * 2;
-
-
-            /*
-             * Process in chunks instead of one enormous
-             * blocking loop. This keeps the browser
-             * responsive on weaker machines.
-             */
-
-            const CHUNK_PIXELS =
-                250000;
-
-
-            for (
-                let start = 0;
-                start < pixelCount;
-                start += CHUNK_PIXELS
-            ) {
-
-                const end =
-                    Math.min(
-                        start + CHUNK_PIXELS,
-                        pixelCount
-                    );
-
-
-                for (
-                    let i = start;
-                    i < end;
-                    i++
-                ) {
-
-                    const p =
-                        i * 4;
-
-
-                    tensorData[
-                        redOffset + i
-                    ] =
-                        imageData.data[p] / 255;
-
-
-                    tensorData[
-                        greenOffset + i
-                    ] =
-                        imageData.data[p + 1] / 255;
-
-
-                    tensorData[
-                        blueOffset + i
-                    ] =
-                        imageData.data[p + 2] / 255;
-
-                }
-
-
-                const percent =
-                    Math.round(
-                        (end / pixelCount) * 100
-                    );
-
-
-                setStatus(
-                    `Preparing image: ${percent}%...`
-                );
-
-
-                await yieldToBrowser();
-
-            }
-
-
-            const tensor =
-                new ort.Tensor(
-                    "float32",
-                    tensorData,
-                    [
-                        1,
-                        3,
-                        paddedHeight,
-                        paddedWidth
-                    ]
-                );
-
-
-            /*
-             * The canvas and ImageData are no longer
-             * needed after the tensor is created.
-             */
-
-            canvas.width = 1;
-            canvas.height = 1;
-
-
-            console.log(
-                `Tensor preparation: ${(
-                    performance.now() -
-                    startTime
-                ).toFixed(0)} ms`
-            );
-
-
-            return {
-
-                tensor,
-
-                originalWidth:
-                    width,
-
-                originalHeight:
-                    height,
-
-                paddedWidth,
-
-                paddedHeight
-
-            };
+            });
 
         }
 
@@ -1236,15 +1106,11 @@
            TENSOR → CANVAS
         ========================================== */
 
-        async function tensorToCanvas(
+        function tensorToCanvas(
             outputTensor,
             originalWidth,
             originalHeight
         ) {
-
-            const startTime =
-                performance.now();
-
 
             const dims =
                 outputTensor.dims;
@@ -1259,13 +1125,6 @@
             const outputWidth =
                 dims[3];
 
-
-            /*
-             * Because the model is 2×, the output
-             * dimensions are twice the original.
-             *
-             * Crop any padding from the odd input.
-             */
 
             const finalWidth =
                 originalWidth * 2;
@@ -1291,15 +1150,6 @@
                 canvas.getContext("2d");
 
 
-            if (!ctx) {
-
-                throw new Error(
-                    "Could not create output canvas."
-                );
-
-            }
-
-
             const imageData =
                 ctx.createImageData(
                     finalWidth,
@@ -1322,55 +1172,25 @@
                 planeSize * 2;
 
 
-            const totalPixels =
-                finalWidth *
-                finalHeight;
-
-
-            const CHUNK_PIXELS =
-                250000;
-
-
             for (
-                let start = 0;
-                start < totalPixels;
-                start += CHUNK_PIXELS
+                let y = 0;
+                y < finalHeight;
+                y++
             ) {
 
-                const end =
-                    Math.min(
-                        start + CHUNK_PIXELS,
-                        totalPixels
-                    );
-
-
                 for (
-                    let i = start;
-                    i < end;
-                    i++
+                    let x = 0;
+                    x < finalWidth;
+                    x++
                 ) {
 
-                    const y =
-                        Math.floor(
-                            i / finalWidth
-                        );
-
-                    const x =
-                        i -
-                        (
-                            y *
-                            finalWidth
-                        );
-
-
                     const sourceIndex =
-                        y *
-                        outputWidth +
-                        x;
-
+                        y * outputWidth + x;
 
                     const targetIndex =
-                        i * 4;
+                        (
+                            y * finalWidth + x
+                        ) * 4;
 
 
                     imageData.data[
@@ -1430,20 +1250,6 @@
 
                 }
 
-
-                const percent =
-                    Math.round(
-                        (end / totalPixels) * 100
-                    );
-
-
-                setStatus(
-                    `Preparing result: ${percent}%...`
-                );
-
-
-                await yieldToBrowser();
-
             }
 
 
@@ -1454,53 +1260,7 @@
             );
 
 
-            console.log(
-                `Output conversion: ${(
-                    performance.now() -
-                    startTime
-                ).toFixed(0)} ms`
-            );
-
-
             return canvas;
-
-        }
-
-
-        /* ==========================================
-           CANVAS → BLOB URL
-           
-           Much cheaper than toDataURL().
-        ========================================== */
-
-        async function canvasToObjectURL(canvas) {
-
-            const blob =
-                await new Promise(
-                    (resolve, reject) => {
-
-                        canvas.toBlob(
-                            result => {
-
-                                if (result) {
-                                    resolve(result);
-                                } else {
-                                    reject(
-                                        new Error(
-                                            "Could not encode the output image."
-                                        )
-                                    );
-                                }
-
-                            },
-                            "image/png"
-                        );
-
-                    }
-                );
-
-
-            return URL.createObjectURL(blob);
 
         }
 
@@ -1533,45 +1293,10 @@
             );
 
 
-            const inferenceStart =
-                performance.now();
-
-
-            let results;
-
-
-            try {
-
-                results =
-                    await ai.run({
-                        input:
-                            prepared.tensor
-                    });
-
-            } catch (error) {
-
-                console.error(
-                    "ONNX inference error:",
-                    error
-                );
-
-                throw new Error(
-                    "AI inference failed: " +
-                    (
-                        error.message ||
-                        "Unknown error"
-                    )
-                );
-
-            }
-
-
-            console.log(
-                `AI inference: ${(
-                    performance.now() -
-                    inferenceStart
-                ).toFixed(0)} ms`
-            );
+            const results =
+                await ai.run({
+                    input: prepared.tensor
+                });
 
 
             const output =
@@ -1587,32 +1312,11 @@
             }
 
 
-            setStatus(
-                "Converting AI result..."
+            return tensorToCanvas(
+                output,
+                prepared.originalWidth,
+                prepared.originalHeight
             );
-
-
-            const resultCanvas =
-                await tensorToCanvas(
-                    output,
-                    prepared.originalWidth,
-                    prepared.originalHeight
-                );
-
-
-            /*
-             * Help release references to the large
-             * intermediate tensor data.
-             */
-
-            prepared.tensor =
-                null;
-
-            results =
-                null;
-
-
-            return resultCanvas;
 
         }
 
@@ -1644,39 +1348,14 @@
                     true;
 
 
-                scale2.disabled =
-                    true;
-
-                scale4.disabled =
-                    true;
-
-                changeImageButton.disabled =
-                    true;
-
-
                 downloadWrapper.style.display =
                     "none";
-
-
-                if (downloadObjectURL) {
-
-                    URL.revokeObjectURL(
-                        downloadObjectURL
-                    );
-
-                    downloadObjectURL = null;
-
-                }
 
 
                 try {
 
                     let resultCanvas;
 
-
-                    /*
-                     * 2×
-                     */
 
                     if (
                         selectedScale === 2
@@ -1687,16 +1366,7 @@
                                 selectedObjectURL
                             );
 
-                    }
-
-
-                    /*
-                     * 4×
-                     *
-                     * Two separate 2× passes.
-                     */
-
-                    else {
+                    } else {
 
                         setStatus(
                             "Running first 2× AI pass..."
@@ -1710,100 +1380,32 @@
 
 
                         setStatus(
-                            "Preparing second 2× pass..."
+                            "Running second 2× AI pass..."
                         );
 
 
-                        /*
-                         * Convert the first pass to a
-                         * Blob rather than a massive
-                         * base64 data URL.
-                         */
-
-                        const firstPassBlob =
-                            await new Promise(
-                                (resolve, reject) => {
-
-                                    firstPass.toBlob(
-                                        blob => {
-
-                                            if (blob) {
-                                                resolve(blob);
-                                            } else {
-                                                reject(
-                                                    new Error(
-                                                        "Could not prepare the first upscale pass."
-                                                    )
-                                                );
-                                            }
-
-                                        },
-                                        "image/png"
-                                    );
-
-                                }
-                            );
-
-
                         const firstPassURL =
-                            URL.createObjectURL(
-                                firstPassBlob
+                            firstPass.toDataURL(
+                                "image/png"
                             );
 
 
-                        try {
-
-                            setStatus(
-                                "Running second 2× AI pass..."
-                            );
-
-
-                            resultCanvas =
-                                await upscale2x(
-                                    firstPassURL
-                                );
-
-                        } finally {
-
-                            URL.revokeObjectURL(
+                        resultCanvas =
+                            await upscale2x(
                                 firstPassURL
                             );
-
-                        }
-
-
-                        /*
-                         * Release first-pass canvas.
-                         */
-
-                        firstPass.width = 1;
-                        firstPass.height = 1;
 
                     }
 
 
-                    /*
-                     * Create final downloadable
-                     * Blob URL.
-                     */
-
-                    setStatus(
-                        "Encoding final image..."
-                    );
-
-
-                    downloadObjectURL =
-                        await canvasToObjectURL(
-                            resultCanvas
+                    const resultURL =
+                        resultCanvas.toDataURL(
+                            "image/png"
                         );
 
 
-                    /*
-                     * Show result.
-                     */
-
                     preview.src =
-                        downloadObjectURL;
+                        resultURL;
 
 
                     imageInfo.textContent =
@@ -1811,7 +1413,7 @@
 
 
                     downloadButton.href =
-                        downloadObjectURL;
+                        resultURL;
 
 
                     downloadButton.download =
@@ -1828,14 +1430,6 @@
                         `Upscaling complete: ${resultCanvas.width} × ${resultCanvas.height}px`,
                         "success"
                     );
-
-
-                    /*
-                     * Release canvas memory.
-                     */
-
-                    resultCanvas.width = 1;
-                    resultCanvas.height = 1;
 
 
                 } catch (error) {
@@ -1860,15 +1454,6 @@
                     upscaleButton.disabled =
                         false;
 
-                    scale2.disabled =
-                        false;
-
-                    scale4.disabled =
-                        false;
-
-                    changeImageButton.disabled =
-                        false;
-
                 }
 
             }
@@ -1887,15 +1472,6 @@
 
                     URL.revokeObjectURL(
                         selectedObjectURL
-                    );
-
-                }
-
-
-                if (downloadObjectURL) {
-
-                    URL.revokeObjectURL(
-                        downloadObjectURL
                     );
 
                 }

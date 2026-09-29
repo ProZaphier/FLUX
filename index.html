@@ -1,1345 +1,1587 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>FLUX — Editor Toolkit</title>
-
-    <meta name="description" content="FLUX is an editing toolkit and creative hub built for modern editors.">
-
-    <style>
-        /* =========================================================
-           FLUX — GLOBAL
-        ========================================================= */
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            background: #05070c;
-            color: #f4f7ff;
-            overflow-x: hidden;
-        }
-
-        a {
-            color: inherit;
-            text-decoration: none;
-        }
-
-        button {
-            font: inherit;
-        }
-
-
-        /* =========================================================
-           BACKGROUND
-        ========================================================= */
-
-        body::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: -2;
-
-            background:
-                radial-gradient(
-                    circle at 15% 15%,
-                    rgba(53, 115, 255, 0.15),
-                    transparent 30%
-                ),
-                radial-gradient(
-                    circle at 85% 40%,
-                    rgba(0, 180, 255, 0.08),
-                    transparent 28%
-                ),
-                radial-gradient(
-                    circle at 50% 100%,
-                    rgba(55, 75, 255, 0.08),
-                    transparent 30%
-                );
-        }
-
-        body::after {
-            content: "";
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: -1;
-            opacity: 0.22;
-
-            background-image:
-                linear-gradient(
-                    rgba(255,255,255,0.025) 1px,
-                    transparent 1px
-                ),
-                linear-gradient(
-                    90deg,
-                    rgba(255,255,255,0.025) 1px,
-                    transparent 1px
-                );
-
-            background-size: 70px 70px;
-
-            mask-image: linear-gradient(
-                to bottom,
-                black,
-                transparent 75%
-            );
-        }
-
-
-        /* =========================================================
-           NAVIGATION
-        ========================================================= */
-
-        .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-
-            height: 78px;
-
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-
-            padding: 0 6vw;
-
-            z-index: 100;
-
-            background: rgba(5, 7, 12, 0.72);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-
-            border-bottom: 1px solid rgba(255,255,255,0.07);
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-
-            font-size: 21px;
-            font-weight: 800;
-            letter-spacing: 0.18em;
-        }
-
-        .logo-mark {
-            width: 34px;
-            height: 34px;
-
-            display: grid;
-            place-items: center;
-
-            border-radius: 10px;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #79a7ff,
-                    #2765ff
-                );
-
-            box-shadow:
-                0 0 25px rgba(50,110,255,0.4);
-
-            color: white;
-            font-size: 15px;
-        }
-
-        .desktop-nav {
-            display: flex;
-            align-items: center;
-            gap: 32px;
-        }
-
-        .desktop-nav a {
-            color: #8f98aa;
-            font-size: 14px;
-            transition: 0.25s ease;
-        }
-
-        .desktop-nav a:hover {
-            color: white;
-        }
-
-        .nav-discord {
-            padding: 10px 17px;
-
-            border: 1px solid rgba(100,150,255,0.3);
-            border-radius: 9px;
-
-            background: rgba(55,100,255,0.09);
-
-            color: #b9ceff !important;
-        }
-
-        .menu-button {
-            width: 43px;
-            height: 43px;
-
-            display: none;
-            place-items: center;
-
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 10px;
-
-            color: white;
-            cursor: pointer;
-
-            font-size: 20px;
-        }
-
-
-        /* =========================================================
-           SIDE MENU
-        ========================================================= */
-
-        .side-menu {
-            position: fixed;
-            top: 0;
-            right: -360px;
-
-            width: 340px;
-            height: 100vh;
-
-            padding: 100px 30px 30px;
-
-            background: rgba(7,10,17,0.96);
-            backdrop-filter: blur(30px);
-
-            border-left: 1px solid rgba(255,255,255,0.08);
-
-            z-index: 200;
-
-            transition: right 0.35s cubic-bezier(.2,.8,.2,1);
-        }
-
-        .side-menu.active {
-            right: 0;
-        }
-
-        .menu-close {
-            position: absolute;
-            top: 25px;
-            right: 28px;
-
-            border: 0;
-            background: none;
-
-            color: #8892a6;
-            font-size: 28px;
-
-            cursor: pointer;
-        }
-
-        .menu-title {
-            margin-bottom: 30px;
-        }
-
-        .menu-title small {
-            color: #667085;
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-            font-size: 10px;
-        }
-
-        .menu-title h2 {
-            margin-top: 5px;
-            font-size: 25px;
-        }
-
-        .menu-group {
-            margin-bottom: 28px;
-        }
-
-        .menu-group-title {
-            margin-bottom: 9px;
-
-            color: #596477;
-            font-size: 10px;
-            font-weight: bold;
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-        }
-
-        .menu-link {
-            display: block;
-
-            padding: 11px 13px;
-            margin: 3px 0;
-
-            border-radius: 8px;
-
-            color: #aeb7c8;
-            font-size: 14px;
-
-            transition: 0.2s;
-        }
-
-        .menu-link:hover {
-            background: rgba(70,120,255,0.1);
-            color: white;
-            transform: translateX(4px);
-        }
-
-        .menu-overlay {
-            position: fixed;
-            inset: 0;
-
-            background: rgba(0,0,0,0.5);
-
-            z-index: 150;
-
-            opacity: 0;
-            pointer-events: none;
-
-            transition: 0.3s;
-        }
-
-        .menu-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-
-        /* =========================================================
-           HERO
-        ========================================================= */
-
-        .hero {
-            min-height: 100vh;
-
-            display: flex;
-            align-items: center;
-
-            padding: 150px 8vw 100px;
-
-            position: relative;
-        }
-
-        .hero-content {
-            max-width: 850px;
-        }
-
-        .hero-label {
-            display: inline-flex;
-            align-items: center;
-            gap: 9px;
-
-            padding: 8px 13px;
-
-            border: 1px solid rgba(93,140,255,0.22);
-            border-radius: 999px;
-
-            background: rgba(55,100,255,0.07);
-
-            color: #8eafff;
-
-            font-size: 11px;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-        }
-
-        .status-dot {
-            width: 6px;
-            height: 6px;
-
-            border-radius: 50%;
-
-            background: #71a1ff;
-            box-shadow: 0 0 12px #71a1ff;
-        }
-
-        .hero h1 {
-            margin-top: 27px;
-
-            font-size: clamp(64px, 10vw, 145px);
-            line-height: 0.85;
-
-            letter-spacing: -0.07em;
-            font-weight: 900;
-        }
-
-        .hero h1 span {
-            background: linear-gradient(
-                110deg,
-                #ffffff 20%,
-                #91b2ff 55%,
-                #407cff 90%
-            );
-
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .hero-subtitle {
-            max-width: 600px;
-
-            margin-top: 30px;
-
-            color: #8993a7;
-
-            font-size: 18px;
-            line-height: 1.7;
-        }
-
-        .hero-buttons {
-            display: flex;
-            gap: 13px;
-
-            margin-top: 35px;
-        }
-
-        .button-primary,
-        .button-secondary {
-            padding: 14px 21px;
-
-            border-radius: 10px;
-
-            font-size: 14px;
-            font-weight: 600;
-
-            cursor: pointer;
-
-            transition: 0.25s;
-        }
-
-        .button-primary {
-            border: 1px solid #5487ff;
-
-            background: linear-gradient(
-                135deg,
-                #477dff,
-                #285de5
-            );
-
-            color: white;
-
-            box-shadow:
-                0 8px 35px rgba(44,95,255,0.2);
-        }
-
-        .button-primary:hover {
-            transform: translateY(-2px);
-            box-shadow:
-                0 12px 45px rgba(44,95,255,0.35);
-        }
-
-        .button-secondary {
-            border: 1px solid rgba(255,255,255,0.11);
-            background: rgba(255,255,255,0.035);
-            color: #b7c0d0;
-        }
-
-        .button-secondary:hover {
-            background: rgba(255,255,255,0.07);
-            color: white;
-        }
-
-        .hero-orb {
-            position: absolute;
-
-            right: 9%;
-            top: 34%;
-
-            width: 280px;
-            height: 280px;
-
-            border-radius: 50%;
-
-            background:
-                radial-gradient(
-                    circle at 35% 30%,
-                    rgba(125,170,255,0.4),
-                    rgba(50,90,255,0.08) 35%,
-                    transparent 70%
-                );
-
-            filter: blur(1px);
-
-            opacity: 0.7;
-        }
-
-
-        /* =========================================================
-           SECTIONS
-        ========================================================= */
-
-        section {
-            padding: 110px 7vw;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: end;
-
-            margin-bottom: 40px;
-        }
-
-        .eyebrow {
-            color: #5d8cff;
-
-            font-size: 10px;
-            font-weight: bold;
-
-            letter-spacing: 0.18em;
-            text-transform: uppercase;
-        }
-
-        .section-header h2 {
-            margin-top: 8px;
-
-            font-size: clamp(32px, 4vw, 52px);
-            letter-spacing: -0.04em;
-        }
-
-        .section-header p {
-            max-width: 380px;
-
-            color: #707b8f;
-
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-
-        /* =========================================================
-           TOOL CARDS
-        ========================================================= */
-
-        .tools-grid {
-            display: grid;
-
-            grid-template-columns:
-                repeat(4, minmax(0, 1fr));
-
-            gap: 14px;
-        }
-
-        .tool-card {
-            min-height: 220px;
-
-            padding: 25px;
-
-            position: relative;
-            overflow: hidden;
-
-            border: 1px solid rgba(255,255,255,0.075);
-            border-radius: 15px;
-
-            background:
-                linear-gradient(
-                    145deg,
-                    rgba(255,255,255,0.055),
-                    rgba(255,255,255,0.018)
-                );
-
-            transition:
-                transform 0.3s,
-                border-color 0.3s,
-                background 0.3s;
-        }
-
-        .tool-card::before {
-            content: "";
-
-            position: absolute;
-
-            width: 150px;
-            height: 150px;
-
-            top: -70px;
-            right: -70px;
-
-            border-radius: 50%;
-
-            background: rgba(50,105,255,0.13);
-
-            filter: blur(20px);
-        }
-
-        .tool-card:hover {
-            transform: translateY(-5px);
-
-            border-color:
-                rgba(90,135,255,0.32);
-
-            background:
-                linear-gradient(
-                    145deg,
-                    rgba(60,100,200,0.09),
-                    rgba(255,255,255,0.025)
-                );
-        }
-
-        .tool-icon {
-            width: 43px;
-            height: 43px;
-
-            display: grid;
-            place-items: center;
-
-            border-radius: 11px;
-
-            background: rgba(70,110,255,0.1);
-            border: 1px solid rgba(80,130,255,0.16);
-
-            color: #80a6ff;
-
-            font-size: 19px;
-        }
-
-        .tool-card h3 {
-            margin-top: 35px;
-
-            font-size: 17px;
-        }
-
-        .tool-card p {
-            margin-top: 9px;
-
-            color: #707b8e;
-
-            font-size: 12px;
-            line-height: 1.6;
-        }
-
-        .tool-arrow {
-            position: absolute;
-            right: 22px;
-            bottom: 20px;
-
-            color: #566174;
-
-            transition: 0.2s;
-        }
-
-        .tool-card:hover .tool-arrow {
-            color: #7fa4ff;
-            transform: translateX(4px);
-        }
-
-
-        /* =========================================================
-           FEATURE STRIP
-        ========================================================= */
-
-        .feature-strip {
-            display: grid;
-            grid-template-columns:
-                repeat(3, 1fr);
-
-            gap: 1px;
-
-            overflow: hidden;
-
-            border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 16px;
-
-            background: rgba(255,255,255,0.07);
-        }
-
-        .feature {
-            padding: 35px;
-
-            background: #080b12;
-        }
-
-        .feature-number {
-            color: #4e7fff;
-
-            font-size: 11px;
-            font-weight: bold;
-            letter-spacing: 0.1em;
-        }
-
-        .feature h3 {
-            margin-top: 25px;
-            font-size: 18px;
-        }
-
-        .feature p {
-            margin-top: 9px;
-
-            color: #707b8e;
-
-            font-size: 13px;
-            line-height: 1.6;
-        }
-
-
-        /* =========================================================
-           COMMUNITY
-        ========================================================= */
-
-        .community {
-            position: relative;
-            overflow: hidden;
-
-            margin: 40px 7vw 110px;
-
-            padding: 70px;
-
-            border: 1px solid rgba(80,125,255,0.18);
-            border-radius: 20px;
-
-            background:
-                radial-gradient(
-                    circle at 80% 50%,
-                    rgba(55,105,255,0.15),
-                    transparent 35%
-                ),
-                rgba(20,28,48,0.4);
-        }
-
-        .community h2 {
-            max-width: 650px;
-
-            font-size: clamp(32px, 5vw, 60px);
-            line-height: 1;
-
-            letter-spacing: -0.05em;
-        }
-
-        .community p {
-            max-width: 560px;
-
-            margin-top: 20px;
-
-            color: #7e899d;
-
-            line-height: 1.7;
-            font-size: 14px;
-        }
-
-        .community .button-primary {
-            display: inline-block;
-            margin-top: 30px;
-        }
-
-
-        /* =========================================================
-           FOOTER
-        ========================================================= */
-
-        footer {
-            padding: 35px 7vw;
-
-            border-top: 1px solid rgba(255,255,255,0.06);
-
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-
-            color: #525d70;
-
-            font-size: 11px;
-        }
-
-        .footer-logo {
-            color: #8993a6;
-            font-weight: bold;
-            letter-spacing: 0.15em;
-        }
-
-
-        /* =========================================================
-           RESPONSIVE
-        ========================================================= */
-
-        @media (max-width: 1000px) {
-
-            .tools-grid {
-                grid-template-columns:
-                    repeat(2, 1fr);
-            }
-
-            .hero-orb {
-                right: -100px;
-                opacity: 0.35;
-            }
-
-            .desktop-nav {
-                display: none;
-            }
-
-            .menu-button {
-                display: grid;
-            }
-        }
-
-        @media (max-width: 650px) {
-
-            .navbar {
-                height: 68px;
-                padding: 0 20px;
-            }
-
-            .hero {
-                padding: 130px 25px 80px;
-            }
-
-            .hero h1 {
-                font-size: 70px;
-            }
-
-            .hero-subtitle {
-                font-size: 15px;
-            }
-
-            .hero-buttons {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            section {
-                padding: 75px 22px;
-            }
-
-            .section-header {
-                display: block;
-            }
-
-            .section-header p {
-                margin-top: 15px;
-            }
-
-            .tools-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .feature-strip {
-                grid-template-columns: 1fr;
-            }
-
-            .community {
-                margin: 20px 22px 75px;
-                padding: 40px 25px;
-            }
-
-            footer {
-                padding: 30px 22px;
-                gap: 20px;
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .side-menu {
-                width: min(340px, 90vw);
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>FLUX — Built for Editors</title>
+
+<style>
+:root {
+    --bg: #03050a;
+    --bg2: #060a13;
+    --panel: rgba(10, 16, 29, .58);
+    --panel-strong: rgba(12, 20, 35, .78);
+
+    --line: rgba(122, 177, 255, .16);
+    --line-bright: rgba(120, 184, 255, .34);
+
+    --text: #f4f7ff;
+    --muted: #8793aa;
+    --muted2: #5d687c;
+
+    --blue: #4d9dff;
+    --blue2: #7cc3ff;
+    --violet: #796cff;
+
+    --ease: cubic-bezier(.22, 1, .36, 1);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 50% -20%, rgba(45, 102, 190, .12), transparent 38%),
+        var(--bg);
+    color: var(--text);
+    font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    overflow-x: hidden;
+}
+
+/* =========================================================
+   AMBIENT BACKGROUND
+   ========================================================= */
+
+.background {
+    position: fixed;
+    inset: 0;
+    z-index: -10;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.background::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+    background-size: 70px 70px;
+    mask-image: linear-gradient(to bottom, black, transparent 80%);
+}
+
+.background::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 20% 30%, rgba(38, 107, 255, .09), transparent 25%),
+        radial-gradient(circle at 80% 20%, rgba(120, 83, 255, .08), transparent 25%),
+        radial-gradient(circle at 50% 80%, rgba(0, 162, 255, .06), transparent 30%);
+    animation: backgroundPulse 12s ease-in-out infinite alternate;
+}
+
+.orb {
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    filter: blur(110px);
+    opacity: .12;
+}
+
+.orb.one {
+    background: #146cff;
+    top: -250px;
+    left: -180px;
+    animation: orbOne 16s ease-in-out infinite alternate;
+}
+
+.orb.two {
+    background: #7048ff;
+    right: -250px;
+    top: 15%;
+    animation: orbTwo 19s ease-in-out infinite alternate;
+}
+
+.orb.three {
+    background: #008cff;
+    left: 25%;
+    bottom: -350px;
+    animation: orbThree 21s ease-in-out infinite alternate;
+}
+
+@keyframes backgroundPulse {
+    from { opacity: .7; }
+    to { opacity: 1; }
+}
+
+@keyframes orbOne {
+    to {
+        transform: translate(180px, 160px) scale(1.25);
+    }
+}
+
+@keyframes orbTwo {
+    to {
+        transform: translate(-180px, 100px) scale(1.18);
+    }
+}
+
+@keyframes orbThree {
+    to {
+        transform: translate(140px, -100px) scale(1.2);
+    }
+}
+
+/* =========================================================
+   PAGE TRANSITION
+   ========================================================= */
+
+.page-transition {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at center, rgba(83,156,255,.25), transparent 45%),
+        #02040a;
+    opacity: 0;
+    transform: scale(1.04);
+    transition:
+        opacity .42s var(--ease),
+        transform .55s var(--ease);
+}
+
+.page-transition.active {
+    opacity: 1;
+    transform: scale(1);
+}
+
+body.page-enter {
+    animation: pageEnter .7s var(--ease) both;
+}
+
+@keyframes pageEnter {
+    from {
+        opacity: 0;
+        transform: scale(.985);
+        filter: blur(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+        filter: blur(0);
+    }
+}
+
+/* =========================================================
+   NAVBAR
+   ========================================================= */
+
+.navbar {
+    position: fixed;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+
+    width: min(1180px, calc(100% - 32px));
+    height: 66px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 20px;
+
+    background: rgba(7, 12, 22, .58);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+
+    backdrop-filter: blur(26px) saturate(150%);
+    -webkit-backdrop-filter: blur(26px) saturate(150%);
+
+    box-shadow:
+        0 18px 60px rgba(0,0,0,.35),
+        inset 0 1px rgba(255,255,255,.05);
+
+    transition:
+        border-color .3s ease,
+        background .3s ease,
+        box-shadow .3s ease;
+}
+
+.navbar:hover {
+    border-color: var(--line-bright);
+    background: rgba(9, 15, 27, .7);
+    box-shadow:
+        0 22px 70px rgba(0,0,0,.42),
+        0 0 35px rgba(50,130,255,.06),
+        inset 0 1px rgba(255,255,255,.07);
+}
+
+.logo {
+    position: relative;
+    color: white;
+    text-decoration: none;
+
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: .32em;
+
+    text-shadow:
+        0 0 18px rgba(100,175,255,.45);
+}
+
+.logo::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 0;
+    height: 1px;
+    background: linear-gradient(90deg, var(--blue), var(--violet));
+    transition: width .45s var(--ease);
+}
+
+.logo:hover::after {
+    width: 100%;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.nav-links a {
+    position: relative;
+    color: var(--muted);
+    text-decoration: none;
+
+    padding: 10px 14px;
+    border-radius: 11px;
+
+    font-size: 13px;
+    transition:
+        color .25s ease,
+        background .25s ease,
+        transform .25s var(--ease);
+}
+
+.nav-links a:hover {
+    color: white;
+    background: rgba(255,255,255,.055);
+    transform: translateY(-1px);
+}
+
+.menu-button {
+    display: none;
+
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,.04);
+    color: white;
+
+    width: 40px;
+    height: 40px;
+
+    border-radius: 12px;
+    cursor: pointer;
+
+    font-size: 19px;
+
+    transition:
+        transform .25s var(--ease),
+        background .25s ease,
+        border-color .25s ease;
+}
+
+.menu-button:hover {
+    transform: scale(1.05);
+    border-color: var(--line-bright);
+    background: rgba(70,140,255,.1);
+}
+
+/* =========================================================
+   SIDE MENU
+   ========================================================= */
+
+.side-menu {
+    position: fixed;
+    top: 96px;
+    right: 16px;
+    z-index: 1001;
+
+    width: 220px;
+
+    padding: 12px;
+
+    background: rgba(7, 12, 22, .82);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+
+    box-shadow: 0 25px 70px rgba(0,0,0,.5);
+
+    opacity: 0;
+    transform: translateY(-10px) scale(.96);
+    pointer-events: none;
+
+    transition:
+        opacity .3s var(--ease),
+        transform .35s var(--ease);
+}
+
+.side-menu.open {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+.side-menu a {
+    display: block;
+    padding: 13px 14px;
+
+    color: var(--muted);
+    text-decoration: none;
+
+    border-radius: 11px;
+
+    transition:
+        color .2s ease,
+        background .2s ease,
+        transform .2s ease;
+}
+
+.side-menu a:hover {
+    color: white;
+    background: rgba(70,140,255,.08);
+    transform: translateX(3px);
+}
+
+/* =========================================================
+   MAIN
+   ========================================================= */
+
+main {
+    width: min(1180px, calc(100% - 32px));
+    margin: auto;
+}
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.hero {
+    min-height: 850px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+
+    padding-top: 130px;
+    position: relative;
+}
+
+.hero-content {
+    max-width: 850px;
+}
+
+.hero-logo {
+    width: min(340px, 68vw);
+    margin-bottom: -15px;
+
+    opacity: .92;
+    mix-blend-mode: screen;
+
+    filter:
+        drop-shadow(0 0 20px rgba(90,155,255,.22))
+        drop-shadow(0 0 60px rgba(85,105,255,.08));
+
+    animation:
+        logoFloat 7s ease-in-out infinite,
+        logoReveal 1.2s var(--ease) both;
+}
+
+@keyframes logoFloat {
+    0%,100% {
+        transform: translateY(0) scale(1);
+    }
+
+    50% {
+        transform: translateY(-8px) scale(1.012);
+    }
+}
+
+@keyframes logoReveal {
+    from {
+        opacity: 0;
+        transform: scale(.92);
+        filter: blur(14px);
+    }
+
+    to {
+        opacity: .92;
+        transform: scale(1);
+        filter:
+            drop-shadow(0 0 20px rgba(90,155,255,.22))
+            drop-shadow(0 0 60px rgba(85,105,255,.08));
+    }
+}
+
+.eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+
+    padding: 8px 12px;
+
+    border: 1px solid rgba(100,170,255,.17);
+    border-radius: 999px;
+
+    background: rgba(70,130,255,.05);
+
+    color: #8bbcff;
+
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+
+    box-shadow: inset 0 1px rgba(255,255,255,.04);
+
+    animation: fadeUp .8s .15s var(--ease) both;
+}
+
+.eyebrow::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+
+    border-radius: 50%;
+    background: #6bb8ff;
+
+    box-shadow: 0 0 14px #4d9dff;
+
+    animation: statusPulse 2s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+    50% {
+        opacity: .45;
+        transform: scale(.7);
+    }
+}
+
+.hero h1 {
+    margin-top: 26px;
+
+    font-size: clamp(48px, 8vw, 92px);
+    line-height: .95;
+    letter-spacing: -.055em;
+
+    background:
+        linear-gradient(
+            110deg,
+            #ffffff 10%,
+            #8cc8ff 42%,
+            #ffffff 58%,
+            #857dff 78%,
+            #ffffff
+        );
+
+    background-size: 240% auto;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+
+    animation:
+        fadeUp .9s .25s var(--ease) both,
+        textFlow 8s linear infinite;
+}
+
+@keyframes textFlow {
+    to {
+        background-position: 240% center;
+    }
+}
+
+.hero p {
+    max-width: 620px;
+    margin: 28px auto 0;
+
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 1.75;
+
+    animation: fadeUp .9s .4s var(--ease) both;
+}
+
+.hero-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+
+    margin-top: 34px;
+
+    animation: fadeUp .9s .55s var(--ease) both;
+}
+
+.primary-button,
+.secondary-button {
+    position: relative;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 48px;
+    padding: 0 22px;
+
+    border-radius: 14px;
+
+    text-decoration: none;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    overflow: hidden;
+
+    transition:
+        transform .3s var(--ease),
+        border-color .3s ease,
+        box-shadow .3s ease;
+}
+
+.primary-button {
+    color: white;
+
+    border: 1px solid rgba(125,190,255,.38);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(66,145,255,.25),
+            rgba(112,88,255,.2)
+        );
+
+    box-shadow:
+        0 12px 40px rgba(45,115,255,.14),
+        inset 0 1px rgba(255,255,255,.1);
+}
+
+.primary-button::before,
+.secondary-button::before {
+    content: "";
+
+    position: absolute;
+    inset: -100%;
+
+    background:
+        linear-gradient(
+            120deg,
+            transparent 40%,
+            rgba(255,255,255,.16),
+            transparent 60%
+        );
+
+    transform: translateX(-100%) rotate(10deg);
+
+    transition: transform .7s var(--ease);
+}
+
+.primary-button:hover::before,
+.secondary-button:hover::before {
+    transform: translateX(100%) rotate(10deg);
+}
+
+.primary-button:hover {
+    transform: translateY(-4px);
+    border-color: rgba(135,205,255,.65);
+
+    box-shadow:
+        0 18px 50px rgba(45,115,255,.2),
+        0 0 35px rgba(75,150,255,.1),
+        inset 0 1px rgba(255,255,255,.13);
+}
+
+.secondary-button {
+    color: #b7c2d4;
+
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,.025);
+}
+
+.secondary-button:hover {
+    color: white;
+    transform: translateY(-4px);
+    border-color: var(--line-bright);
+    background: rgba(255,255,255,.05);
+}
+
+/* =========================================================
+   SECTIONS
+   ========================================================= */
+
+.section {
+    padding: 90px 0;
+}
+
+.section-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 30px;
+
+    margin-bottom: 30px;
+}
+
+.section-heading h2 {
+    font-size: clamp(28px, 4vw, 42px);
+    letter-spacing: -.035em;
+
+    animation: textFlow 8s linear infinite;
+}
+
+.section-heading p {
+    max-width: 420px;
+    color: var(--muted);
+    line-height: 1.7;
+    font-size: 13px;
+}
+
+/* =========================================================
+   TOOL GRID
+   ========================================================= */
+
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+.tool-card {
+    position: relative;
+
+    min-height: 260px;
+    padding: 25px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    overflow: hidden;
+
+    color: white;
+    text-decoration: none;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(18,27,46,.72),
+            rgba(7,12,22,.58)
+        );
+
+    border: 1px solid var(--line);
+    border-radius: 22px;
+
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+
+    box-shadow:
+        inset 0 1px rgba(255,255,255,.045),
+        0 20px 60px rgba(0,0,0,.18);
+
+    transition:
+        transform .45s var(--ease),
+        border-color .35s ease,
+        box-shadow .45s ease,
+        background .35s ease;
+}
+
+.tool-card::before {
+    content: "";
+
+    position: absolute;
+    width: 230px;
+    height: 230px;
+
+    top: -120px;
+    right: -100px;
+
+    border-radius: 50%;
+
+    background: radial-gradient(
+        circle,
+        rgba(70,150,255,.18),
+        transparent 70%
+    );
+
+    transition:
+        transform .6s var(--ease),
+        opacity .4s ease;
+}
+
+.tool-card::after {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    background:
+        linear-gradient(
+            125deg,
+            transparent 25%,
+            rgba(255,255,255,.055),
+            transparent 50%
+        );
+
+    transform: translateX(-100%);
+    transition: transform .7s var(--ease);
+}
+
+.tool-card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(115,180,255,.35);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(20,32,55,.82),
+            rgba(8,14,26,.72)
+        );
+
+    box-shadow:
+        0 30px 80px rgba(0,0,0,.34),
+        0 0 45px rgba(55,130,255,.08),
+        inset 0 1px rgba(255,255,255,.08);
+}
+
+.tool-card:hover::before {
+    transform: scale(1.35);
+}
+
+.tool-card:hover::after {
+    transform: translateX(100%);
+}
+
+.tool-icon {
+    width: 48px;
+    height: 48px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 14px;
+
+    color: #9bcfff;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(70,150,255,.14),
+            rgba(120,90,255,.08)
+        );
+
+    border: 1px solid rgba(110,180,255,.2);
+
+    box-shadow:
+        inset 0 1px rgba(255,255,255,.08),
+        0 0 25px rgba(50,130,255,.05);
+
+    font-size: 20px;
+
+    transition:
+        transform .4s var(--ease),
+        box-shadow .4s ease;
+}
+
+.tool-card:hover .tool-icon {
+    transform: rotate(-4deg) scale(1.08);
+    box-shadow:
+        0 0 30px rgba(70,150,255,.15),
+        inset 0 1px rgba(255,255,255,.12);
+}
+
+.tool-card h3 {
+    margin-top: 30px;
+
+    font-size: 20px;
+    letter-spacing: -.025em;
+}
+
+.tool-card p {
+    margin-top: 8px;
+
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.65;
+}
+
+.card-arrow {
+    position: absolute;
+    right: 24px;
+    bottom: 24px;
+
+    color: #6f7c91;
+
+    transition:
+        transform .3s var(--ease),
+        color .3s ease;
+}
+
+.tool-card:hover .card-arrow {
+    color: #9ccfff;
+    transform: translate(4px, -4px);
+}
+
+/* =========================================================
+   FEATURE PANEL
+   ========================================================= */
+
+.feature-panel {
+    position: relative;
+
+    padding: 38px;
+
+    border-radius: 26px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(14,23,40,.75),
+            rgba(7,11,20,.55)
+        );
+
+    border: 1px solid var(--line);
+
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+
+    overflow: hidden;
+}
+
+.feature-panel::before {
+    content: "";
+
+    position: absolute;
+    width: 500px;
+    height: 500px;
+
+    right: -180px;
+    top: -300px;
+
+    background: radial-gradient(
+        circle,
+        rgba(81,145,255,.18),
+        transparent 68%
+    );
+
+    filter: blur(15px);
+}
+
+.feature-grid {
+    position: relative;
+
+    display: grid;
+    grid-template-columns: 1.2fr .8fr;
+    gap: 40px;
+
+    align-items: center;
+}
+
+.feature-panel h2 {
+    font-size: clamp(28px, 4vw, 44px);
+    letter-spacing: -.045em;
+}
+
+.feature-panel p {
+    margin-top: 18px;
+
+    color: var(--muted);
+    line-height: 1.75;
+    font-size: 14px;
+}
+
+.feature-stat {
+    display: grid;
+    gap: 10px;
+}
+
+.stat {
+    padding: 18px;
+
+    border: 1px solid var(--line);
+    border-radius: 16px;
+
+    background: rgba(255,255,255,.025);
+
+    transition:
+        transform .3s var(--ease),
+        border-color .3s ease;
+}
+
+.stat:hover {
+    transform: translateX(5px);
+    border-color: var(--line-bright);
+}
+
+.stat strong {
+    display: block;
+
+    font-size: 19px;
+}
+
+.stat span {
+    display: block;
+    margin-top: 4px;
+
+    color: var(--muted);
+    font-size: 12px;
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+footer {
+    padding: 45px 0 70px;
+
+    border-top: 1px solid rgba(120,170,255,.08);
+
+    color: #596579;
+    text-align: center;
+
+    font-size: 12px;
+}
+
+/* =========================================================
+   ANIMATIONS
+   ========================================================= */
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+        filter: blur(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        filter: blur(0);
+    }
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 850px) {
+    .nav-links {
+        display: none;
+    }
+
+    .menu-button {
+        display: block;
+    }
+
+    .hero {
+        min-height: 760px;
+    }
+
+    .tools-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .feature-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .section-heading {
+        display: block;
+    }
+
+    .section-heading p {
+        margin-top: 12px;
+    }
+}
+
+@media (max-width: 600px) {
+    .navbar {
+        top: 10px;
+        width: calc(100% - 20px);
+    }
+
+    .hero {
+        padding-top: 100px;
+    }
+
+    .hero-logo {
+        width: 280px;
+    }
+
+    .hero h1 {
+        font-size: 48px;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+    }
+
+    .hero-actions a {
+        width: 100%;
+    }
+
+    .tools-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .section {
+        padding: 65px 0;
+    }
+
+    .feature-panel {
+        padding: 24px;
+    }
+}
+</style>
 </head>
 
+<body class="page-enter">
 
-<body>
+<div class="background">
+    <div class="orb one"></div>
+    <div class="orb two"></div>
+    <div class="orb three"></div>
+</div>
 
-    <!-- =========================================================
-         NAVIGATION
-    ========================================================== -->
+<div class="page-transition" id="pageTransition"></div>
 
-    <header class="navbar">
+<nav class="navbar">
 
-        <a href="#" class="logo">
-            <span class="logo-mark">F</span>
-            FLUX
+    <a href="index.html" class="logo">
+        FLUX
+    </a>
+
+    <div class="nav-links">
+        <a href="#tools">Tools</a>
+        <a href="#utilities">Utilities</a>
+        <a href="#community">Community</a>
+        <a href="https://discord.com/" target="_blank">
+            Discord
         </a>
+    </div>
 
-        <nav class="desktop-nav">
-            <a href="#tools">Tools</a>
-            <a href="#utilities">Utilities</a>
-            <a href="#community">Community</a>
-            <a href="#" class="nav-discord">Discord ↗</a>
-        </nav>
+    <button
+        class="menu-button"
+        id="menuButton"
+        aria-label="Open menu"
+    >
+        ☰
+    </button>
 
-        <button class="menu-button" id="menuButton">
-            ☰
-        </button>
+</nav>
 
-    </header>
+<div class="side-menu" id="sideMenu">
 
+    <a href="#tools">Tools</a>
+    <a href="#utilities">Utilities</a>
+    <a href="#community">Community</a>
 
-    <!-- =========================================================
-         SIDE MENU
-    ========================================================== -->
+    <a
+        href="https://discord.com/"
+        target="_blank"
+        rel="noopener"
+    >
+        Discord
+    </a>
 
-    <div class="menu-overlay" id="menuOverlay"></div>
+</div>
 
-    <aside class="side-menu" id="sideMenu">
+<main>
 
-        <button class="menu-close" id="menuClose">
-            ×
-        </button>
+    <!-- HERO -->
 
-        <div class="menu-title">
-            <small>FLUX Navigation</small>
-            <h2>Editor Hub</h2>
-        </div>
+    <section class="hero">
 
-        <div class="menu-group">
+        <div class="hero-content">
 
-            <div class="menu-group-title">
-                Main
+            <img
+                class="hero-logo"
+                src="assets/images/flux-logo.jpg"
+                alt="FLUX"
+            >
+
+            <div class="eyebrow">
+                EDITOR TOOLKIT
             </div>
 
-            <a href="#" class="menu-link">
-                Home
-            </a>
+            <h1>
+                Built for editors.
+            </h1>
 
-            <a href="#tools" class="menu-link">
-                Tools
-            </a>
+            <p>
+                A growing collection of fast, browser-based tools
+                for editors, creators and people who apparently
+                enjoy spending six hours perfecting a three-second clip.
+            </p>
 
-            <a href="#utilities" class="menu-link">
-                Utilities
-            </a>
+            <div class="hero-actions">
 
-            <a href="#community" class="menu-link">
-                Community
-            </a>
+                <a
+                    href="#tools"
+                    class="primary-button"
+                >
+                    Explore Tools
+                </a>
 
-        </div>
+                <a
+                    href="#community"
+                    class="secondary-button"
+                >
+                    Explore FLUX
+                </a>
 
-
-        <div class="menu-group">
-
-            <div class="menu-group-title">
-                Media Tools
             </div>
 
-            <a href="#" class="menu-link">
-                Audio Extractor
-            </a>
-
-            <a href="#" class="menu-link">
-                Image Upscaler
-            </a>
-
-            <a href="#" class="menu-link">
-                Frame Extractor
-            </a>
-
-            <a href="#" class="menu-link">
-                Image Compressor
-            </a>
-
-            <a href="#" class="menu-link">
-                Format Converter
-            </a>
-
         </div>
 
+    </section>
 
-        <div class="menu-group">
+    <!-- TOOLS -->
 
-            <div class="menu-group-title">
-                Community
-            </div>
+    <section class="section" id="tools">
 
-            <a href="#" class="menu-link">
-                Featured Edits
-            </a>
+        <div class="section-heading">
 
-            <a href="#" class="menu-link">
-                FLUX Members
-            </a>
-
-            <a href="#" class="menu-link">
-                Submit an Edit
-            </a>
-
-        </div>
-
-    </aside>
-
-
-    <!-- =========================================================
-         HERO
-    ========================================================== -->
-
-    <main>
-
-        <section class="hero">
-
-            <div class="hero-content">
-
-                <div class="hero-label">
-                    <span class="status-dot"></span>
-                    Built for editors
+            <div>
+                <div class="eyebrow">
+                    TOOLKIT
                 </div>
 
-                <h1>
-                    <span>FLUX</span>
-                </h1>
-
-                <p class="hero-subtitle">
-                    A creative toolkit built for editors.
-                    Extract audio, process media, calculate timing,
-                    prepare assets and build better edits without
-                    leaving your workflow.
-                </p>
-
-                <div class="hero-buttons">
-
-                    <a href="#tools" class="button-primary">
-                        Explore tools →
-                    </a>
-
-                    <a href="#community" class="button-secondary">
-                        Enter the community
-                    </a>
-
-                </div>
-
+                <h2>
+                    Everything you need.
+                </h2>
             </div>
 
-            <div class="hero-orb"></div>
+            <p>
+                Browser-based tools designed around speed,
+                simplicity and local processing.
+            </p>
 
-        </section>
+        </div>
 
+        <div class="tools-grid">
 
-        <!-- =====================================================
-             TOOLS
-        ====================================================== -->
-
-        <section id="tools">
-
-            <div class="section-header">
+            <a
+                href="tools/audio-extractor.html"
+                class="tool-card"
+            >
 
                 <div>
-                    <div class="eyebrow">
-                        Editor toolkit
-                    </div>
-
-                    <h2>
-                        Create faster.
-                    </h2>
-                </div>
-
-                <p>
-                    Practical tools for video editors,
-                    AMV creators, motion designers and
-                    anyone who has spent too long converting
-                    one stupid file format.
-                </p>
-
-            </div>
-
-
-            <div class="tools-grid">
-
-                <a href="tools/audio-extractor.html" class="tool-card">
-
-                    <div class="tool-icon">
-                        ♪
-                    </div>
+                    <div class="tool-icon">♫</div>
 
                     <h3>
                         Audio Extractor
                     </h3>
 
                     <p>
-                        Extract audio tracks from your
-                        video files directly in your browser.
+                        Extract clean WAV audio from video
+                        directly inside your browser.
                     </p>
+                </div>
 
-                    <span class="tool-arrow">
-                        →
-                    </span>
+                <span class="card-arrow">↗</span>
 
-                </a>
+            </a>
 
+            <a
+                href="tools/upscaler.html"
+                class="tool-card"
+            >
 
-                <a href="tools/upscaler.html" class="tool-card">
-
-                    <div class="tool-icon">
-                        ◈
-                    </div>
+                <div>
+                    <div class="tool-icon">✦</div>
 
                     <h3>
                         Image Upscaler
                     </h3>
 
                     <p>
-                        Increase image resolution and prepare
-                        assets for editing.
+                        Enhance images locally with
+                        Real-ESRGAN AI processing.
                     </p>
+                </div>
 
-                    <span class="tool-arrow">
-                        →
-                    </span>
+                <span class="card-arrow">↗</span>
 
-                </a>
+            </a>
 
+            <a
+                href="tools/frame-extractor.html"
+                class="tool-card"
+            >
 
-                <a href="tools/frame-extractor.html" class="tool-card">
-
-                    <div class="tool-icon">
-                        ▣
-                    </div>
+                <div>
+                    <div class="tool-icon">▣</div>
 
                     <h3>
                         Frame Extractor
                     </h3>
 
                     <p>
-                        Pull individual frames from video
-                        for thumbnails, references and edits.
+                        Step through videos frame-by-frame
+                        and export individual frames.
                     </p>
+                </div>
 
-                    <span class="tool-arrow">
-                        →
-                    </span>
+                <span class="card-arrow">↗</span>
 
-                </a>
+            </a>
 
+            <a
+                href="tools/image-compressor.html"
+                class="tool-card"
+            >
 
-                <a href="#" class="tool-card">
-
-                    <div class="tool-icon">
-                        ⧉
-                    </div>
+                <div>
+                    <div class="tool-icon">⌁</div>
 
                     <h3>
                         Image Compressor
                     </h3>
 
                     <p>
-                        Reduce file size while maintaining
-                        control over image quality.
+                        Reduce image size while keeping
+                        visual quality under control.
                     </p>
+                </div>
 
-                    <span class="tool-arrow">
-                        →
-                    </span>
+                <span class="card-arrow">↗</span>
 
-                </a>
+            </a>
 
-            </div>
-
-        </section>
-
-
-        <!-- =====================================================
-             UTILITIES
-        ====================================================== -->
-
-        <section id="utilities">
-
-            <div class="section-header">
+            <a
+                href="tools/converter.html"
+                class="tool-card"
+            >
 
                 <div>
-                    <div class="eyebrow">
-                        Editing utilities
-                    </div>
-
-                    <h2>
-                        The small things.
-                    </h2>
-                </div>
-
-                <p>
-                    Timing, formats, ratios and other tiny
-                    problems that somehow consume half an
-                    editing session.
-                </p>
-
-            </div>
-
-
-            <div class="feature-strip">
-
-                <div class="feature">
-
-                    <div class="feature-number">
-                        01
-                    </div>
+                    <div class="tool-icon">⇄</div>
 
                     <h3>
-                        FPS & Frame Calculator
+                        Converter
                     </h3>
 
                     <p>
-                        Convert timestamps into frames and
-                        frames into exact timestamps.
+                        Convert common media formats
+                        without leaving your browser.
                     </p>
-
                 </div>
 
+                <span class="card-arrow">↗</span>
 
-                <div class="feature">
+            </a>
 
-                    <div class="feature-number">
-                        02
-                    </div>
+            <a
+                href="tools/frame-extractor.html"
+                class="tool-card"
+            >
+
+                <div>
+                    <div class="tool-icon">+</div>
 
                     <h3>
-                        BPM & Beat Tools
+                        More Coming
                     </h3>
 
                     <p>
-                        Calculate BPM and make timing your
-                        transitions considerably less painful.
+                        FLUX is still being built.
+                        More editor-focused tools are on the way.
                     </p>
-
                 </div>
 
+                <span class="card-arrow">↗</span>
 
-                <div class="feature">
-
-                    <div class="feature-number">
-                        03
-                    </div>
-
-                    <h3>
-                        Aspect Ratio
-                    </h3>
-
-                    <p>
-                        Quickly calculate dimensions for
-                        common editing and social formats.
-                    </p>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- =====================================================
-             COMMUNITY
-        ====================================================== -->
-
-        <div class="community" id="community">
-
-            <div class="eyebrow">
-                The FLUX community
-            </div>
-
-            <h2>
-                More than just
-                another toolkit.
-            </h2>
-
-            <p>
-                Discover editors, showcase your work,
-                find resources and connect with the
-                people behind the edits.
-            </p>
-
-            <a href="#" class="button-primary">
-                Explore FLUX →
             </a>
 
         </div>
 
-    </main>
+    </section>
 
+    <!-- UTILITIES -->
 
-    <!-- =========================================================
-         FOOTER
-    ========================================================== -->
+    <section
+        class="section"
+        id="utilities"
+    >
 
-    <footer>
+        <div class="feature-panel">
 
-        <div class="footer-logo">
-            FLUX
+            <div class="feature-grid">
+
+                <div>
+
+                    <div class="eyebrow">
+                        UTILITIES
+                    </div>
+
+                    <h2>
+                        Small tools.
+                        <br>
+                        Big time savings.
+                    </h2>
+
+                    <p>
+                        FPS, BPM, frame and aspect-ratio utilities
+                        for the annoyingly specific calculations
+                        editing software expects you to already know.
+                    </p>
+
+                </div>
+
+                <div class="feature-stat">
+
+                    <a
+                        href="utilities/fps.html"
+                        class="stat"
+                        style="text-decoration:none;color:inherit"
+                    >
+                        <strong>FPS Calculator</strong>
+                        <span>
+                            Frames, duration and timing.
+                        </span>
+                    </a>
+
+                    <a
+                        href="utilities/bpm.html"
+                        class="stat"
+                        style="text-decoration:none;color:inherit"
+                    >
+                        <strong>BPM Calculator</strong>
+                        <span>
+                            Beat timing for edits.
+                        </span>
+                    </a>
+
+                    <a
+                        href="utilities/aspect-ratio.html"
+                        class="stat"
+                        style="text-decoration:none;color:inherit"
+                    >
+                        <strong>Aspect Ratio</strong>
+                        <span>
+                            Calculate common dimensions.
+                        </span>
+                    </a>
+
+                </div>
+
+            </div>
+
         </div>
 
-        <div>
-            EDIT. CREATE. EVOLVE.
+    </section>
+
+    <!-- COMMUNITY -->
+
+    <section
+        class="section"
+        id="community"
+    >
+
+        <div class="section-heading">
+
+            <div>
+
+                <div class="eyebrow">
+                    COMMUNITY
+                </div>
+
+                <h2>
+                    Made around editors.
+                </h2>
+
+            </div>
+
+            <p>
+                Discover creators, featured edits and the
+                wider FLUX community.
+            </p>
+
         </div>
 
-        <div>
-            © 2026 FLUX
+        <div class="tools-grid">
+
+            <a
+                href="community/members.html"
+                class="tool-card"
+            >
+                <div>
+                    <div class="tool-icon">◎</div>
+
+                    <h3>
+                        Members
+                    </h3>
+
+                    <p>
+                        Browse the FLUX community.
+                    </p>
+                </div>
+
+                <span class="card-arrow">↗</span>
+            </a>
+
+            <a
+                href="community/featured.html"
+                class="tool-card"
+            >
+                <div>
+                    <div class="tool-icon">★</div>
+
+                    <h3>
+                        Featured
+                    </h3>
+
+                    <p>
+                        Discover edits and creators.
+                    </p>
+                </div>
+
+                <span class="card-arrow">↗</span>
+            </a>
+
+            <a
+                href="community/submit.html"
+                class="tool-card"
+            >
+                <div>
+                    <div class="tool-icon">↑</div>
+
+                    <h3>
+                        Submit
+                    </h3>
+
+                    <p>
+                        Submit your work to FLUX.
+                    </p>
+                </div>
+
+                <span class="card-arrow">↗</span>
+            </a>
+
         </div>
 
-    </footer>
+    </section>
 
+</main>
 
-    <!-- =========================================================
-         JAVASCRIPT
-    ========================================================== -->
+<footer>
+    FLUX · Built for editors
+</footer>
 
-    <script>
+<script>
 
-        const menuButton =
-            document.getElementById("menuButton");
+/* =========================================================
+   MENU
+   ========================================================= */
 
-        const menuClose =
-            document.getElementById("menuClose");
+const menuButton =
+    document.getElementById("menuButton");
 
-        const sideMenu =
-            document.getElementById("sideMenu");
+const sideMenu =
+    document.getElementById("sideMenu");
 
-        const menuOverlay =
-            document.getElementById("menuOverlay");
+menuButton.addEventListener("click", () => {
+    sideMenu.classList.toggle("open");
+});
 
+document.addEventListener("click", event => {
 
-        function openMenu() {
+    if (
+        !sideMenu.contains(event.target) &&
+        !menuButton.contains(event.target)
+    ) {
+        sideMenu.classList.remove("open");
+    }
 
-            sideMenu.classList.add("active");
+});
 
-            menuOverlay.classList.add("active");
+/* =========================================================
+   PAGE TRANSITIONS
+   ========================================================= */
 
+const transition =
+    document.getElementById("pageTransition");
+
+document.querySelectorAll("a").forEach(link => {
+
+    link.addEventListener("click", event => {
+
+        const href = link.getAttribute("href");
+
+        if (
+            !href ||
+            href.startsWith("#") ||
+            href.startsWith("http") ||
+            link.target === "_blank"
+        ) {
+            return;
         }
 
+        event.preventDefault();
 
-        function closeMenu() {
+        transition.classList.add("active");
 
-            sideMenu.classList.remove("active");
+        setTimeout(() => {
+            window.location.href = href;
+        }, 260);
 
-            menuOverlay.classList.remove("active");
+    });
 
-        }
+});
 
+/* =========================================================
+   CURSOR AMBIENT LIGHT
+   ========================================================= */
 
-        menuButton.addEventListener(
-            "click",
-            openMenu
-        );
+document.addEventListener("pointermove", event => {
 
+    const x =
+        (event.clientX / window.innerWidth) * 100;
 
-        menuClose.addEventListener(
-            "click",
-            closeMenu
-        );
+    const y =
+        (event.clientY / window.innerHeight) * 100;
 
+    document.documentElement.style.setProperty(
+        "--mouse-x",
+        `${x}%`
+    );
 
-        menuOverlay.addEventListener(
-            "click",
-            closeMenu
-        );
+    document.documentElement.style.setProperty(
+        "--mouse-y",
+        `${y}%`
+    );
 
+});
 
-        document
-            .querySelectorAll(".menu-link")
-            .forEach(link => {
-
-                link.addEventListener(
-                    "click",
-                    closeMenu
-                );
-
-            });
-
-    </script>
+</script>
 
 </body>
 </html>

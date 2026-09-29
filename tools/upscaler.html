@@ -832,6 +832,9 @@
 
     const downloadButton =
         document.getElementById("downloadButton");
+    
+    const newUpscaleButton =
+    document.getElementById("newUpscaleButton");
 
 
     /* =========================================================
@@ -2371,7 +2374,72 @@
         }
     );
 
+    
+/* =========================================================
+   NEW UPSCALE
+   ========================================================= */
 
+newUpscaleButton.addEventListener(
+    "click",
+    () => {
+
+        // Reset selected image/file
+        selectedFile = null;
+        selectedImage = null;
+        resultCanvas = null;
+
+        // Reset file input
+        fileInput.value = "";
+
+        // Hide preview and result
+        previewSection.classList.remove("visible");
+        resultSection.classList.remove("visible");
+        progressContainer.classList.remove("visible");
+
+        // Reset preview
+        previewImage.removeAttribute("src");
+
+        // Reset information
+        fileName.textContent = "-";
+        imageDimensions.textContent = "-";
+        fileSize.textContent = "-";
+
+        // Reset progress
+        setProgress(
+            0,
+            "Preparing...",
+            ""
+        );
+
+        // Reset scale to 2x
+        selectedScale = 2;
+
+        document
+            .querySelectorAll(".scale-button")
+            .forEach(button => {
+
+                button.classList.toggle(
+                    "active",
+                    button.dataset.scale === "2"
+                );
+
+            });
+
+        // Reset button
+        upscaleButton.disabled = true;
+        upscaleButton.textContent =
+            "Upscale Image";
+
+        // Scroll back to uploader
+        dropZone.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+
+    }
+);
+
+    
     /* =========================================================
        HELPERS
        ========================================================= */

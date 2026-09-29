@@ -1,1587 +1,2133 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>FLUX — Built for Editors</title>
-
-<style>
-:root {
-    --bg: #03050a;
-    --bg2: #060a13;
-    --panel: rgba(10, 16, 29, .58);
-    --panel-strong: rgba(12, 20, 35, .78);
-
-    --line: rgba(122, 177, 255, .16);
-    --line-bright: rgba(120, 184, 255, .34);
-
-    --text: #f4f7ff;
-    --muted: #8793aa;
-    --muted2: #5d687c;
-
-    --blue: #4d9dff;
-    --blue2: #7cc3ff;
-    --violet: #796cff;
-
-    --ease: cubic-bezier(.22, 1, .36, 1);
-}
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-html {
-    scroll-behavior: smooth;
-}
-
-body {
-    min-height: 100vh;
-    background:
-        radial-gradient(circle at 50% -20%, rgba(45, 102, 190, .12), transparent 38%),
-        var(--bg);
-    color: var(--text);
-    font-family:
-        Inter,
-        ui-sans-serif,
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
-    overflow-x: hidden;
-}
-
-/* =========================================================
-   AMBIENT BACKGROUND
-   ========================================================= */
-
-.background {
-    position: fixed;
-    inset: 0;
-    z-index: -10;
-    overflow: hidden;
-    pointer-events: none;
-}
-
-.background::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background:
-        linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
-    background-size: 70px 70px;
-    mask-image: linear-gradient(to bottom, black, transparent 80%);
-}
-
-.background::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background:
-        radial-gradient(circle at 20% 30%, rgba(38, 107, 255, .09), transparent 25%),
-        radial-gradient(circle at 80% 20%, rgba(120, 83, 255, .08), transparent 25%),
-        radial-gradient(circle at 50% 80%, rgba(0, 162, 255, .06), transparent 30%);
-    animation: backgroundPulse 12s ease-in-out infinite alternate;
-}
-
-.orb {
-    position: absolute;
-    width: 500px;
-    height: 500px;
-    border-radius: 50%;
-    filter: blur(110px);
-    opacity: .12;
-}
-
-.orb.one {
-    background: #146cff;
-    top: -250px;
-    left: -180px;
-    animation: orbOne 16s ease-in-out infinite alternate;
-}
-
-.orb.two {
-    background: #7048ff;
-    right: -250px;
-    top: 15%;
-    animation: orbTwo 19s ease-in-out infinite alternate;
-}
-
-.orb.three {
-    background: #008cff;
-    left: 25%;
-    bottom: -350px;
-    animation: orbThree 21s ease-in-out infinite alternate;
-}
-
-@keyframes backgroundPulse {
-    from { opacity: .7; }
-    to { opacity: 1; }
-}
-
-@keyframes orbOne {
-    to {
-        transform: translate(180px, 160px) scale(1.25);
-    }
-}
-
-@keyframes orbTwo {
-    to {
-        transform: translate(-180px, 100px) scale(1.18);
-    }
-}
-
-@keyframes orbThree {
-    to {
-        transform: translate(140px, -100px) scale(1.2);
-    }
-}
-
-/* =========================================================
-   PAGE TRANSITION
-   ========================================================= */
-
-.page-transition {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    pointer-events: none;
-    background:
-        radial-gradient(circle at center, rgba(83,156,255,.25), transparent 45%),
-        #02040a;
-    opacity: 0;
-    transform: scale(1.04);
-    transition:
-        opacity .42s var(--ease),
-        transform .55s var(--ease);
-}
-
-.page-transition.active {
-    opacity: 1;
-    transform: scale(1);
-}
-
-body.page-enter {
-    animation: pageEnter .7s var(--ease) both;
-}
-
-@keyframes pageEnter {
-    from {
-        opacity: 0;
-        transform: scale(.985);
-        filter: blur(8px);
-    }
-
-    to {
-        opacity: 1;
-        transform: scale(1);
-        filter: blur(0);
-    }
-}
-
-/* =========================================================
-   NAVBAR
-   ========================================================= */
-
-.navbar {
-    position: fixed;
-    top: 18px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-
-    width: min(1180px, calc(100% - 32px));
-    height: 66px;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    padding: 0 20px;
-
-    background: rgba(7, 12, 22, .58);
-    border: 1px solid var(--line);
-    border-radius: 20px;
-
-    backdrop-filter: blur(26px) saturate(150%);
-    -webkit-backdrop-filter: blur(26px) saturate(150%);
-
-    box-shadow:
-        0 18px 60px rgba(0,0,0,.35),
-        inset 0 1px rgba(255,255,255,.05);
-
-    transition:
-        border-color .3s ease,
-        background .3s ease,
-        box-shadow .3s ease;
-}
-
-.navbar:hover {
-    border-color: var(--line-bright);
-    background: rgba(9, 15, 27, .7);
-    box-shadow:
-        0 22px 70px rgba(0,0,0,.42),
-        0 0 35px rgba(50,130,255,.06),
-        inset 0 1px rgba(255,255,255,.07);
-}
-
-.logo {
-    position: relative;
-    color: white;
-    text-decoration: none;
-
-    font-size: 19px;
-    font-weight: 800;
-    letter-spacing: .32em;
-
-    text-shadow:
-        0 0 18px rgba(100,175,255,.45);
-}
-
-.logo::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: -5px;
-    width: 0;
-    height: 1px;
-    background: linear-gradient(90deg, var(--blue), var(--violet));
-    transition: width .45s var(--ease);
-}
-
-.logo:hover::after {
-    width: 100%;
-}
-
-.nav-links {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-}
-
-.nav-links a {
-    position: relative;
-    color: var(--muted);
-    text-decoration: none;
-
-    padding: 10px 14px;
-    border-radius: 11px;
-
-    font-size: 13px;
-    transition:
-        color .25s ease,
-        background .25s ease,
-        transform .25s var(--ease);
-}
-
-.nav-links a:hover {
-    color: white;
-    background: rgba(255,255,255,.055);
-    transform: translateY(-1px);
-}
-
-.menu-button {
-    display: none;
-
-    border: 1px solid var(--line);
-    background: rgba(255,255,255,.04);
-    color: white;
-
-    width: 40px;
-    height: 40px;
-
-    border-radius: 12px;
-    cursor: pointer;
-
-    font-size: 19px;
-
-    transition:
-        transform .25s var(--ease),
-        background .25s ease,
-        border-color .25s ease;
-}
-
-.menu-button:hover {
-    transform: scale(1.05);
-    border-color: var(--line-bright);
-    background: rgba(70,140,255,.1);
-}
-
-/* =========================================================
-   SIDE MENU
-   ========================================================= */
-
-.side-menu {
-    position: fixed;
-    top: 96px;
-    right: 16px;
-    z-index: 1001;
-
-    width: 220px;
-
-    padding: 12px;
-
-    background: rgba(7, 12, 22, .82);
-    border: 1px solid var(--line);
-    border-radius: 18px;
-
-    backdrop-filter: blur(30px);
-    -webkit-backdrop-filter: blur(30px);
-
-    box-shadow: 0 25px 70px rgba(0,0,0,.5);
-
-    opacity: 0;
-    transform: translateY(-10px) scale(.96);
-    pointer-events: none;
-
-    transition:
-        opacity .3s var(--ease),
-        transform .35s var(--ease);
-}
-
-.side-menu.open {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-    pointer-events: auto;
-}
-
-.side-menu a {
-    display: block;
-    padding: 13px 14px;
-
-    color: var(--muted);
-    text-decoration: none;
-
-    border-radius: 11px;
-
-    transition:
-        color .2s ease,
-        background .2s ease,
-        transform .2s ease;
-}
-
-.side-menu a:hover {
-    color: white;
-    background: rgba(70,140,255,.08);
-    transform: translateX(3px);
-}
-
-/* =========================================================
-   MAIN
-   ========================================================= */
-
-main {
-    width: min(1180px, calc(100% - 32px));
-    margin: auto;
-}
-
-/* =========================================================
-   HERO
-   ========================================================= */
-
-.hero {
-    min-height: 850px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    text-align: center;
-
-    padding-top: 130px;
-    position: relative;
-}
-
-.hero-content {
-    max-width: 850px;
-}
-
-.hero-logo {
-    width: min(340px, 68vw);
-    margin-bottom: -15px;
-
-    opacity: .92;
-    mix-blend-mode: screen;
-
-    filter:
-        drop-shadow(0 0 20px rgba(90,155,255,.22))
-        drop-shadow(0 0 60px rgba(85,105,255,.08));
-
-    animation:
-        logoFloat 7s ease-in-out infinite,
-        logoReveal 1.2s var(--ease) both;
-}
-
-@keyframes logoFloat {
-    0%,100% {
-        transform: translateY(0) scale(1);
-    }
-
-    50% {
-        transform: translateY(-8px) scale(1.012);
-    }
-}
-
-@keyframes logoReveal {
-    from {
-        opacity: 0;
-        transform: scale(.92);
-        filter: blur(14px);
-    }
-
-    to {
-        opacity: .92;
-        transform: scale(1);
-        filter:
-            drop-shadow(0 0 20px rgba(90,155,255,.22))
-            drop-shadow(0 0 60px rgba(85,105,255,.08));
-    }
-}
-
-.eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 9px;
-
-    padding: 8px 12px;
-
-    border: 1px solid rgba(100,170,255,.17);
-    border-radius: 999px;
-
-    background: rgba(70,130,255,.05);
-
-    color: #8bbcff;
-
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: .18em;
-    text-transform: uppercase;
-
-    box-shadow: inset 0 1px rgba(255,255,255,.04);
-
-    animation: fadeUp .8s .15s var(--ease) both;
-}
-
-.eyebrow::before {
-    content: "";
-    width: 6px;
-    height: 6px;
-
-    border-radius: 50%;
-    background: #6bb8ff;
-
-    box-shadow: 0 0 14px #4d9dff;
-
-    animation: statusPulse 2s ease-in-out infinite;
-}
-
-@keyframes statusPulse {
-    50% {
-        opacity: .45;
-        transform: scale(.7);
-    }
-}
-
-.hero h1 {
-    margin-top: 26px;
-
-    font-size: clamp(48px, 8vw, 92px);
-    line-height: .95;
-    letter-spacing: -.055em;
-
-    background:
-        linear-gradient(
-            110deg,
-            #ffffff 10%,
-            #8cc8ff 42%,
-            #ffffff 58%,
-            #857dff 78%,
-            #ffffff
-        );
-
-    background-size: 240% auto;
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
-
-    animation:
-        fadeUp .9s .25s var(--ease) both,
-        textFlow 8s linear infinite;
-}
-
-@keyframes textFlow {
-    to {
-        background-position: 240% center;
-    }
-}
-
-.hero p {
-    max-width: 620px;
-    margin: 28px auto 0;
-
-    color: var(--muted);
-    font-size: 16px;
-    line-height: 1.75;
-
-    animation: fadeUp .9s .4s var(--ease) both;
-}
-
-.hero-actions {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-
-    margin-top: 34px;
-
-    animation: fadeUp .9s .55s var(--ease) both;
-}
-
-.primary-button,
-.secondary-button {
-    position: relative;
-
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    min-height: 48px;
-    padding: 0 22px;
-
-    border-radius: 14px;
-
-    text-decoration: none;
-
-    font-size: 13px;
-    font-weight: 700;
-
-    cursor: pointer;
-
-    overflow: hidden;
-
-    transition:
-        transform .3s var(--ease),
-        border-color .3s ease,
-        box-shadow .3s ease;
-}
-
-.primary-button {
-    color: white;
-
-    border: 1px solid rgba(125,190,255,.38);
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(66,145,255,.25),
-            rgba(112,88,255,.2)
-        );
-
-    box-shadow:
-        0 12px 40px rgba(45,115,255,.14),
-        inset 0 1px rgba(255,255,255,.1);
-}
-
-.primary-button::before,
-.secondary-button::before {
-    content: "";
-
-    position: absolute;
-    inset: -100%;
-
-    background:
-        linear-gradient(
-            120deg,
-            transparent 40%,
-            rgba(255,255,255,.16),
-            transparent 60%
-        );
-
-    transform: translateX(-100%) rotate(10deg);
-
-    transition: transform .7s var(--ease);
-}
-
-.primary-button:hover::before,
-.secondary-button:hover::before {
-    transform: translateX(100%) rotate(10deg);
-}
-
-.primary-button:hover {
-    transform: translateY(-4px);
-    border-color: rgba(135,205,255,.65);
-
-    box-shadow:
-        0 18px 50px rgba(45,115,255,.2),
-        0 0 35px rgba(75,150,255,.1),
-        inset 0 1px rgba(255,255,255,.13);
-}
-
-.secondary-button {
-    color: #b7c2d4;
-
-    border: 1px solid var(--line);
-    background: rgba(255,255,255,.025);
-}
-
-.secondary-button:hover {
-    color: white;
-    transform: translateY(-4px);
-    border-color: var(--line-bright);
-    background: rgba(255,255,255,.05);
-}
-
-/* =========================================================
-   SECTIONS
-   ========================================================= */
-
-.section {
-    padding: 90px 0;
-}
-
-.section-heading {
-    display: flex;
-    align-items: end;
-    justify-content: space-between;
-    gap: 30px;
-
-    margin-bottom: 30px;
-}
-
-.section-heading h2 {
-    font-size: clamp(28px, 4vw, 42px);
-    letter-spacing: -.035em;
-
-    animation: textFlow 8s linear infinite;
-}
-
-.section-heading p {
-    max-width: 420px;
-    color: var(--muted);
-    line-height: 1.7;
-    font-size: 13px;
-}
-
-/* =========================================================
-   TOOL GRID
-   ========================================================= */
-
-.tools-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
-}
-
-.tool-card {
-    position: relative;
-
-    min-height: 260px;
-    padding: 25px;
-
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-
-    overflow: hidden;
-
-    color: white;
-    text-decoration: none;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(18,27,46,.72),
-            rgba(7,12,22,.58)
-        );
-
-    border: 1px solid var(--line);
-    border-radius: 22px;
-
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
-
-    box-shadow:
-        inset 0 1px rgba(255,255,255,.045),
-        0 20px 60px rgba(0,0,0,.18);
-
-    transition:
-        transform .45s var(--ease),
-        border-color .35s ease,
-        box-shadow .45s ease,
-        background .35s ease;
-}
-
-.tool-card::before {
-    content: "";
-
-    position: absolute;
-    width: 230px;
-    height: 230px;
-
-    top: -120px;
-    right: -100px;
-
-    border-radius: 50%;
-
-    background: radial-gradient(
-        circle,
-        rgba(70,150,255,.18),
-        transparent 70%
-    );
-
-    transition:
-        transform .6s var(--ease),
-        opacity .4s ease;
-}
-
-.tool-card::after {
-    content: "";
-
-    position: absolute;
-    inset: 0;
-
-    background:
-        linear-gradient(
-            125deg,
-            transparent 25%,
-            rgba(255,255,255,.055),
-            transparent 50%
-        );
-
-    transform: translateX(-100%);
-    transition: transform .7s var(--ease);
-}
-
-.tool-card:hover {
-    transform: translateY(-8px);
-    border-color: rgba(115,180,255,.35);
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(20,32,55,.82),
-            rgba(8,14,26,.72)
-        );
-
-    box-shadow:
-        0 30px 80px rgba(0,0,0,.34),
-        0 0 45px rgba(55,130,255,.08),
-        inset 0 1px rgba(255,255,255,.08);
-}
-
-.tool-card:hover::before {
-    transform: scale(1.35);
-}
-
-.tool-card:hover::after {
-    transform: translateX(100%);
-}
-
-.tool-icon {
-    width: 48px;
-    height: 48px;
-
-    display: grid;
-    place-items: center;
-
-    border-radius: 14px;
-
-    color: #9bcfff;
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(70,150,255,.14),
-            rgba(120,90,255,.08)
-        );
-
-    border: 1px solid rgba(110,180,255,.2);
-
-    box-shadow:
-        inset 0 1px rgba(255,255,255,.08),
-        0 0 25px rgba(50,130,255,.05);
-
-    font-size: 20px;
-
-    transition:
-        transform .4s var(--ease),
-        box-shadow .4s ease;
-}
-
-.tool-card:hover .tool-icon {
-    transform: rotate(-4deg) scale(1.08);
-    box-shadow:
-        0 0 30px rgba(70,150,255,.15),
-        inset 0 1px rgba(255,255,255,.12);
-}
-
-.tool-card h3 {
-    margin-top: 30px;
-
-    font-size: 20px;
-    letter-spacing: -.025em;
-}
-
-.tool-card p {
-    margin-top: 8px;
-
-    color: var(--muted);
-    font-size: 13px;
-    line-height: 1.65;
-}
-
-.card-arrow {
-    position: absolute;
-    right: 24px;
-    bottom: 24px;
-
-    color: #6f7c91;
-
-    transition:
-        transform .3s var(--ease),
-        color .3s ease;
-}
-
-.tool-card:hover .card-arrow {
-    color: #9ccfff;
-    transform: translate(4px, -4px);
-}
-
-/* =========================================================
-   FEATURE PANEL
-   ========================================================= */
-
-.feature-panel {
-    position: relative;
-
-    padding: 38px;
-
-    border-radius: 26px;
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(14,23,40,.75),
-            rgba(7,11,20,.55)
-        );
-
-    border: 1px solid var(--line);
-
-    backdrop-filter: blur(30px);
-    -webkit-backdrop-filter: blur(30px);
-
-    overflow: hidden;
-}
-
-.feature-panel::before {
-    content: "";
-
-    position: absolute;
-    width: 500px;
-    height: 500px;
-
-    right: -180px;
-    top: -300px;
-
-    background: radial-gradient(
-        circle,
-        rgba(81,145,255,.18),
-        transparent 68%
-    );
-
-    filter: blur(15px);
-}
-
-.feature-grid {
-    position: relative;
-
-    display: grid;
-    grid-template-columns: 1.2fr .8fr;
-    gap: 40px;
-
-    align-items: center;
-}
-
-.feature-panel h2 {
-    font-size: clamp(28px, 4vw, 44px);
-    letter-spacing: -.045em;
-}
-
-.feature-panel p {
-    margin-top: 18px;
-
-    color: var(--muted);
-    line-height: 1.75;
-    font-size: 14px;
-}
-
-.feature-stat {
-    display: grid;
-    gap: 10px;
-}
-
-.stat {
-    padding: 18px;
-
-    border: 1px solid var(--line);
-    border-radius: 16px;
-
-    background: rgba(255,255,255,.025);
-
-    transition:
-        transform .3s var(--ease),
-        border-color .3s ease;
-}
-
-.stat:hover {
-    transform: translateX(5px);
-    border-color: var(--line-bright);
-}
-
-.stat strong {
-    display: block;
-
-    font-size: 19px;
-}
-
-.stat span {
-    display: block;
-    margin-top: 4px;
-
-    color: var(--muted);
-    font-size: 12px;
-}
-
-/* =========================================================
-   FOOTER
-   ========================================================= */
-
-footer {
-    padding: 45px 0 70px;
-
-    border-top: 1px solid rgba(120,170,255,.08);
-
-    color: #596579;
-    text-align: center;
-
-    font-size: 12px;
-}
-
-/* =========================================================
-   ANIMATIONS
-   ========================================================= */
-
-@keyframes fadeUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-        filter: blur(5px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-        filter: blur(0);
-    }
-}
-
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
-
-@media (max-width: 850px) {
-    .nav-links {
-        display: none;
-    }
-
-    .menu-button {
-        display: block;
-    }
-
-    .hero {
-        min-height: 760px;
-    }
-
-    .tools-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-
-    .feature-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .section-heading {
-        display: block;
-    }
-
-    .section-heading p {
-        margin-top: 12px;
-    }
-}
-
-@media (max-width: 600px) {
-    .navbar {
-        top: 10px;
-        width: calc(100% - 20px);
-    }
-
-    .hero {
-        padding-top: 100px;
-    }
-
-    .hero-logo {
-        width: 280px;
-    }
-
-    .hero h1 {
-        font-size: 48px;
-    }
-
-    .hero-actions {
-        flex-direction: column;
-    }
-
-    .hero-actions a {
-        width: 100%;
-    }
-
-    .tools-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .section {
-        padding: 65px 0;
-    }
-
-    .feature-panel {
-        padding: 24px;
-    }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>FLUX | Tools for Editors</title>
+
+    <style>
+        :root {
+            --bg: #05070d;
+            --bg-soft: #080b14;
+            --panel: rgba(13, 17, 29, 0.68);
+            --panel-strong: rgba(16, 21, 35, 0.82);
+            --border: rgba(255, 255, 255, 0.09);
+            --border-hover: rgba(112, 168, 255, 0.35);
+
+            --text: #f5f7ff;
+            --muted: #8e97ab;
+            --muted-light: #b4bdd0;
+
+            --blue: #4c9cff;
+            --blue-bright: #76b5ff;
+            --purple: #8c6cff;
+
+            --radius: 22px;
+            --nav-height: 76px;
+
+            --ease: cubic-bezier(.22, 1, .36, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            background: var(--bg);
+        }
+
+        body {
+            min-height: 100vh;
+            overflow-x: hidden;
+
+            background:
+                radial-gradient(
+                    circle at 50% -20%,
+                    rgba(67, 118, 255, 0.12),
+                    transparent 38%
+                ),
+                var(--bg);
+
+            color: var(--text);
+
+            font-family:
+                Inter,
+                ui-sans-serif,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        button {
+            font: inherit;
+        }
+
+        ::selection {
+            background: rgba(76, 156, 255, 0.28);
+        }
+
+        /* =========================================
+           BACKGROUND
+        ========================================= */
+
+        .background {
+            position: fixed;
+            inset: 0;
+            z-index: -10;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .background::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+
+            background:
+                linear-gradient(
+                    rgba(255, 255, 255, 0.015) 1px,
+                    transparent 1px
+                ),
+                linear-gradient(
+                    90deg,
+                    rgba(255, 255, 255, 0.015) 1px,
+                    transparent 1px
+                );
+
+            background-size: 80px 80px;
+
+            mask-image: linear-gradient(
+                to bottom,
+                black,
+                transparent 75%
+            );
+
+            opacity: 0.35;
+        }
+
+        .ambient {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+        }
+
+        .orb {
+            position: absolute;
+            width: 420px;
+            height: 420px;
+
+            border-radius: 50%;
+
+            opacity: 0.16;
+
+            filter: blur(90px);
+
+            will-change: transform;
+        }
+
+        .orb-one {
+            top: -180px;
+            left: -100px;
+            background: #1767ff;
+            animation: orb-one 14s ease-in-out infinite alternate;
+        }
+
+        .orb-two {
+            top: 25%;
+            right: -180px;
+            background: #744cff;
+            animation: orb-two 17s ease-in-out infinite alternate;
+        }
+
+        .orb-three {
+            bottom: -220px;
+            left: 35%;
+            background: #1767ff;
+            animation: orb-three 19s ease-in-out infinite alternate;
+        }
+
+        @keyframes orb-one {
+            from {
+                transform: translate3d(0, 0, 0);
+            }
+
+            to {
+                transform: translate3d(90px, 60px, 0);
+            }
+        }
+
+        @keyframes orb-two {
+            from {
+                transform: translate3d(0, 0, 0);
+            }
+
+            to {
+                transform: translate3d(-80px, 80px, 0);
+            }
+        }
+
+        @keyframes orb-three {
+            from {
+                transform: translate3d(0, 0, 0);
+            }
+
+            to {
+                transform: translate3d(80px, -70px, 0);
+            }
+        }
+
+        /* =========================================
+           NAVBAR
+        ========================================= */
+
+        .navbar {
+            position: fixed;
+            top: 16px;
+            left: 50%;
+
+            z-index: 1000;
+
+            width: min(
+                calc(100% - 32px),
+                1180px
+            );
+
+            height: var(--nav-height);
+
+            transform: translateX(-50%);
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 18px 0 24px;
+
+            border: 1px solid var(--border);
+            border-radius: 20px;
+
+            background: rgba(7, 10, 18, 0.72);
+
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.28),
+                inset 0 1px 0 rgba(255, 255, 255, 0.035);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+        }
+
+        .logo-mark {
+            width: 34px;
+            height: 34px;
+
+            display: grid;
+            place-items: center;
+
+            border-radius: 10px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(76, 156, 255, 0.95),
+                    rgba(140, 108, 255, 0.95)
+                );
+
+            box-shadow:
+                0 0 28px rgba(76, 156, 255, 0.22);
+        }
+
+        .logo-mark::after {
+            content: "F";
+
+            color: white;
+            font-size: 17px;
+            font-weight: 900;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-links a {
+            position: relative;
+
+            padding: 10px 14px;
+
+            border-radius: 11px;
+
+            color: var(--muted);
+
+            font-size: 14px;
+            font-weight: 600;
+
+            transition:
+                color 220ms ease,
+                background 220ms ease,
+                transform 220ms var(--ease);
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+
+            background: rgba(255, 255, 255, 0.05);
+
+            transform: translateY(-1px);
+        }
+
+        .discord-button {
+            margin-left: 6px;
+
+            padding: 10px 15px !important;
+
+            color: white !important;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(76, 156, 255, 0.2),
+                    rgba(140, 108, 255, 0.16)
+                );
+
+            border: 1px solid rgba(112, 168, 255, 0.2);
+        }
+
+        .menu-button {
+            display: none;
+
+            width: 42px;
+            height: 42px;
+
+            border: 1px solid var(--border);
+            border-radius: 12px;
+
+            color: white;
+            background: rgba(255, 255, 255, 0.035);
+
+            cursor: pointer;
+        }
+
+        /* =========================================
+           SIDE MENU
+        ========================================= */
+
+        .side-menu {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+
+            pointer-events: none;
+            visibility: hidden;
+        }
+
+        .side-menu.active {
+            pointer-events: auto;
+            visibility: visible;
+        }
+
+        .side-menu-backdrop {
+            position: absolute;
+            inset: 0;
+
+            background: rgba(0, 0, 0, 0.58);
+
+            opacity: 0;
+
+            transition: opacity 260ms ease;
+        }
+
+        .side-menu.active .side-menu-backdrop {
+            opacity: 1;
+        }
+
+        .side-panel {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            bottom: 12px;
+
+            width: min(
+                calc(100% - 24px),
+                360px
+            );
+
+            padding: 24px;
+
+            border: 1px solid var(--border);
+            border-radius: 24px;
+
+            background: rgba(10, 14, 24, 0.94);
+
+            backdrop-filter: blur(22px);
+            -webkit-backdrop-filter: blur(22px);
+
+            transform: translateX(calc(100% + 30px));
+
+            transition:
+                transform 420ms var(--ease);
+        }
+
+        .side-menu.active .side-panel {
+            transform: translateX(0);
+        }
+
+        .side-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            margin-bottom: 32px;
+        }
+
+        .side-header span {
+            font-weight: 800;
+            letter-spacing: 0.08em;
+        }
+
+        .close-menu {
+            width: 40px;
+            height: 40px;
+
+            border: 1px solid var(--border);
+            border-radius: 12px;
+
+            color: white;
+            background: rgba(255, 255, 255, 0.04);
+
+            cursor: pointer;
+        }
+
+        .side-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .side-links a {
+            padding: 15px;
+
+            border-radius: 14px;
+
+            color: var(--muted-light);
+
+            background: rgba(255, 255, 255, 0.025);
+
+            transition:
+                transform 220ms var(--ease),
+                background 220ms ease,
+                color 220ms ease;
+        }
+
+        .side-links a:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateX(4px);
+        }
+
+        /* =========================================
+           MAIN
+        ========================================= */
+
+        main {
+            width: min(
+                calc(100% - 32px),
+                1180px
+            );
+
+            margin: 0 auto;
+            padding-top: 150px;
+            padding-bottom: 80px;
+        }
+
+        /* =========================================
+           HERO
+        ========================================= */
+
+        .hero {
+            position: relative;
+
+            min-height: 550px;
+
+            display: flex;
+            align-items: center;
+
+            margin-bottom: 76px;
+
+            overflow: hidden;
+
+            border: 1px solid var(--border);
+            border-radius: 32px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(16, 23, 39, 0.78),
+                    rgba(8, 11, 20, 0.68)
+                );
+
+            box-shadow:
+                0 40px 100px rgba(0, 0, 0, 0.28),
+                inset 0 1px 0 rgba(255, 255, 255, 0.035);
+
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+        }
+
+        .hero::before {
+            content: "";
+
+            position: absolute;
+            inset: 0;
+
+            background:
+                radial-gradient(
+                    circle at 75% 35%,
+                    rgba(76, 156, 255, 0.12),
+                    transparent 32%
+                ),
+                radial-gradient(
+                    circle at 30% 90%,
+                    rgba(140, 108, 255, 0.08),
+                    transparent 30%
+                );
+
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+
+            width: 100%;
+
+            padding: 70px 72px;
+        }
+
+        .hero-logo {
+            width: 88px;
+            height: 88px;
+
+            object-fit: cover;
+
+            margin-bottom: 28px;
+
+            border-radius: 22px;
+
+            border: 1px solid rgba(255, 255, 255, 0.1);
+
+            box-shadow:
+                0 20px 50px rgba(0, 0, 0, 0.3),
+                0 0 50px rgba(76, 156, 255, 0.12);
+
+            animation:
+                hero-in 700ms var(--ease) both;
+        }
+
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+
+            margin-bottom: 18px;
+
+            color: var(--blue-bright);
+
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+
+            animation:
+                hero-in 700ms 70ms var(--ease) both;
+        }
+
+        .hero-eyebrow::before {
+            content: "";
+
+            width: 7px;
+            height: 7px;
+
+            border-radius: 50%;
+
+            background: var(--blue);
+
+            box-shadow:
+                0 0 14px var(--blue);
+        }
+
+        .hero h1 {
+            max-width: 800px;
+
+            margin-bottom: 22px;
+
+            font-size:
+                clamp(
+                    52px,
+                    7vw,
+                    88px
+                );
+
+            line-height: 0.96;
+
+            letter-spacing: -0.055em;
+
+            background:
+                linear-gradient(
+                    110deg,
+                    #ffffff 10%,
+                    #b9d8ff 45%,
+                    #8c6cff 75%,
+                    #ffffff 95%
+                );
+
+            background-size: 220% 100%;
+
+            -webkit-background-clip: text;
+            background-clip: text;
+
+            color: transparent;
+
+            animation:
+                hero-in 750ms 100ms var(--ease) both,
+                text-flow 8s linear infinite;
+        }
+
+        @keyframes text-flow {
+            from {
+                background-position: 0% 50%;
+            }
+
+            to {
+                background-position: 220% 50%;
+            }
+        }
+
+        .hero p {
+            max-width: 620px;
+
+            margin-bottom: 32px;
+
+            color: var(--muted-light);
+
+            font-size: 17px;
+            line-height: 1.7;
+
+            animation:
+                hero-in 750ms 170ms var(--ease) both;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+
+            animation:
+                hero-in 750ms 230ms var(--ease) both;
+        }
+
+        .button {
+            position: relative;
+
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
+            min-height: 48px;
+
+            padding: 0 20px;
+
+            border: 1px solid var(--border);
+            border-radius: 13px;
+
+            color: white;
+
+            background: rgba(255, 255, 255, 0.045);
+
+            font-size: 14px;
+            font-weight: 700;
+
+            cursor: pointer;
+
+            overflow: hidden;
+
+            transition:
+                transform 220ms var(--ease),
+                border-color 220ms ease,
+                background 220ms ease,
+                box-shadow 220ms ease;
+        }
+
+        .button::before {
+            content: "";
+
+            position: absolute;
+            inset: 0;
+
+            background:
+                linear-gradient(
+                    110deg,
+                    transparent 25%,
+                    rgba(255, 255, 255, 0.08),
+                    transparent 75%
+                );
+
+            transform: translateX(-120%);
+
+            transition:
+                transform 600ms var(--ease);
+        }
+
+        .button:hover {
+            transform: translateY(-3px);
+
+            border-color: rgba(112, 168, 255, 0.35);
+
+            background: rgba(255, 255, 255, 0.07);
+
+            box-shadow:
+                0 12px 30px rgba(0, 0, 0, 0.22);
+        }
+
+        .button:hover::before {
+            transform: translateX(120%);
+        }
+
+        .button-primary {
+            border-color: rgba(76, 156, 255, 0.45);
+
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(76, 156, 255, 0.95),
+                    rgba(92, 108, 255, 0.95)
+                );
+
+            box-shadow:
+                0 12px 35px rgba(76, 156, 255, 0.18);
+        }
+
+        .button-primary:hover {
+            border-color: rgba(140, 180, 255, 0.7);
+
+            box-shadow:
+                0 18px 45px rgba(76, 156, 255, 0.25);
+        }
+
+        @keyframes hero-in {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* =========================================
+           SECTION HEADER
+        ========================================= */
+
+        .section-header {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+
+            gap: 24px;
+
+            margin-bottom: 22px;
+        }
+
+        .section-header h2 {
+            font-size: 26px;
+            letter-spacing: -0.025em;
+        }
+
+        .section-header p {
+            max-width: 500px;
+
+            color: var(--muted);
+
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* =========================================
+           TOOL GRID
+        ========================================= */
+
+        .tools-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    3,
+                    minmax(0, 1fr)
+                );
+
+            gap: 14px;
+        }
+
+        .tool-card {
+            position: relative;
+
+            min-height: 235px;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+
+            padding: 24px;
+
+            overflow: hidden;
+
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(17, 23, 38, 0.72),
+                    rgba(9, 12, 21, 0.65)
+                );
+
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+
+            transition:
+                transform 300ms var(--ease),
+                border-color 300ms ease,
+                box-shadow 300ms ease,
+                background 300ms ease;
+        }
+
+        .tool-card::before {
+            content: "";
+
+            position: absolute;
+            inset: 0;
+
+            background:
+                radial-gradient(
+                    circle at var(--card-x, 50%) var(--card-y, 50%),
+                    rgba(76, 156, 255, 0.13),
+                    transparent 35%
+                );
+
+            opacity: 0;
+
+            transition: opacity 250ms ease;
+
+            pointer-events: none;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-6px);
+
+            border-color: var(--border-hover);
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(20, 29, 48, 0.82),
+                    rgba(10, 14, 24, 0.76)
+                );
+
+            box-shadow:
+                0 24px 55px rgba(0, 0, 0, 0.25),
+                0 0 35px rgba(76, 156, 255, 0.05);
+        }
+
+        .tool-card:hover::before {
+            opacity: 1;
+        }
+
+        .tool-top {
+            position: relative;
+            z-index: 1;
+
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+        }
+
+        .tool-icon {
+            width: 48px;
+            height: 48px;
+
+            display: grid;
+            place-items: center;
+
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+
+            color: var(--blue-bright);
+
+            background:
+                rgba(76, 156, 255, 0.08);
+
+            font-size: 20px;
+
+            transition:
+                transform 300ms var(--ease),
+                background 300ms ease,
+                box-shadow 300ms ease;
+        }
+
+        .tool-card:hover .tool-icon {
+            transform: translateY(-3px) scale(1.04);
+
+            background:
+                rgba(76, 156, 255, 0.13);
+
+            box-shadow:
+                0 0 24px rgba(76, 156, 255, 0.12);
+        }
+
+        .tool-arrow {
+            color: #657087;
+
+            font-size: 20px;
+
+            transition:
+                transform 300ms var(--ease),
+                color 300ms ease;
+        }
+
+        .tool-card:hover .tool-arrow {
+            color: var(--blue-bright);
+
+            transform: translate(4px, -4px);
+        }
+
+        .tool-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .tool-content h3 {
+            margin-bottom: 8px;
+
+            font-size: 18px;
+            letter-spacing: -0.015em;
+        }
+
+        .tool-content p {
+            max-width: 280px;
+
+            color: var(--muted);
+
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        /* =========================================
+           UTILITIES
+        ========================================= */
+
+        .utilities {
+            margin-top: 76px;
+        }
+
+        .utilities-panel {
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    4,
+                    minmax(0, 1fr)
+                );
+
+            overflow: hidden;
+
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+
+            background:
+                rgba(11, 15, 26, 0.66);
+
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .utility {
+            position: relative;
+
+            padding: 24px;
+
+            transition:
+                background 220ms ease;
+        }
+
+        .utility:not(:last-child)::after {
+            content: "";
+
+            position: absolute;
+
+            top: 20%;
+            right: 0;
+            bottom: 20%;
+
+            width: 1px;
+
+            background: var(--border);
+        }
+
+        .utility:hover {
+            background: rgba(255, 255, 255, 0.025);
+        }
+
+        .utility-label {
+            display: block;
+
+            margin-bottom: 9px;
+
+            color: var(--muted);
+
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .utility-value {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+
+            margin-bottom: 7px;
+
+            font-size: 23px;
+            font-weight: 800;
+        }
+
+        .utility p {
+            color: var(--muted);
+
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        /* =========================================
+           COMMUNITY
+        ========================================= */
+
+        .community {
+            margin-top: 76px;
+        }
+
+        .community-banner {
+            position: relative;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 30px;
+
+            padding: 34px;
+
+            overflow: hidden;
+
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(19, 26, 45, 0.78),
+                    rgba(12, 16, 28, 0.65)
+                );
+
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+        }
+
+        .community-banner::before {
+            content: "";
+
+            position: absolute;
+
+            width: 280px;
+            height: 280px;
+
+            top: -180px;
+            right: 12%;
+
+            border-radius: 50%;
+
+            background: rgba(76, 156, 255, 0.13);
+
+            filter: blur(70px);
+
+            pointer-events: none;
+        }
+
+        .community-copy {
+            position: relative;
+            z-index: 1;
+        }
+
+        .community-copy h2 {
+            margin-bottom: 8px;
+
+            font-size: 25px;
+            letter-spacing: -0.025em;
+        }
+
+        .community-copy p {
+            max-width: 560px;
+
+            color: var(--muted);
+
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .community-links {
+            position: relative;
+            z-index: 1;
+
+            display: flex;
+            gap: 8px;
+        }
+
+        .community-links a {
+            padding: 11px 14px;
+
+            border: 1px solid var(--border);
+            border-radius: 11px;
+
+            color: var(--muted-light);
+
+            background: rgba(255, 255, 255, 0.035);
+
+            font-size: 13px;
+            font-weight: 700;
+
+            transition:
+                transform 220ms var(--ease),
+                color 220ms ease,
+                background 220ms ease,
+                border-color 220ms ease;
+        }
+
+        .community-links a:hover {
+            color: white;
+
+            border-color: var(--border-hover);
+
+            background: rgba(76, 156, 255, 0.08);
+
+            transform: translateY(-2px);
+        }
+
+        /* =========================================
+           FOOTER
+        ========================================= */
+
+        footer {
+            width: min(
+                calc(100% - 32px),
+                1180px
+            );
+
+            margin: 0 auto;
+
+            padding: 26px 0 34px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 20px;
+
+            border-top: 1px solid var(--border);
+
+            color: var(--muted);
+
+            font-size: 12px;
+        }
+
+        footer strong {
+            color: var(--muted-light);
+        }
+
+        /* =========================================
+           PAGE TRANSITION
+        ========================================= */
+
+        .page-transition {
+            position: fixed;
+            inset: 0;
+
+            z-index: 9999;
+
+            background:
+                radial-gradient(
+                    circle at center,
+                    rgba(76, 156, 255, 0.16),
+                    rgba(5, 7, 13, 0.98) 55%
+                );
+
+            pointer-events: none;
+
+            opacity: 0;
+
+            transition:
+                opacity 260ms ease;
+        }
+
+        body.is-leaving .page-transition {
+            opacity: 1;
+        }
+
+        /* =========================================
+           RESPONSIVE
+        ========================================= */
+
+        @media (max-width: 900px) {
+            .nav-links {
+                display: none;
+            }
+
+            .menu-button {
+                display: grid;
+                place-items: center;
+            }
+
+            .hero {
+                min-height: 500px;
+            }
+
+            .hero-content {
+                padding: 55px 42px;
+            }
+
+            .tools-grid {
+                grid-template-columns:
+                    repeat(
+                        2,
+                        minmax(0, 1fr)
+                    );
+            }
+
+            .utilities-panel {
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+            }
+
+            .utility:nth-child(2)::after {
+                display: none;
+            }
+
+            .utility:nth-child(-n + 2) {
+                border-bottom: 1px solid var(--border);
+            }
+
+            .community-banner {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 620px) {
+            :root {
+                --nav-height: 66px;
+            }
+
+            .navbar {
+                top: 10px;
+
+                width: calc(100% - 20px);
+
+                height: var(--nav-height);
+
+                border-radius: 17px;
+
+                padding-left: 17px;
+                padding-right: 10px;
+            }
+
+            .logo {
+                font-size: 16px;
+            }
+
+            .logo-mark {
+                width: 32px;
+                height: 32px;
+            }
+
+            main {
+                width: calc(100% - 20px);
+
+                padding-top: 105px;
+                padding-bottom: 55px;
+            }
+
+            .hero {
+                min-height: auto;
+
+                margin-bottom: 55px;
+
+                border-radius: 24px;
+            }
+
+            .hero-content {
+                padding: 42px 24px;
+            }
+
+            .hero-logo {
+                width: 70px;
+                height: 70px;
+
+                border-radius: 18px;
+
+                margin-bottom: 22px;
+            }
+
+            .hero h1 {
+                font-size: clamp(45px, 14vw, 68px);
+            }
+
+            .hero p {
+                font-size: 15px;
+            }
+
+            .hero-actions {
+                flex-direction: column;
+            }
+
+            .hero-actions .button {
+                width: 100%;
+            }
+
+            .section-header {
+                align-items: flex-start;
+                flex-direction: column;
+
+                gap: 8px;
+            }
+
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tool-card {
+                min-height: 210px;
+            }
+
+            .utilities {
+                margin-top: 55px;
+            }
+
+            .utilities-panel {
+                grid-template-columns: 1fr;
+            }
+
+            .utility {
+                border-bottom: 1px solid var(--border);
+            }
+
+            .utility:last-child {
+                border-bottom: 0;
+            }
+
+            .utility::after {
+                display: none !important;
+            }
+
+            .community {
+                margin-top: 55px;
+            }
+
+            .community-banner {
+                padding: 25px;
+            }
+
+            .community-links {
+                width: 100%;
+
+                display: grid;
+                grid-template-columns: 1fr;
+            }
+
+            .community-links a {
+                text-align: center;
+            }
+
+            footer {
+                width: calc(100% - 20px);
+
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+
+        /* =========================================
+           REDUCED MOTION
+        ========================================= */
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+            }
+        }
+    </style>
 </head>
 
-<body class="page-enter">
+<body>
 
-<div class="background">
-    <div class="orb one"></div>
-    <div class="orb two"></div>
-    <div class="orb three"></div>
-</div>
-
-<div class="page-transition" id="pageTransition"></div>
-
-<nav class="navbar">
-
-    <a href="index.html" class="logo">
-        FLUX
-    </a>
-
-    <div class="nav-links">
-        <a href="#tools">Tools</a>
-        <a href="#utilities">Utilities</a>
-        <a href="#community">Community</a>
-        <a href="https://discord.com/" target="_blank">
-            Discord
-        </a>
+    <div class="background">
+        <div class="ambient">
+            <div class="orb orb-one"></div>
+            <div class="orb orb-two"></div>
+            <div class="orb orb-three"></div>
+        </div>
     </div>
 
-    <button
-        class="menu-button"
-        id="menuButton"
-        aria-label="Open menu"
-    >
-        ☰
-    </button>
+    <!-- =========================================
+         NAVBAR
+    ========================================== -->
 
-</nav>
+    <nav class="navbar">
 
-<div class="side-menu" id="sideMenu">
+        <a href="index.html" class="logo">
+            <span class="logo-mark"></span>
+            FLUX
+        </a>
 
-    <a href="#tools">Tools</a>
-    <a href="#utilities">Utilities</a>
-    <a href="#community">Community</a>
+        <div class="nav-links">
 
-    <a
-        href="https://discord.com/"
-        target="_blank"
-        rel="noopener"
-    >
-        Discord
-    </a>
+            <a href="#tools">
+                Tools
+            </a>
 
-</div>
+            <a href="#utilities">
+                Utilities
+            </a>
 
-<main>
+            <a href="#community">
+                Community
+            </a>
 
-    <!-- HERO -->
-
-    <section class="hero">
-
-        <div class="hero-content">
-
-            <img
-                class="hero-logo"
-                src="assets/images/flux-logo.jpg"
-                alt="FLUX"
+            <a
+                href="https://discord.gg/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="discord-button"
             >
+                Discord
+            </a>
 
-            <div class="eyebrow">
-                EDITOR TOOLKIT
+        </div>
+
+        <button
+            class="menu-button"
+            id="menuButton"
+            aria-label="Open menu"
+        >
+            ☰
+        </button>
+
+    </nav>
+
+    <!-- =========================================
+         MOBILE SIDE MENU
+    ========================================== -->
+
+    <div
+        class="side-menu"
+        id="sideMenu"
+    >
+
+        <div
+            class="side-menu-backdrop"
+            id="sideBackdrop"
+        ></div>
+
+        <div class="side-panel">
+
+            <div class="side-header">
+
+                <span>FLUX</span>
+
+                <button
+                    class="close-menu"
+                    id="closeMenu"
+                    aria-label="Close menu"
+                >
+                    ×
+                </button>
+
             </div>
 
-            <h1>
-                Built for editors.
-            </h1>
+            <div class="side-links">
 
-            <p>
-                A growing collection of fast, browser-based tools
-                for editors, creators and people who apparently
-                enjoy spending six hours perfecting a three-second clip.
-            </p>
+                <a href="#tools">
+                    Tools
+                </a>
 
-            <div class="hero-actions">
+                <a href="#utilities">
+                    Utilities
+                </a>
 
-                <a
-                    href="#tools"
-                    class="primary-button"
-                >
-                    Explore Tools
+                <a href="#community">
+                    Community
                 </a>
 
                 <a
-                    href="#community"
-                    class="secondary-button"
+                    href="https://discord.gg/"
+                    target="_blank"
+                    rel="noopener noreferrer"
                 >
-                    Explore FLUX
+                    Discord
                 </a>
 
             </div>
 
         </div>
 
-    </section>
+    </div>
 
-    <!-- TOOLS -->
+    <!-- =========================================
+         MAIN
+    ========================================== -->
 
-    <section class="section" id="tools">
+    <main>
 
-        <div class="section-heading">
+        <!-- HERO -->
 
-            <div>
-                <div class="eyebrow">
-                    TOOLKIT
+        <section class="hero">
+
+            <div class="hero-content">
+
+                <img
+                    class="hero-logo"
+                    src="assets/images/flux-logo.jpg"
+                    alt="FLUX"
+                >
+
+                <div class="hero-eyebrow">
+                    Editor toolkit
                 </div>
 
-                <h2>
-                    Everything you need.
-                </h2>
+                <h1>
+                    Built for editors.
+                </h1>
+
+                <p>
+                    Fast, browser-based tools for editors and creators.
+                    Convert, extract, calculate and optimise your
+                    workflow without sending your files to a server.
+                </p>
+
+                <div class="hero-actions">
+
+                    <a
+                        href="#tools"
+                        class="button button-primary"
+                    >
+                        Explore tools
+                    </a>
+
+                    <a
+                        href="#utilities"
+                        class="button"
+                    >
+                        View utilities
+                    </a>
+
+                </div>
+
             </div>
 
-            <p>
-                Browser-based tools designed around speed,
-                simplicity and local processing.
-            </p>
+        </section>
 
-        </div>
+        <!-- TOOLS -->
 
-        <div class="tools-grid">
+        <section id="tools">
 
-            <a
-                href="tools/audio-extractor.html"
-                class="tool-card"
-            >
+            <div class="section-header">
 
                 <div>
-                    <div class="tool-icon">♫</div>
-
-                    <h3>
-                        Audio Extractor
-                    </h3>
-
-                    <p>
-                        Extract clean WAV audio from video
-                        directly inside your browser.
-                    </p>
+                    <h2>
+                        Tools
+                    </h2>
                 </div>
 
-                <span class="card-arrow">↗</span>
+                <p>
+                    Browser-based utilities designed around
+                    common editing workflows.
+                </p>
 
-            </a>
+            </div>
 
-            <a
-                href="tools/upscaler.html"
-                class="tool-card"
-            >
+            <div class="tools-grid">
 
-                <div>
-                    <div class="tool-icon">✦</div>
+                <a
+                    href="tools/audio-extractor.html"
+                    class="tool-card"
+                >
 
-                    <h3>
-                        Image Upscaler
-                    </h3>
+                    <div class="tool-top">
 
-                    <p>
-                        Enhance images locally with
-                        Real-ESRGAN AI processing.
-                    </p>
-                </div>
+                        <div class="tool-icon">
+                            ♪
+                        </div>
 
-                <span class="card-arrow">↗</span>
+                        <div class="tool-arrow">
+                            ↗
+                        </div>
 
-            </a>
-
-            <a
-                href="tools/frame-extractor.html"
-                class="tool-card"
-            >
-
-                <div>
-                    <div class="tool-icon">▣</div>
-
-                    <h3>
-                        Frame Extractor
-                    </h3>
-
-                    <p>
-                        Step through videos frame-by-frame
-                        and export individual frames.
-                    </p>
-                </div>
-
-                <span class="card-arrow">↗</span>
-
-            </a>
-
-            <a
-                href="tools/image-compressor.html"
-                class="tool-card"
-            >
-
-                <div>
-                    <div class="tool-icon">⌁</div>
-
-                    <h3>
-                        Image Compressor
-                    </h3>
-
-                    <p>
-                        Reduce image size while keeping
-                        visual quality under control.
-                    </p>
-                </div>
-
-                <span class="card-arrow">↗</span>
-
-            </a>
-
-            <a
-                href="tools/converter.html"
-                class="tool-card"
-            >
-
-                <div>
-                    <div class="tool-icon">⇄</div>
-
-                    <h3>
-                        Converter
-                    </h3>
-
-                    <p>
-                        Convert common media formats
-                        without leaving your browser.
-                    </p>
-                </div>
-
-                <span class="card-arrow">↗</span>
-
-            </a>
-
-            <a
-                href="tools/frame-extractor.html"
-                class="tool-card"
-            >
-
-                <div>
-                    <div class="tool-icon">+</div>
-
-                    <h3>
-                        More Coming
-                    </h3>
-
-                    <p>
-                        FLUX is still being built.
-                        More editor-focused tools are on the way.
-                    </p>
-                </div>
-
-                <span class="card-arrow">↗</span>
-
-            </a>
-
-        </div>
-
-    </section>
-
-    <!-- UTILITIES -->
-
-    <section
-        class="section"
-        id="utilities"
-    >
-
-        <div class="feature-panel">
-
-            <div class="feature-grid">
-
-                <div>
-
-                    <div class="eyebrow">
-                        UTILITIES
                     </div>
 
+                    <div class="tool-content">
+
+                        <h3>
+                            Audio Extractor
+                        </h3>
+
+                        <p>
+                            Extract audio from supported video
+                            files directly in your browser.
+                        </p>
+
+                    </div>
+
+                </a>
+
+                <a
+                    href="tools/upscaler.html"
+                    class="tool-card"
+                >
+
+                    <div class="tool-top">
+
+                        <div class="tool-icon">
+                            ✦
+                        </div>
+
+                        <div class="tool-arrow">
+                            ↗
+                        </div>
+
+                    </div>
+
+                    <div class="tool-content">
+
+                        <h3>
+                            Image Upscaler
+                        </h3>
+
+                        <p>
+                            Increase image resolution using
+                            browser-based AI processing.
+                        </p>
+
+                    </div>
+
+                </a>
+
+                <a
+                    href="tools/frame-extractor.html"
+                    class="tool-card"
+                >
+
+                    <div class="tool-top">
+
+                        <div class="tool-icon">
+                            ▣
+                        </div>
+
+                        <div class="tool-arrow">
+                            ↗
+                        </div>
+
+                    </div>
+
+                    <div class="tool-content">
+
+                        <h3>
+                            Frame Extractor
+                        </h3>
+
+                        <p>
+                            Navigate through video frames and
+                            export individual frames as images.
+                        </p>
+
+                    </div>
+
+                </a>
+
+                <a
+                    href="tools/image-compressor.html"
+                    class="tool-card"
+                >
+
+                    <div class="tool-top">
+
+                        <div class="tool-icon">
+                            ◈
+                        </div>
+
+                        <div class="tool-arrow">
+                            ↗
+                        </div>
+
+                    </div>
+
+                    <div class="tool-content">
+
+                        <h3>
+                            Image Compressor
+                        </h3>
+
+                        <p>
+                            Reduce image file size while
+                            maintaining useful visual quality.
+                        </p>
+
+                    </div>
+
+                </a>
+
+                <a
+                    href="tools/converter.html"
+                    class="tool-card"
+                >
+
+                    <div class="tool-top">
+
+                        <div class="tool-icon">
+                            ⇄
+                        </div>
+
+                        <div class="tool-arrow">
+                            ↗
+                        </div>
+
+                    </div>
+
+                    <div class="tool-content">
+
+                        <h3>
+                            Converter
+                        </h3>
+
+                        <p>
+                            Convert media between commonly used
+                            formats directly in your browser.
+                        </p>
+
+                    </div>
+
+                </a>
+
+                <a
+                    href="#"
+                    class="tool-card"
+                >
+
+                    <div class="tool-top">
+
+                        <div class="tool-icon">
+                            +
+                        </div>
+
+                        <div class="tool-arrow">
+                            ↗
+                        </div>
+
+                    </div>
+
+                    <div class="tool-content">
+
+                        <h3>
+                            More tools
+                        </h3>
+
+                        <p>
+                            Additional editing utilities are
+                            being added to FLUX.
+                        </p>
+
+                    </div>
+
+                </a>
+
+            </div>
+
+        </section>
+
+        <!-- UTILITIES -->
+
+        <section
+            class="utilities"
+            id="utilities"
+        >
+
+            <div class="section-header">
+
+                <div>
                     <h2>
-                        Small tools.
-                        <br>
-                        Big time savings.
+                        Utilities
+                    </h2>
+                </div>
+
+                <p>
+                    Quick calculations for the small technical
+                    details that editing software expects.
+                </p>
+
+            </div>
+
+            <div class="utilities-panel">
+
+                <a
+                    href="utilities/fps.html"
+                    class="utility"
+                >
+
+                    <span class="utility-label">
+                        FPS
+                    </span>
+
+                    <div class="utility-value">
+                        Frame rate
+                    </div>
+
+                    <p>
+                        Calculate and convert frame rates.
+                    </p>
+
+                </a>
+
+                <a
+                    href="utilities/bpm.html"
+                    class="utility"
+                >
+
+                    <span class="utility-label">
+                        BPM
+                    </span>
+
+                    <div class="utility-value">
+                        Beat timing
+                    </div>
+
+                    <p>
+                        Calculate beat intervals for edits.
+                    </p>
+
+                </a>
+
+                <a
+                    href="utilities/frames.html"
+                    class="utility"
+                >
+
+                    <span class="utility-label">
+                        Frames
+                    </span>
+
+                    <div class="utility-value">
+                        Time ↔ frames
+                    </div>
+
+                    <p>
+                        Convert timestamps and frame counts.
+                    </p>
+
+                </a>
+
+                <a
+                    href="utilities/aspect-ratio.html"
+                    class="utility"
+                >
+
+                    <span class="utility-label">
+                        Ratio
+                    </span>
+
+                    <div class="utility-value">
+                        Aspect ratio
+                    </div>
+
+                    <p>
+                        Calculate dimensions and aspect ratios.
+                    </p>
+
+                </a>
+
+            </div>
+
+        </section>
+
+        <!-- COMMUNITY -->
+
+        <section
+            class="community"
+            id="community"
+        >
+
+            <div class="community-banner">
+
+                <div class="community-copy">
+
+                    <h2>
+                        FLUX Community
                     </h2>
 
                     <p>
-                        FPS, BPM, frame and aspect-ratio utilities
-                        for the annoyingly specific calculations
-                        editing software expects you to already know.
+                        Explore members, discover featured edits,
+                        and submit your own work to the community.
                     </p>
 
                 </div>
 
-                <div class="feature-stat">
+                <div class="community-links">
 
-                    <a
-                        href="utilities/fps.html"
-                        class="stat"
-                        style="text-decoration:none;color:inherit"
-                    >
-                        <strong>FPS Calculator</strong>
-                        <span>
-                            Frames, duration and timing.
-                        </span>
-                    </a>
-
-                    <a
-                        href="utilities/bpm.html"
-                        class="stat"
-                        style="text-decoration:none;color:inherit"
-                    >
-                        <strong>BPM Calculator</strong>
-                        <span>
-                            Beat timing for edits.
-                        </span>
-                    </a>
-
-                    <a
-                        href="utilities/aspect-ratio.html"
-                        class="stat"
-                        style="text-decoration:none;color:inherit"
-                    >
-                        <strong>Aspect Ratio</strong>
-                        <span>
-                            Calculate common dimensions.
-                        </span>
-                    </a>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </section>
-
-    <!-- COMMUNITY -->
-
-    <section
-        class="section"
-        id="community"
-    >
-
-        <div class="section-heading">
-
-            <div>
-
-                <div class="eyebrow">
-                    COMMUNITY
-                </div>
-
-                <h2>
-                    Made around editors.
-                </h2>
-
-            </div>
-
-            <p>
-                Discover creators, featured edits and the
-                wider FLUX community.
-            </p>
-
-        </div>
-
-        <div class="tools-grid">
-
-            <a
-                href="community/members.html"
-                class="tool-card"
-            >
-                <div>
-                    <div class="tool-icon">◎</div>
-
-                    <h3>
+                    <a href="community/members.html">
                         Members
-                    </h3>
+                    </a>
 
-                    <p>
-                        Browse the FLUX community.
-                    </p>
-                </div>
-
-                <span class="card-arrow">↗</span>
-            </a>
-
-            <a
-                href="community/featured.html"
-                class="tool-card"
-            >
-                <div>
-                    <div class="tool-icon">★</div>
-
-                    <h3>
+                    <a href="community/featured.html">
                         Featured
-                    </h3>
+                    </a>
 
-                    <p>
-                        Discover edits and creators.
-                    </p>
-                </div>
-
-                <span class="card-arrow">↗</span>
-            </a>
-
-            <a
-                href="community/submit.html"
-                class="tool-card"
-            >
-                <div>
-                    <div class="tool-icon">↑</div>
-
-                    <h3>
+                    <a href="community/submit.html">
                         Submit
-                    </h3>
+                    </a>
 
-                    <p>
-                        Submit your work to FLUX.
-                    </p>
                 </div>
 
-                <span class="card-arrow">↗</span>
-            </a>
+            </div>
 
-        </div>
+        </section>
 
-    </section>
+    </main>
 
-</main>
+    <!-- =========================================
+         FOOTER
+    ========================================== -->
 
-<footer>
-    FLUX · Built for editors
-</footer>
+    <footer>
 
-<script>
+        <span>
+            <strong>FLUX</strong>
+            · Tools for editors
+        </span>
 
-/* =========================================================
-   MENU
-   ========================================================= */
+        <span>
+            Built for the editing community.
+        </span>
 
-const menuButton =
-    document.getElementById("menuButton");
+    </footer>
 
-const sideMenu =
-    document.getElementById("sideMenu");
+    <div class="page-transition"></div>
 
-menuButton.addEventListener("click", () => {
-    sideMenu.classList.toggle("open");
-});
+    <script>
 
-document.addEventListener("click", event => {
+        /* =========================================
+           MOBILE MENU
+        ========================================== */
 
-    if (
-        !sideMenu.contains(event.target) &&
-        !menuButton.contains(event.target)
-    ) {
-        sideMenu.classList.remove("open");
-    }
+        const menuButton =
+            document.getElementById("menuButton");
 
-});
+        const closeMenu =
+            document.getElementById("closeMenu");
 
-/* =========================================================
-   PAGE TRANSITIONS
-   ========================================================= */
+        const sideMenu =
+            document.getElementById("sideMenu");
 
-const transition =
-    document.getElementById("pageTransition");
+        const sideBackdrop =
+            document.getElementById("sideBackdrop");
 
-document.querySelectorAll("a").forEach(link => {
+        function openMenu() {
+            sideMenu.classList.add("active");
 
-    link.addEventListener("click", event => {
-
-        const href = link.getAttribute("href");
-
-        if (
-            !href ||
-            href.startsWith("#") ||
-            href.startsWith("http") ||
-            link.target === "_blank"
-        ) {
-            return;
+            document.body.style.overflow = "hidden";
         }
 
-        event.preventDefault();
+        function closeSideMenu() {
+            sideMenu.classList.remove("active");
 
-        transition.classList.add("active");
+            document.body.style.overflow = "";
+        }
 
-        setTimeout(() => {
-            window.location.href = href;
-        }, 260);
+        menuButton.addEventListener(
+            "click",
+            openMenu
+        );
 
-    });
+        closeMenu.addEventListener(
+            "click",
+            closeSideMenu
+        );
 
-});
+        sideBackdrop.addEventListener(
+            "click",
+            closeSideMenu
+        );
 
-/* =========================================================
-   CURSOR AMBIENT LIGHT
-   ========================================================= */
+        document
+            .querySelectorAll(".side-links a")
+            .forEach(link => {
 
-document.addEventListener("pointermove", event => {
+                link.addEventListener(
+                    "click",
+                    closeSideMenu
+                );
 
-    const x =
-        (event.clientX / window.innerWidth) * 100;
+            });
 
-    const y =
-        (event.clientY / window.innerHeight) * 100;
+        /* =========================================
+           CARD POINTER EFFECT
+        ========================================== */
 
-    document.documentElement.style.setProperty(
-        "--mouse-x",
-        `${x}%`
-    );
+        const cards =
+            document.querySelectorAll(".tool-card");
 
-    document.documentElement.style.setProperty(
-        "--mouse-y",
-        `${y}%`
-    );
+        cards.forEach(card => {
 
-});
+            let animationFrame = null;
 
-</script>
+            card.addEventListener(
+                "pointermove",
+                event => {
+
+                    if (animationFrame) {
+                        return;
+                    }
+
+                    animationFrame =
+                        requestAnimationFrame(() => {
+
+                            const rect =
+                                card.getBoundingClientRect();
+
+                            const x =
+                                (
+                                    (event.clientX - rect.left)
+                                    /
+                                    rect.width
+                                ) * 100;
+
+                            const y =
+                                (
+                                    (event.clientY - rect.top)
+                                    /
+                                    rect.height
+                                ) * 100;
+
+                            card.style.setProperty(
+                                "--card-x",
+                                `${x}%`
+                            );
+
+                            card.style.setProperty(
+                                "--card-y",
+                                `${y}%`
+                            );
+
+                            animationFrame = null;
+                        });
+
+                }
+            );
+
+        });
+
+        /* =========================================
+           PAGE TRANSITIONS
+        ========================================== */
+
+        const transition =
+            document.querySelector(".page-transition");
+
+        document
+            .querySelectorAll("a")
+            .forEach(link => {
+
+                const href =
+                    link.getAttribute("href");
+
+                if (
+                    !href ||
+                    href.startsWith("#") ||
+                    href.startsWith("http") ||
+                    href.startsWith("mailto:")
+                ) {
+                    return;
+                }
+
+                link.addEventListener(
+                    "click",
+                    event => {
+
+                        if (
+                            event.ctrlKey ||
+                            event.metaKey ||
+                            event.shiftKey ||
+                            event.altKey
+                        ) {
+                            return;
+                        }
+
+                        event.preventDefault();
+
+                        document.body.classList.add(
+                            "is-leaving"
+                        );
+
+                        setTimeout(() => {
+                            window.location.href = href;
+                        }, 230);
+
+                    }
+                );
+
+            });
+
+    </script>
 
 </body>
 </html>

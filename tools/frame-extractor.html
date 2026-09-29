@@ -21,6 +21,7 @@
         body {
             margin: 0;
             min-height: 100vh;
+
             background:
                 radial-gradient(
                     circle at 50% -20%,
@@ -28,7 +29,9 @@
                     transparent 40%
                 ),
                 #07090f;
+
             color: #f3f6ff;
+
             font-family:
                 Inter,
                 ui-sans-serif,
@@ -49,14 +52,15 @@
         }
 
         /* =========================
-           NAVIGATION
-        ========================= */
+           NAVBAR
+        ========================== */
 
         .navbar {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
+
             z-index: 1000;
 
             height: 72px;
@@ -68,29 +72,37 @@
             padding: 0 32px;
 
             background: rgba(7, 9, 15, 0.78);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+
+            border-bottom:
+                1px solid rgba(255, 255, 255, 0.07);
+
             backdrop-filter: blur(18px);
         }
 
         .logo {
             color: white;
             text-decoration: none;
+
             font-size: 22px;
             font-weight: 900;
+
             letter-spacing: 0.18em;
         }
 
         .nav-links {
             display: flex;
             align-items: center;
+
             gap: 30px;
         }
 
         .nav-links a {
             color: #aab3c7;
             text-decoration: none;
+
             font-size: 14px;
             font-weight: 600;
+
             transition: color 0.2s ease;
         }
 
@@ -106,10 +118,14 @@
             align-items: center;
             justify-content: center;
 
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border:
+                1px solid rgba(255, 255, 255, 0.08);
+
             border-radius: 10px;
 
-            background: rgba(255, 255, 255, 0.04);
+            background:
+                rgba(255, 255, 255, 0.04);
+
             color: white;
         }
 
@@ -118,10 +134,12 @@
         .menu-button span::after {
             width: 18px;
             height: 2px;
+
             display: block;
-            background: #fff;
+
+            background: white;
+
             border-radius: 2px;
-            transition: 0.2s ease;
         }
 
         .menu-button span {
@@ -131,6 +149,7 @@
         .menu-button span::before,
         .menu-button span::after {
             content: "";
+
             position: absolute;
             left: 0;
         }
@@ -145,12 +164,13 @@
 
         /* =========================
            SIDE MENU
-        ========================= */
+        ========================== */
 
         .side-menu {
             position: fixed;
             top: 0;
             right: -320px;
+
             z-index: 1100;
 
             width: 300px;
@@ -158,8 +178,11 @@
 
             padding: 90px 26px 30px;
 
-            background: rgba(9, 12, 20, 0.97);
-            border-left: 1px solid rgba(255, 255, 255, 0.08);
+            background:
+                rgba(9, 12, 20, 0.97);
+
+            border-left:
+                1px solid rgba(255, 255, 255, 0.08);
 
             backdrop-filter: blur(20px);
 
@@ -172,12 +195,14 @@
 
         .side-menu a {
             display: block;
+
             padding: 15px 4px;
 
             color: #aab3c7;
             text-decoration: none;
 
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            border-bottom:
+                1px solid rgba(255, 255, 255, 0.06);
 
             font-size: 15px;
             font-weight: 600;
@@ -189,16 +214,21 @@
 
         .close-menu {
             position: absolute;
+
             top: 24px;
             right: 24px;
 
             width: 40px;
             height: 40px;
 
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border:
+                1px solid rgba(255, 255, 255, 0.08);
+
             border-radius: 10px;
 
-            background: rgba(255, 255, 255, 0.04);
+            background:
+                rgba(255, 255, 255, 0.04);
+
             color: white;
 
             font-size: 22px;
@@ -207,9 +237,11 @@
         .menu-overlay {
             position: fixed;
             inset: 0;
+
             z-index: 1050;
 
-            background: rgba(0, 0, 0, 0.5);
+            background:
+                rgba(0, 0, 0, 0.5);
 
             opacity: 0;
             pointer-events: none;
@@ -224,277 +256,254 @@
 
         /* =========================
            MAIN
-        ========================= */
+        ========================== */
 
         main {
-            width: min(1100px, calc(100% - 32px));
+            width: min(1050px, 92%);
+
             margin: 0 auto;
-            padding: 132px 0 80px;
+
+            padding: 115px 0 90px;
         }
 
         .page-header {
             text-align: center;
+
             margin-bottom: 42px;
         }
 
         .eyebrow {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            color: #76aaff;
 
-            padding: 7px 12px;
-
-            border: 1px solid rgba(66, 139, 255, 0.2);
-            border-radius: 999px;
-
-            background: rgba(50, 120, 255, 0.07);
-
-            color: #72a9ff;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 800;
-            letter-spacing: 0.14em;
+
+            letter-spacing: 3px;
+
             text-transform: uppercase;
         }
 
-        .eyebrow::before {
-            content: "";
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: #5795ff;
-            box-shadow: 0 0 12px rgba(87, 149, 255, 0.8);
-        }
-
         h1 {
-            margin: 18px 0 12px;
+            margin: 15px 0 0;
 
-            font-size: clamp(38px, 6vw, 68px);
-            line-height: 0.95;
-            letter-spacing: -0.055em;
+            font-size:
+                clamp(38px, 6vw, 65px);
+
+            line-height: 1;
+
+            letter-spacing: -2px;
         }
 
         .subtitle {
-            max-width: 620px;
-            margin: 0 auto;
+            max-width: 650px;
 
-            color: #8e99af;
-            font-size: 16px;
+            margin: 18px auto 0;
+
+            color: #8994aa;
+
             line-height: 1.7;
+
+            font-size: 15px;
         }
 
         /* =========================
-           CARD
-        ========================= */
+           MAIN CARD
+        ========================== */
 
-        .tool-card {
-            overflow: hidden;
-
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
+        .extractor-card {
+            padding: 30px;
 
             background:
                 linear-gradient(
                     145deg,
-                    rgba(19, 25, 39, 0.95),
-                    rgba(10, 13, 21, 0.96)
+                    rgba(255, 255, 255, 0.035),
+                    rgba(255, 255, 255, 0.015)
                 );
 
+            border:
+                1px solid rgba(255, 255, 255, 0.08);
+
+            border-radius: 22px;
+
             box-shadow:
-                0 30px 80px rgba(0, 0, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.025);
+                0 30px 100px rgba(0, 0, 0, 0.25);
         }
 
         /* =========================
            DROP ZONE
-        ========================= */
-
-        .upload-section {
-            padding: 26px;
-        }
+        ========================== */
 
         .drop-zone {
-            position: relative;
-
-            min-height: 230px;
+            min-height: 330px;
 
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
 
             padding: 30px;
 
-            border: 1px dashed rgba(105, 148, 221, 0.3);
-            border-radius: 16px;
+            border:
+                1px dashed rgba(118, 170, 255, 0.35);
+
+            border-radius: 18px;
+
+            cursor: pointer;
+
+            text-align: center;
 
             background:
                 radial-gradient(
                     circle at center,
-                    rgba(49, 119, 255, 0.06),
-                    transparent 65%
-                );
-
-            text-align: center;
+                    rgba(77, 141, 255, 0.08),
+                    transparent 55%
+                ),
+                rgba(255, 255, 255, 0.015);
 
             transition:
-                border-color 0.2s ease,
-                background 0.2s ease,
-                transform 0.2s ease;
+                0.25s ease;
         }
 
         .drop-zone:hover,
         .drop-zone.dragging {
-            border-color: rgba(83, 143, 255, 0.7);
+            border-color: #4d8dff;
+
             background:
                 radial-gradient(
                     circle at center,
-                    rgba(49, 119, 255, 0.12),
-                    transparent 65%
-                );
-        }
+                    rgba(77, 141, 255, 0.14),
+                    transparent 60%
+                ),
+                rgba(255, 255, 255, 0.025);
 
-        .drop-zone.dragging {
-            transform: scale(1.01);
+            transform: translateY(-1px);
         }
 
         .upload-icon {
-            width: 62px;
-            height: 62px;
+            width: 65px;
+            height: 65px;
+
+            margin: 0 auto 20px;
 
             display: flex;
             align-items: center;
             justify-content: center;
 
-            margin-bottom: 18px;
+            border-radius: 18px;
 
-            border: 1px solid rgba(90, 145, 255, 0.22);
-            border-radius: 16px;
+            background:
+                rgba(77, 141, 255, 0.1);
 
-            background: rgba(57, 125, 255, 0.08);
+            color: #76aaff;
 
-            color: #76a9ff;
-            font-size: 27px;
+            font-size: 28px;
         }
 
         .drop-zone h2 {
-            margin: 0 0 8px;
+            margin: 0 0 9px;
 
             font-size: 20px;
-            letter-spacing: -0.02em;
         }
 
         .drop-zone p {
-            margin: 0 0 20px;
+            margin: 0;
 
-            color: #7f899e;
-            font-size: 13px;
+            color: #8994aa;
+
+            font-size: 14px;
+        }
+
+        .formats {
+            margin-top: 14px;
+
+            color: #697287;
+
+            font-size: 11px;
+
+            letter-spacing: 1px;
+
+            text-transform: uppercase;
         }
 
         #videoInput {
             display: none;
         }
 
-        .browse-button,
-        .primary-button,
-        .secondary-button,
-        .download-button {
-            border: 0;
-            border-radius: 10px;
-
-            padding: 12px 18px;
-
-            color: white;
-            font-weight: 750;
-            font-size: 13px;
-
-            transition:
-                transform 0.15s ease,
-                opacity 0.15s ease,
-                background 0.15s ease;
-        }
-
-        .browse-button:hover,
-        .primary-button:hover,
-        .secondary-button:hover,
-        .download-button:hover {
-            transform: translateY(-1px);
-        }
-
-        .browse-button {
-            background: #397fff;
-            box-shadow: 0 8px 25px rgba(57, 127, 255, 0.2);
-        }
-
-        .browse-button:hover {
-            background: #4a8bff;
-        }
-
         /* =========================
-           VIDEO AREA
-        ========================= */
+           WORKSPACE
+        ========================== */
 
         .workspace {
             display: none;
-            padding: 0 26px 26px;
         }
 
         .workspace.visible {
             display: block;
         }
 
+        /* =========================
+           VIDEO
+        ========================== */
+
         .video-panel {
             overflow: hidden;
 
-            border: 1px solid rgba(255, 255, 255, 0.07);
-            border-radius: 15px;
+            background: #03050a;
 
-            background: #05070b;
+            border:
+                1px solid rgba(255, 255, 255, 0.08);
+
+            border-radius: 16px;
         }
 
         .video-wrapper {
             position: relative;
 
+            width: 100%;
+
+            min-height: 300px;
+
             display: flex;
             align-items: center;
             justify-content: center;
 
-            min-height: 300px;
-            max-height: 650px;
+            padding: 0;
 
-            background:
-                linear-gradient(
-                    45deg,
-                    #090c12 25%,
-                    #07090e 25%,
-                    #07090e 50%,
-                    #090c12 50%,
-                    #090c12 75%,
-                    #07090e 75%
-                );
+            background: #020308;
 
-            background-size: 16px 16px;
+            overflow: hidden;
         }
 
         #videoPreview {
             display: block;
 
             width: 100%;
-            max-height: 650px;
+            height: auto;
+
+            max-height: 680px;
 
             object-fit: contain;
 
             background: #000;
         }
 
+        /* =========================
+           VIDEO CONTROLS
+        ========================== */
+
         .video-controls {
-            padding: 16px;
-            border-top: 1px solid rgba(255, 255, 255, 0.07);
-            background: rgba(10, 13, 20, 0.95);
+            padding: 17px;
+
+            border-top:
+                1px solid rgba(255, 255, 255, 0.07);
+
+            background:
+                rgba(10, 13, 20, 0.96);
         }
 
         .timeline-row {
             display: flex;
             align-items: center;
+
             gap: 12px;
         }
 
@@ -510,7 +519,7 @@
         }
 
         .time-display {
-            min-width: 110px;
+            min-width: 120px;
 
             color: #aeb8ca;
 
@@ -522,68 +531,88 @@
                 monospace;
 
             font-size: 12px;
+
             text-align: right;
         }
 
         .control-row {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
 
-            gap: 12px;
-
-            margin-top: 14px;
+            margin-top: 15px;
         }
 
         .frame-controls {
             display: flex;
+            align-items: center;
+
             gap: 7px;
         }
 
         .control-button {
-            min-width: 44px;
+            min-width: 45px;
             height: 38px;
 
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 0 12px;
+
+            border:
+                1px solid rgba(255, 255, 255, 0.08);
+
             border-radius: 9px;
 
-            background: rgba(255, 255, 255, 0.045);
+            background:
+                rgba(255, 255, 255, 0.045);
+
             color: #dbe4f5;
 
             font-size: 13px;
             font-weight: 700;
 
             transition:
-                background 0.15s ease,
-                border-color 0.15s ease;
+                0.15s ease;
         }
 
         .control-button:hover {
-            background: rgba(69, 130, 255, 0.1);
-            border-color: rgba(80, 140, 255, 0.25);
+            background:
+                rgba(69, 130, 255, 0.1);
+
+            border-color:
+                rgba(80, 140, 255, 0.25);
         }
 
         .play-button {
             min-width: 90px;
         }
 
+        /* =========================
+           VIDEO INFO
+        ========================== */
+
         .video-info {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+
+            grid-template-columns:
+                repeat(4, 1fr);
 
             margin-top: 18px;
 
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 12px;
-
             overflow: hidden;
 
-            background: rgba(255, 255, 255, 0.025);
+            border:
+                1px solid rgba(255, 255, 255, 0.06);
+
+            border-radius: 12px;
+
+            background:
+                rgba(255, 255, 255, 0.025);
         }
 
         .info-item {
             padding: 14px 15px;
-            border-right: 1px solid rgba(255, 255, 255, 0.06);
+
+            border-right:
+                1px solid rgba(255, 255, 255, 0.06);
         }
 
         .info-item:last-child {
@@ -597,7 +626,9 @@
 
             font-size: 10px;
             font-weight: 800;
+
             letter-spacing: 0.1em;
+
             text-transform: uppercase;
         }
 
@@ -608,17 +639,21 @@
             font-weight: 650;
 
             white-space: nowrap;
+
             overflow: hidden;
+
             text-overflow: ellipsis;
         }
 
         /* =========================
-           EXTRACTION
-        ========================= */
+           EXTRACTION CONTROLS
+        ========================== */
 
         .extract-section {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+
+            grid-template-columns:
+                1fr 1fr;
 
             gap: 20px;
 
@@ -628,10 +663,13 @@
         .extract-card {
             padding: 20px;
 
-            border: 1px solid rgba(255, 255, 255, 0.07);
+            border:
+                1px solid rgba(255, 255, 255, 0.07);
+
             border-radius: 14px;
 
-            background: rgba(255, 255, 255, 0.025);
+            background:
+                rgba(255, 255, 255, 0.025);
         }
 
         .section-label {
@@ -641,7 +679,9 @@
 
             font-size: 10px;
             font-weight: 800;
+
             letter-spacing: 0.12em;
+
             text-transform: uppercase;
         }
 
@@ -663,12 +703,14 @@
             margin-top: 6px;
 
             color: #6d788e;
+
             font-size: 12px;
         }
 
         .fps-control {
             display: flex;
             align-items: center;
+
             gap: 10px;
         }
 
@@ -677,60 +719,94 @@
 
             padding: 10px 12px;
 
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border:
+                1px solid rgba(255, 255, 255, 0.08);
+
             border-radius: 9px;
 
             outline: none;
 
-            background: rgba(0, 0, 0, 0.2);
+            background:
+                rgba(0, 0, 0, 0.2);
+
             color: white;
 
             font-size: 13px;
         }
 
         #fpsInput:focus {
-            border-color: rgba(79, 139, 255, 0.5);
+            border-color:
+                rgba(79, 139, 255, 0.5);
         }
 
         .fps-label {
             color: #788399;
+
             font-size: 12px;
         }
 
+        /* =========================
+           ACTION BUTTONS
+        ========================== */
+
         .action-row {
             display: flex;
+
             gap: 10px;
 
             margin-top: 20px;
         }
 
+        .primary-button,
+        .secondary-button,
+        .download-button {
+            padding: 14px 18px;
+
+            border-radius: 12px;
+
+            font-size: 13px;
+            font-weight: 750;
+        }
+
         .primary-button {
             flex: 1;
+
+            border:
+                1px solid rgba(74, 139, 255, 0.3);
+
             background: #397fff;
+
+            color: white;
         }
 
         .primary-button:hover {
             background: #4a8bff;
         }
 
-        .primary-button:disabled,
-        .secondary-button:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-            transform: none;
+        .secondary-button {
+            min-width: 150px;
+
+            border:
+                1px solid rgba(255, 255, 255, 0.08);
+
+            background:
+                rgba(255, 255, 255, 0.06);
+
+            color: white;
         }
 
-        .secondary-button {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        .secondary-button:hover {
+            background:
+                rgba(255, 255, 255, 0.1);
         }
 
         /* =========================
            RESULT
-        ========================= */
+        ========================== */
 
         .result-section {
             display: none;
+
             margin-top: 20px;
         }
 
@@ -753,22 +829,25 @@
 
         .result-status {
             color: #6f7b91;
+
             font-size: 12px;
         }
 
         .result-preview {
+            min-height: 220px;
+            max-height: 600px;
+
             display: flex;
             align-items: center;
             justify-content: center;
-
-            min-height: 220px;
-            max-height: 600px;
 
             padding: 16px;
 
             overflow: auto;
 
-            border: 1px solid rgba(255, 255, 255, 0.07);
+            border:
+                1px solid rgba(255, 255, 255, 0.07);
+
             border-radius: 14px;
 
             background:
@@ -791,11 +870,13 @@
             max-width: 100%;
             height: auto;
 
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
+            box-shadow:
+                0 15px 40px rgba(0, 0, 0, 0.35);
         }
 
         .download-row {
             display: flex;
+
             gap: 10px;
 
             margin-top: 12px;
@@ -803,63 +884,66 @@
 
         .download-button {
             flex: 1;
-            background: rgba(255, 255, 255, 0.07);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+
+            border:
+                1px solid rgba(255, 255, 255, 0.08);
+
+            background:
+                rgba(255, 255, 255, 0.07);
+
+            color: white;
         }
 
         .download-button:hover {
-            background: rgba(255, 255, 255, 0.11);
-        }
-
-        .new-video-button {
-            width: 100%;
-            margin-top: 10px;
-
-            background: rgba(58, 126, 255, 0.1);
-            border-color: rgba(70, 132, 255, 0.18);
-            color: #79aaff;
-        }
-
-        .new-video-button:hover {
-            background: rgba(58, 126, 255, 0.16);
+            background:
+                rgba(255, 255, 255, 0.11);
         }
 
         /* =========================
            STATUS
-        ========================= */
+        ========================== */
 
         .status {
             min-height: 18px;
+
             margin-top: 14px;
 
             color: #6f7b91;
 
             font-size: 12px;
+
             text-align: center;
         }
 
-        .error {
+        .status.error {
             color: #ff7c8b;
         }
 
         /* =========================
            FOOTER
-        ========================= */
+        ========================== */
 
         footer {
             margin-top: 50px;
 
+            padding-top: 30px;
+
+            border-top:
+                1px solid rgba(255, 255, 255, 0.07);
+
             color: #566075;
 
             font-size: 12px;
+
             text-align: center;
         }
 
         /* =========================
-           RESPONSIVE
-        ========================= */
+           MOBILE
+        ========================== */
 
         @media (max-width: 800px) {
+
             .navbar {
                 padding: 0 18px;
             }
@@ -873,18 +957,22 @@
             }
 
             main {
-                width: min(100% - 20px, 700px);
-                padding-top: 112px;
+                width: 92%;
+
+                padding-top: 105px;
             }
 
-            .upload-section,
-            .workspace {
-                padding-left: 14px;
-                padding-right: 14px;
+            .extractor-card {
+                padding: 18px;
+            }
+
+            .drop-zone {
+                min-height: 270px;
             }
 
             .video-info {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns:
+                    repeat(2, 1fr);
             }
 
             .info-item:nth-child(2) {
@@ -892,7 +980,8 @@
             }
 
             .info-item:nth-child(-n + 2) {
-                border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+                border-bottom:
+                    1px solid rgba(255, 255, 255, 0.06);
             }
 
             .extract-section {
@@ -901,6 +990,7 @@
         }
 
         @media (max-width: 500px) {
+
             h1 {
                 font-size: 43px;
             }
@@ -909,26 +999,8 @@
                 font-size: 14px;
             }
 
-            .drop-zone {
-                min-height: 205px;
-                padding: 22px;
-            }
-
             .video-wrapper {
                 min-height: 210px;
-            }
-
-            .control-row {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .frame-controls {
-                justify-content: center;
-            }
-
-            .play-button {
-                width: 100%;
             }
 
             .timeline-row {
@@ -937,12 +1009,35 @@
             }
 
             .time-display {
+                width: 100%;
                 text-align: center;
             }
 
-            .download-row,
-            .action-row {
+            .frame-controls {
+                width: 100%;
+
+                display: grid;
+
+                grid-template-columns:
+                    repeat(4, 1fr);
+            }
+
+            .frame-controls .play-button {
+                grid-column:
+                    span 4;
+
+                order: -1;
+
+                width: 100%;
+            }
+
+            .action-row,
+            .download-row {
                 flex-direction: column;
+            }
+
+            .secondary-button {
+                width: 100%;
             }
         }
     </style>
@@ -950,17 +1045,35 @@
 
 <body>
 
-    <!-- =========================
-         NAVIGATION
-    ========================== -->
+    <!-- NAVIGATION -->
 
     <nav class="navbar">
-        <a href="../index.html" class="logo">FLUX</a>
+
+        <a
+            href="../index.html"
+            class="logo"
+        >
+            FLUX
+        </a>
 
         <div class="nav-links">
-            <a href="../index.html#tools">Tools</a>
-            <a href="../index.html#utilities">Utilities</a>
-            <a href="../index.html#community">Community</a>
+
+            <a href="../index.html">
+                Home
+            </a>
+
+            <a href="../index.html#tools">
+                Tools
+            </a>
+
+            <a href="../index.html#utilities">
+                Utilities
+            </a>
+
+            <a href="../index.html#community">
+                Community
+            </a>
+
             <a
                 href="https://discord.com"
                 target="_blank"
@@ -968,6 +1081,7 @@
             >
                 Discord
             </a>
+
         </div>
 
         <button
@@ -977,11 +1091,19 @@
         >
             <span></span>
         </button>
+
     </nav>
 
-    <div class="menu-overlay" id="menuOverlay"></div>
+    <div
+        class="menu-overlay"
+        id="menuOverlay"
+    ></div>
 
-    <aside class="side-menu" id="sideMenu">
+    <aside
+        class="side-menu"
+        id="sideMenu"
+    >
+
         <button
             class="close-menu"
             id="closeMenu"
@@ -990,10 +1112,22 @@
             ×
         </button>
 
-        <a href="../index.html">Home</a>
-        <a href="../index.html#tools">Tools</a>
-        <a href="../index.html#utilities">Utilities</a>
-        <a href="../index.html#community">Community</a>
+        <a href="../index.html">
+            Home
+        </a>
+
+        <a href="../index.html#tools">
+            Tools
+        </a>
+
+        <a href="../index.html#utilities">
+            Utilities
+        </a>
+
+        <a href="../index.html#community">
+            Community
+        </a>
+
         <a
             href="https://discord.com"
             target="_blank"
@@ -1001,76 +1135,94 @@
         >
             Discord
         </a>
+
     </aside>
 
-    <!-- =========================
-         MAIN
-    ========================== -->
+
+    <!-- MAIN -->
 
     <main>
 
-        <header class="page-header">
-            <span class="eyebrow">FLUX TOOL</span>
+        <div class="page-header">
 
-            <h1>Frame Extractor</h1>
-
-            <p class="subtitle">
-                Scrub through your video, step through individual frames,
-                and extract exactly the moment you need.
-                Everything happens locally in your browser.
-            </p>
-        </header>
-
-        <section class="tool-card">
-
-            <!-- =========================
-                 UPLOAD
-            ========================== -->
-
-            <div class="upload-section">
-                <div class="drop-zone" id="dropZone">
-
-                    <div class="upload-icon">
-                        ▣
-                    </div>
-
-                    <h2>Drop a video here</h2>
-
-                    <p>
-                        MP4, WebM, MOV and other browser-supported formats
-                    </p>
-
-                    <input
-                        type="file"
-                        id="videoInput"
-                        accept="video/*"
-                    >
-
-                    <button
-                        class="browse-button"
-                        id="browseButton"
-                    >
-                        Choose Video
-                    </button>
-
-                </div>
+            <div class="eyebrow">
+                FLUX TOOL
             </div>
 
-            <!-- =========================
-                 WORKSPACE
-            ========================== -->
+            <h1>
+                Frame Extractor
+            </h1>
 
-            <div class="workspace" id="workspace">
+            <p class="subtitle">
+                Scrub through your video, step through individual
+                frames, and extract exactly the moment you need.
+                Everything happens locally in your browser.
+            </p>
+
+        </div>
+
+
+        <div class="extractor-card">
+
+
+            <!-- UPLOAD -->
+
+            <div
+                class="drop-zone"
+                id="dropZone"
+            >
+
+                <div>
+
+                    <div class="upload-icon">
+                        ↑
+                    </div>
+
+                    <h2>
+                        Drop a video here
+                    </h2>
+
+                    <p>
+                        or click to browse your files
+                    </p>
+
+                    <div class="formats">
+                        MP4 · WEBM · MOV · AVI · MKV
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <input
+                type="file"
+                id="videoInput"
+                accept="video/*"
+            >
+
+
+            <!-- WORKSPACE -->
+
+            <div
+                class="workspace"
+                id="workspace"
+            >
+
+                <!-- VIDEO -->
 
                 <div class="video-panel">
 
                     <div class="video-wrapper">
+
                         <video
                             id="videoPreview"
-                            preload="metadata"
+                            preload="auto"
                             playsinline
                         ></video>
+
                     </div>
+
 
                     <div class="video-controls">
 
@@ -1094,6 +1246,7 @@
 
                         </div>
 
+
                         <div class="control-row">
 
                             <div class="frame-controls">
@@ -1101,7 +1254,7 @@
                                 <button
                                     class="control-button"
                                     id="firstFrameButton"
-                                    title="Go to beginning"
+                                    title="First frame"
                                 >
                                     |◀
                                 </button>
@@ -1132,7 +1285,7 @@
                                 <button
                                     class="control-button"
                                     id="lastFrameButton"
-                                    title="Go to end"
+                                    title="Last frame"
                                 >
                                     ▶|
                                 </button>
@@ -1142,55 +1295,81 @@
                         </div>
 
                     </div>
+
                 </div>
+
 
                 <!-- VIDEO INFO -->
 
                 <div class="video-info">
 
                     <div class="info-item">
-                        <div class="info-label">File</div>
+
+                        <div class="info-label">
+                            File
+                        </div>
+
                         <div
                             class="info-value"
                             id="fileName"
                         >
                             -
                         </div>
+
                     </div>
 
+
                     <div class="info-item">
-                        <div class="info-label">Resolution</div>
+
+                        <div class="info-label">
+                            Resolution
+                        </div>
+
                         <div
                             class="info-value"
                             id="resolution"
                         >
                             -
                         </div>
+
                     </div>
 
+
                     <div class="info-item">
-                        <div class="info-label">Duration</div>
+
+                        <div class="info-label">
+                            Duration
+                        </div>
+
                         <div
                             class="info-value"
                             id="duration"
                         >
                             -
                         </div>
+
                     </div>
 
+
                     <div class="info-item">
-                        <div class="info-label">Estimated FPS</div>
+
+                        <div class="info-label">
+                            Frame Rate
+                        </div>
+
                         <div
                             class="info-value"
                             id="detectedFps"
                         >
-                            -
+                            30 FPS
                         </div>
+
                     </div>
 
                 </div>
 
-                <!-- EXTRACTION CONTROLS -->
+
+                <!-- EXTRACTION -->
 
                 <div class="extract-section">
 
@@ -1215,6 +1394,7 @@
                         </div>
 
                     </div>
+
 
                     <div class="extract-card">
 
@@ -1243,6 +1423,9 @@
 
                 </div>
 
+
+                <!-- ACTIONS -->
+
                 <div class="action-row">
 
                     <button
@@ -1261,10 +1444,12 @@
 
                 </div>
 
+
                 <div
                     class="status"
                     id="status"
                 ></div>
+
 
                 <!-- RESULT -->
 
@@ -1288,9 +1473,15 @@
 
                     </div>
 
+
                     <div class="result-preview">
-                        <canvas id="frameCanvas"></canvas>
+
+                        <canvas
+                            id="frameCanvas"
+                        ></canvas>
+
                     </div>
+
 
                     <div class="download-row">
 
@@ -1314,7 +1505,8 @@
 
             </div>
 
-        </section>
+        </div>
+
 
         <footer>
             FLUX · Built for editors
@@ -1322,149 +1514,227 @@
 
     </main>
 
+
     <script>
+
         /* =========================
            ELEMENTS
         ========================== */
 
         const videoInput =
-            document.getElementById("videoInput");
-
-        const browseButton =
-            document.getElementById("browseButton");
+            document.getElementById(
+                "videoInput"
+            );
 
         const dropZone =
-            document.getElementById("dropZone");
+            document.getElementById(
+                "dropZone"
+            );
 
         const workspace =
-            document.getElementById("workspace");
+            document.getElementById(
+                "workspace"
+            );
 
         const videoPreview =
-            document.getElementById("videoPreview");
+            document.getElementById(
+                "videoPreview"
+            );
 
         const timeline =
-            document.getElementById("timeline");
+            document.getElementById(
+                "timeline"
+            );
 
         const timeDisplay =
-            document.getElementById("timeDisplay");
+            document.getElementById(
+                "timeDisplay"
+            );
 
         const playButton =
-            document.getElementById("playButton");
+            document.getElementById(
+                "playButton"
+            );
 
         const firstFrameButton =
-            document.getElementById("firstFrameButton");
+            document.getElementById(
+                "firstFrameButton"
+            );
 
         const previousFrameButton =
-            document.getElementById("previousFrameButton");
+            document.getElementById(
+                "previousFrameButton"
+            );
 
         const nextFrameButton =
-            document.getElementById("nextFrameButton");
+            document.getElementById(
+                "nextFrameButton"
+            );
 
         const lastFrameButton =
-            document.getElementById("lastFrameButton");
+            document.getElementById(
+                "lastFrameButton"
+            );
 
         const fileName =
-            document.getElementById("fileName");
+            document.getElementById(
+                "fileName"
+            );
 
         const resolution =
-            document.getElementById("resolution");
+            document.getElementById(
+                "resolution"
+            );
 
         const duration =
-            document.getElementById("duration");
+            document.getElementById(
+                "duration"
+            );
 
         const detectedFps =
-            document.getElementById("detectedFps");
+            document.getElementById(
+                "detectedFps"
+            );
 
         const currentFrame =
-            document.getElementById("currentFrame");
+            document.getElementById(
+                "currentFrame"
+            );
 
         const frameNumber =
-            document.getElementById("frameNumber");
+            document.getElementById(
+                "frameNumber"
+            );
 
         const fpsInput =
-            document.getElementById("fpsInput");
+            document.getElementById(
+                "fpsInput"
+            );
 
         const extractButton =
-            document.getElementById("extractButton");
+            document.getElementById(
+                "extractButton"
+            );
 
         const newVideoButton =
-            document.getElementById("newVideoButton");
+            document.getElementById(
+                "newVideoButton"
+            );
 
         const status =
-            document.getElementById("status");
+            document.getElementById(
+                "status"
+            );
 
         const resultSection =
-            document.getElementById("resultSection");
+            document.getElementById(
+                "resultSection"
+            );
 
         const resultStatus =
-            document.getElementById("resultStatus");
+            document.getElementById(
+                "resultStatus"
+            );
 
         const frameCanvas =
-            document.getElementById("frameCanvas");
+            document.getElementById(
+                "frameCanvas"
+            );
 
         const downloadPngButton =
-            document.getElementById("downloadPngButton");
+            document.getElementById(
+                "downloadPngButton"
+            );
 
         const downloadJpgButton =
-            document.getElementById("downloadJpgButton");
+            document.getElementById(
+                "downloadJpgButton"
+            );
 
         const menuButton =
-            document.getElementById("menuButton");
+            document.getElementById(
+                "menuButton"
+            );
 
         const closeMenu =
-            document.getElementById("closeMenu");
+            document.getElementById(
+                "closeMenu"
+            );
 
         const sideMenu =
-            document.getElementById("sideMenu");
+            document.getElementById(
+                "sideMenu"
+            );
 
         const menuOverlay =
-            document.getElementById("menuOverlay");
+            document.getElementById(
+                "menuOverlay"
+            );
+
 
         /* =========================
            STATE
         ========================== */
 
         let currentFile = null;
+
         let videoURL = null;
 
-        let estimatedFPS = 30;
         let lastExtractedTime = 0;
+
+        let videoReady = false;
+
 
         /* =========================
            UTILITIES
         ========================== */
 
         function formatTime(seconds) {
-            if (!Number.isFinite(seconds)) {
+
+            if (
+                !Number.isFinite(seconds)
+            ) {
                 return "00:00.000";
             }
 
             const minutes =
-                Math.floor(seconds / 60);
+                Math.floor(
+                    seconds / 60
+                );
 
             const remaining =
                 seconds % 60;
 
             const secs =
-                Math.floor(remaining);
+                Math.floor(
+                    remaining
+                );
 
             const milliseconds =
                 Math.floor(
-                    (remaining - secs) * 1000
+                    (remaining - secs) *
+                    1000
                 );
 
             return (
-                String(minutes).padStart(2, "0") +
+                String(minutes)
+                    .padStart(2, "0") +
                 ":" +
-                String(secs).padStart(2, "0") +
+                String(secs)
+                    .padStart(2, "0") +
                 "." +
-                String(milliseconds).padStart(3, "0")
+                String(milliseconds)
+                    .padStart(3, "0")
             );
         }
 
+
         function getFPS() {
+
             const value =
-                parseFloat(fpsInput.value);
+                parseFloat(
+                    fpsInput.value
+                );
 
             if (
                 !Number.isFinite(value) ||
@@ -1473,10 +1743,34 @@
                 return 30;
             }
 
-            return Math.min(value, 240);
+            return Math.min(
+                value,
+                240
+            );
         }
 
+
+        function setStatus(
+            message,
+            isError = false
+        ) {
+
+            status.textContent =
+                message;
+
+            status.classList.toggle(
+                "error",
+                isError
+            );
+        }
+
+
         function updateTimeUI() {
+
+            if (!videoReady) {
+                return;
+            }
+
             const time =
                 videoPreview.currentTime || 0;
 
@@ -1493,272 +1787,458 @@
             currentFrame.textContent =
                 formatTime(time);
 
-            const fps = getFPS();
+            const fps =
+                getFPS();
 
             const frame =
                 Math.max(
                     0,
-                    Math.round(time * fps)
+                    Math.round(
+                        time * fps
+                    )
                 );
 
             frameNumber.textContent =
                 "Frame " + frame;
         }
 
-        function setStatus(message, isError = false) {
-            status.textContent = message;
-
-            status.classList.toggle(
-                "error",
-                isError
-            );
-        }
 
         function setVideoTime(time) {
-            if (!Number.isFinite(time)) {
+
+            if (!videoReady) {
                 return;
             }
 
-            const duration =
+            const total =
                 videoPreview.duration || 0;
+
+            if (!Number.isFinite(total)) {
+                return;
+            }
 
             const safeTime =
                 Math.max(
                     0,
-                    Math.min(time, duration)
+                    Math.min(
+                        time,
+                        total
+                    )
                 );
 
             videoPreview.currentTime =
                 safeTime;
+
+            updateTimeUI();
         }
 
+
         /* =========================
-           VIDEO LOADING
+           LOAD VIDEO
         ========================== */
 
         function loadVideo(file) {
+
             if (!file) {
                 return;
             }
 
-            if (!file.type.startsWith("video/")) {
+            if (
+                !file.type ||
+                !file.type.startsWith("video/")
+            ) {
+
                 setStatus(
-                    "Please choose a video file.",
+                    "Please select a video file.",
                     true
                 );
+
                 return;
             }
 
-            if (videoURL) {
-                URL.revokeObjectURL(videoURL);
+
+            /*
+             * If a video is already loaded,
+             * do not replace it accidentally.
+             */
+
+            if (currentFile) {
+
+                setStatus(
+                    "A video is already loaded. Use + New Video first.",
+                    true
+                );
+
+                return;
             }
+
 
             currentFile = file;
 
-            videoURL =
-                URL.createObjectURL(file);
+            videoReady = false;
 
-            videoPreview.src = videoURL;
-            videoPreview.load();
+
+            if (videoURL) {
+                URL.revokeObjectURL(
+                    videoURL
+                );
+            }
+
+
+            videoURL =
+                URL.createObjectURL(
+                    file
+                );
+
 
             fileName.textContent =
                 file.name;
 
-            workspace.classList.add("visible");
 
-            resultSection.classList.remove(
+            /*
+             * Hide the upload area immediately.
+             * The user can only load another video
+             * after pressing + New Video.
+             */
+
+            dropZone.style.display =
+                "none";
+
+
+            workspace.classList.add(
                 "visible"
             );
+
 
             setStatus(
                 "Loading video..."
             );
+
+
+            /*
+             * Reset the video element completely
+             * before assigning the new source.
+             */
+
+            videoPreview.pause();
+
+            videoPreview.removeAttribute(
+                "src"
+            );
+
+            videoPreview.load();
+
+
+            videoPreview.src =
+                videoURL;
+
+            videoPreview.load();
         }
 
+
         /* =========================
-           VIDEO METADATA
+           VIDEO READY
         ========================== */
+
+        function videoIsReady() {
+
+            if (
+                videoPreview.videoWidth <= 0 ||
+                videoPreview.videoHeight <= 0 ||
+                !Number.isFinite(
+                    videoPreview.duration
+                ) ||
+                videoPreview.duration <= 0
+            ) {
+                return false;
+            }
+
+            return true;
+        }
+
+
+        function initialiseVideo() {
+
+            if (!videoIsReady()) {
+
+                /*
+                 * Some browsers report metadata
+                 * before the actual decoded frame
+                 * is available. Wait for canplay/data.
+                 */
+
+                return;
+            }
+
+
+            videoReady = true;
+
+
+            const width =
+                videoPreview.videoWidth;
+
+            const height =
+                videoPreview.videoHeight;
+
+            const total =
+                videoPreview.duration;
+
+
+            resolution.textContent =
+                width +
+                " × " +
+                height;
+
+
+            duration.textContent =
+                formatTime(
+                    total
+                );
+
+
+            timeline.max =
+                total;
+
+            timeline.value =
+                0;
+
+
+            detectedFps.textContent =
+                "30 FPS";
+
+
+            fpsInput.value =
+                30;
+
+
+            videoPreview.currentTime =
+                0;
+
+
+            updateTimeUI();
+
+
+            setStatus(
+                "Video ready."
+            );
+        }
+
 
         videoPreview.addEventListener(
             "loadedmetadata",
-            () => {
-                const width =
-                    videoPreview.videoWidth;
-
-                const height =
-                    videoPreview.videoHeight;
-
-                const total =
-                    videoPreview.duration;
-
-                resolution.textContent =
-                    width + " × " + height;
-
-                duration.textContent =
-                    formatTime(total);
-
-                timeline.max = total;
-                timeline.value = 0;
-
-                /*
-                 * HTML video does not reliably expose
-                 * the source video's exact FPS.
-                 *
-                 * We use 30 FPS as the initial
-                 * stepping rate unless the browser
-                 * exposes a more precise value.
-                 */
-
-                estimatedFPS = 30;
-
-                detectedFps.textContent =
-                    "30 FPS";
-
-                fpsInput.value =
-                    estimatedFPS;
-
-                updateTimeUI();
-
-                setStatus(
-                    "Video ready."
-                );
-            }
+            initialiseVideo
         );
+
 
         videoPreview.addEventListener(
             "loadeddata",
             () => {
-                updateTimeUI();
+
+                if (!videoReady) {
+                    initialiseVideo();
+                }
+
             }
         );
+
+
+        videoPreview.addEventListener(
+            "canplay",
+            () => {
+
+                if (!videoReady) {
+                    initialiseVideo();
+                }
+
+            }
+        );
+
 
         videoPreview.addEventListener(
             "timeupdate",
-            () => {
-                updateTimeUI();
-            }
+            updateTimeUI
         );
+
 
         videoPreview.addEventListener(
             "seeking",
+            updateTimeUI
+        );
+
+
+        videoPreview.addEventListener(
+            "play",
             () => {
-                updateTimeUI();
+
+                playButton.textContent =
+                    "Pause";
+
             }
         );
+
+
+        videoPreview.addEventListener(
+            "pause",
+            () => {
+
+                playButton.textContent =
+                    "Play";
+
+            }
+        );
+
+
+        videoPreview.addEventListener(
+            "ended",
+            () => {
+
+                playButton.textContent =
+                    "Play";
+
+            }
+        );
+
 
         videoPreview.addEventListener(
             "error",
             () => {
+
+                videoReady = false;
+
+                resolution.textContent =
+                    "Unsupported";
+
+                duration.textContent =
+                    "-";
+
+                detectedFps.textContent =
+                    "-";
+
+
                 setStatus(
-                    "This video could not be decoded by your browser.",
+                    "This video format or codec is not supported by your browser.",
                     true
                 );
+
             }
         );
+
 
         /* =========================
-           UPLOAD EVENTS
+           DROP ZONE
         ========================== */
 
-        browseButton.addEventListener(
+        dropZone.addEventListener(
             "click",
             () => {
+
+                /*
+                 * Prevent selecting another file
+                 * if one is already loaded.
+                 */
+
+                if (currentFile) {
+                    return;
+                }
+
                 videoInput.click();
+
             }
         );
+
 
         videoInput.addEventListener(
             "change",
             () => {
+
                 const file =
                     videoInput.files[0];
 
                 loadVideo(file);
+
             }
         );
+
 
         dropZone.addEventListener(
             "dragover",
             event => {
+
                 event.preventDefault();
+
+                if (currentFile) {
+                    return;
+                }
 
                 dropZone.classList.add(
                     "dragging"
                 );
+
             }
         );
+
 
         dropZone.addEventListener(
             "dragleave",
             () => {
+
                 dropZone.classList.remove(
                     "dragging"
                 );
+
             }
         );
+
 
         dropZone.addEventListener(
             "drop",
             event => {
+
                 event.preventDefault();
 
                 dropZone.classList.remove(
                     "dragging"
                 );
+
+                if (currentFile) {
+                    return;
+                }
 
                 const file =
                     event.dataTransfer.files[0];
 
                 loadVideo(file);
+
             }
         );
 
+
         /* =========================
-           PLAYBACK
+           PLAY / PAUSE
         ========================== */
 
         playButton.addEventListener(
             "click",
             () => {
+
+                if (!videoReady) {
+                    return;
+                }
+
                 if (
                     videoPreview.paused
                 ) {
+
                     videoPreview.play();
 
-                    playButton.textContent =
-                        "Pause";
                 } else {
+
                     videoPreview.pause();
 
-                    playButton.textContent =
-                        "Play";
                 }
+
             }
         );
 
-        videoPreview.addEventListener(
-            "play",
-            () => {
-                playButton.textContent =
-                    "Pause";
-            }
-        );
-
-        videoPreview.addEventListener(
-            "pause",
-            () => {
-                playButton.textContent =
-                    "Play";
-            }
-        );
-
-        videoPreview.addEventListener(
-            "ended",
-            () => {
-                playButton.textContent =
-                    "Play";
-            }
-        );
 
         /* =========================
            TIMELINE
@@ -1767,13 +2247,20 @@
         timeline.addEventListener(
             "input",
             () => {
+
+                if (!videoReady) {
+                    return;
+                }
+
                 setVideoTime(
                     parseFloat(
                         timeline.value
                     )
                 );
+
             }
         );
+
 
         /* =========================
            FRAME STEPPING
@@ -1782,75 +2269,91 @@
         previousFrameButton.addEventListener(
             "click",
             () => {
+
+                if (!videoReady) {
+                    return;
+                }
+
                 videoPreview.pause();
-
-                const fps =
-                    getFPS();
-
-                const frameDuration =
-                    1 / fps;
 
                 setVideoTime(
                     videoPreview.currentTime -
-                    frameDuration
+                    (1 / getFPS())
                 );
+
             }
         );
+
 
         nextFrameButton.addEventListener(
             "click",
             () => {
+
+                if (!videoReady) {
+                    return;
+                }
+
                 videoPreview.pause();
-
-                const fps =
-                    getFPS();
-
-                const frameDuration =
-                    1 / fps;
 
                 setVideoTime(
                     videoPreview.currentTime +
-                    frameDuration
+                    (1 / getFPS())
                 );
+
             }
         );
+
 
         firstFrameButton.addEventListener(
             "click",
             () => {
+
+                if (!videoReady) {
+                    return;
+                }
+
                 videoPreview.pause();
 
                 setVideoTime(0);
+
             }
         );
+
 
         lastFrameButton.addEventListener(
             "click",
             () => {
+
+                if (!videoReady) {
+                    return;
+                }
+
                 videoPreview.pause();
 
                 const total =
-                    videoPreview.duration || 0;
-
-                const fps =
-                    getFPS();
+                    videoPreview.duration;
 
                 setVideoTime(
                     Math.max(
                         0,
                         total -
-                        (1 / fps)
+                        (1 / getFPS())
                     )
                 );
+
             }
         );
+
 
         fpsInput.addEventListener(
             "input",
             () => {
+
                 updateTimeUI();
+
             }
         );
+
 
         /* =========================
            EXTRACT FRAME
@@ -1859,18 +2362,20 @@
         extractButton.addEventListener(
             "click",
             () => {
-                if (
-                    !videoPreview.videoWidth ||
-                    !videoPreview.videoHeight
-                ) {
+
+                if (!videoReady) {
+
                     setStatus(
                         "The video is not ready yet.",
                         true
                     );
+
                     return;
                 }
 
+
                 videoPreview.pause();
+
 
                 const width =
                     videoPreview.videoWidth;
@@ -1878,11 +2383,27 @@
                 const height =
                     videoPreview.videoHeight;
 
+
+                if (
+                    width <= 0 ||
+                    height <= 0
+                ) {
+
+                    setStatus(
+                        "The video frame could not be decoded.",
+                        true
+                    );
+
+                    return;
+                }
+
+
                 frameCanvas.width =
                     width;
 
                 frameCanvas.height =
                     height;
+
 
                 const context =
                     frameCanvas.getContext(
@@ -1892,6 +2413,7 @@
                         }
                     );
 
+
                 context.drawImage(
                     videoPreview,
                     0,
@@ -1900,28 +2422,35 @@
                     height
                 );
 
+
                 lastExtractedTime =
                     videoPreview.currentTime;
+
 
                 resultSection.classList.add(
                     "visible"
                 );
+
 
                 resultStatus.textContent =
                     formatTime(
                         lastExtractedTime
                     );
 
+
                 setStatus(
                     "Frame extracted successfully."
                 );
+
 
                 resultSection.scrollIntoView({
                     behavior: "smooth",
                     block: "nearest"
                 });
+
             }
         );
+
 
         /* =========================
            DOWNLOAD
@@ -1930,8 +2459,9 @@
         function downloadCanvas(
             type,
             extension,
-            quality = undefined
+            quality
         ) {
+
             if (
                 !frameCanvas.width ||
                 !frameCanvas.height
@@ -1939,15 +2469,20 @@
                 return;
             }
 
+
             frameCanvas.toBlob(
                 blob => {
+
                     if (!blob) {
+
                         setStatus(
                             "Could not create the image.",
                             true
                         );
+
                         return;
                     }
+
 
                     const baseName =
                         currentFile
@@ -1958,91 +2493,110 @@
                                 )
                             : "frame";
 
-                    const fps =
-                        getFPS();
 
                     const frame =
                         Math.max(
                             0,
                             Math.round(
                                 lastExtractedTime *
-                                fps
+                                getFPS()
                             )
                         );
 
-                    const safeBaseName =
-                        baseName
-                            .replace(
-                                /[^a-z0-9_-]/gi,
-                                "_"
-                            );
 
-                    const fileName =
+                    const safeBaseName =
+                        baseName.replace(
+                            /[^a-z0-9_-]/gi,
+                            "_"
+                        );
+
+
+                    const outputName =
                         safeBaseName +
                         "_frame_" +
-                        String(frame) +
+                        frame +
                         "." +
                         extension;
+
 
                     const url =
                         URL.createObjectURL(
                             blob
                         );
 
+
                     const link =
                         document.createElement(
                             "a"
                         );
 
-                    link.href = url;
+
+                    link.href =
+                        url;
+
                     link.download =
-                        fileName;
+                        outputName;
+
 
                     document.body.appendChild(
                         link
                     );
 
+
                     link.click();
+
                     link.remove();
+
 
                     setTimeout(
                         () => {
+
                             URL.revokeObjectURL(
                                 url
                             );
+
                         },
                         1000
                     );
 
+
                     setStatus(
                         "Frame downloaded."
                     );
+
                 },
                 type,
                 quality
             );
         }
 
+
         downloadPngButton.addEventListener(
             "click",
             () => {
+
                 downloadCanvas(
                     "image/png",
                     "png"
                 );
+
             }
         );
+
 
         downloadJpgButton.addEventListener(
             "click",
             () => {
+
                 downloadCanvas(
                     "image/jpeg",
                     "jpg",
                     0.95
                 );
+
             }
         );
+
 
         /* =========================
            NEW VIDEO
@@ -2051,16 +2605,25 @@
         newVideoButton.addEventListener(
             "click",
             () => {
+
                 videoPreview.pause();
 
+
                 if (videoURL) {
+
                     URL.revokeObjectURL(
                         videoURL
                     );
+
                 }
 
+
                 videoURL = null;
+
                 currentFile = null;
+
+                videoReady = false;
+
 
                 videoPreview.removeAttribute(
                     "src"
@@ -2068,23 +2631,43 @@
 
                 videoPreview.load();
 
+
                 videoInput.value = "";
+
 
                 workspace.classList.remove(
                     "visible"
                 );
 
+
                 resultSection.classList.remove(
                     "visible"
                 );
 
-                timeline.value = 0;
-                timeline.max = 0;
 
-                fileName.textContent = "-";
-                resolution.textContent = "-";
-                duration.textContent = "-";
-                detectedFps.textContent = "-";
+                dropZone.style.display =
+                    "flex";
+
+
+                timeline.value =
+                    0;
+
+                timeline.max =
+                    0;
+
+
+                fileName.textContent =
+                    "-";
+
+                resolution.textContent =
+                    "-";
+
+                duration.textContent =
+                    "-";
+
+                detectedFps.textContent =
+                    "-";
+
 
                 currentFrame.textContent =
                     "00:00.000";
@@ -2092,28 +2675,39 @@
                 frameNumber.textContent =
                     "Frame 0";
 
+
                 timeDisplay.textContent =
                     "00:00.000 / 00:00.000";
 
+
+                frameCanvas.width = 0;
+                frameCanvas.height = 0;
+
+
                 setStatus("");
+
 
                 window.scrollTo({
                     top: 0,
                     behavior: "smooth"
                 });
+
             }
         );
 
+
         /* =========================
-           KEYBOARD FRAME CONTROL
+           KEYBOARD
         ========================== */
 
         document.addEventListener(
             "keydown",
             event => {
+
                 const tag =
                     document.activeElement
                         ?.tagName;
+
 
                 if (
                     tag === "INPUT" ||
@@ -2122,15 +2716,20 @@
                     return;
                 }
 
-                if (!workspace.classList.contains(
-                    "visible"
-                )) {
+
+                if (
+                    !workspace.classList.contains(
+                        "visible"
+                    )
+                ) {
                     return;
                 }
+
 
                 if (
                     event.key === "ArrowLeft"
                 ) {
+
                     event.preventDefault();
 
                     videoPreview.pause();
@@ -2139,11 +2738,14 @@
                         videoPreview.currentTime -
                         (1 / getFPS())
                     );
+
                 }
+
 
                 if (
                     event.key === "ArrowRight"
                 ) {
+
                     event.preventDefault();
 
                     videoPreview.pause();
@@ -2152,29 +2754,40 @@
                         videoPreview.currentTime +
                         (1 / getFPS())
                     );
+
                 }
+
 
                 if (
                     event.code === "Space"
                 ) {
+
                     event.preventDefault();
 
                     if (
                         videoPreview.paused
                     ) {
+
                         videoPreview.play();
+
                     } else {
+
                         videoPreview.pause();
+
                     }
+
                 }
+
             }
         );
+
 
         /* =========================
            SIDE MENU
         ========================== */
 
         function openMenu() {
+
             sideMenu.classList.add(
                 "open"
             );
@@ -2182,9 +2795,12 @@
             menuOverlay.classList.add(
                 "visible"
             );
+
         }
 
+
         function closeSideMenu() {
+
             sideMenu.classList.remove(
                 "open"
             );
@@ -2192,31 +2808,39 @@
             menuOverlay.classList.remove(
                 "visible"
             );
+
         }
+
 
         menuButton.addEventListener(
             "click",
             openMenu
         );
 
+
         closeMenu.addEventListener(
             "click",
             closeSideMenu
         );
+
 
         menuOverlay.addEventListener(
             "click",
             closeSideMenu
         );
 
+
         sideMenu
             .querySelectorAll("a")
             .forEach(link => {
+
                 link.addEventListener(
                     "click",
                     closeSideMenu
                 );
+
             });
+
 
         /* =========================
            CLEANUP
@@ -2225,13 +2849,18 @@
         window.addEventListener(
             "beforeunload",
             () => {
+
                 if (videoURL) {
+
                     URL.revokeObjectURL(
                         videoURL
                     );
+
                 }
+
             }
         );
+
     </script>
 
 </body>
